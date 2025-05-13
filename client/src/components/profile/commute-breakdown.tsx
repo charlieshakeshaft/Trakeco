@@ -54,9 +54,12 @@ const getOrdinal = (n: number): string => {
 };
 
 const CommuteBreakdown = ({ userId }: CommuteBreakdownProps) => {
-  const { data: breakdownData, isLoading } = useCommuteBreakdown(userId);
+  const { data, isLoading } = useCommuteBreakdown(userId);
   
-  const breakdownInfo = breakdownData || {} as CommuteBreakdownData;
+  const breakdownInfo: CommuteBreakdownData = data ? data as CommuteBreakdownData : {
+    breakdown: [],
+    totalDays: 0
+  };
 
   if (isLoading) {
     return (
@@ -80,7 +83,7 @@ const CommuteBreakdown = ({ userId }: CommuteBreakdownProps) => {
 
   return (
     <div className="space-y-4">
-      {breakdownInfo.breakdown && breakdownInfo.breakdown.slice(0, 3).map((item, index) => {
+      {breakdownInfo.breakdown && breakdownInfo.breakdown.slice(0, 3).map((item: CommuteBreakdownItem, index: number) => {
         const colorClass = commuteColors[item.type] || "gray-600";
         
         return (

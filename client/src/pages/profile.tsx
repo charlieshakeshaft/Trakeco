@@ -68,13 +68,13 @@ const Profile = () => {
                   {user?.name ? user.name.charAt(0).toUpperCase() : 
                    user?.username ? user.username.charAt(0).toUpperCase() : "U"}
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800 truncate max-w-[200px] text-center">{user?.name || user?.username || "User"}</h2>
-                <p className="text-gray-500 mb-4">{user?.email || "No email"}</p>
+                <h2 className="text-xl font-semibold text-gray-800 truncate max-w-[90%] text-center mx-auto">{user?.name || user?.username || "User"}</h2>
+                <p className="text-gray-500 mb-4 truncate max-w-[90%] text-center mx-auto">{user?.email || "No email"}</p>
                 
                 <div className="w-full p-4 rounded-lg bg-blue-50 mt-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Company</span>
-                    <span className="text-sm text-primary font-medium truncate ml-2 max-w-[120px]">
+                    <span className="text-sm text-primary font-medium truncate ml-2 max-w-[150px]">
                       {profileData.company?.name || "No company"}
                     </span>
                   </div>
