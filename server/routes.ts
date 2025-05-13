@@ -16,18 +16,35 @@ import {
 
 // Authentication middleware
 const authenticate = async (req: Request, res: Response, next: Function) => {
-  // For simplicity, we'll fake a session-based auth by checking for userId in query params
-  // In a real app, this would be replaced with proper session-based authentication
-  const userId = req.query.userId ? Number(req.query.userId) : 1; // Default to demo user
-  
-  const user = await storage.getUser(userId);
-  if (!user) {
-    return res.status(401).json({ message: "User not found" });
+  try {
+    // Check if user is logged in via the session
+    const userId = (req as any).session?.userId;
+    
+    if (!userId) {
+      // If no session, check if userId is provided as a query param (for development)
+      // In production, we would remove this fallback
+      if (req.query.userId) {
+        const user = await storage.getUser(Number(req.query.userId));
+        if (user) {
+          (req as any).user = user;
+          return next();
+        }
+      }
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    
+    // Attach user to request for use in route handlers
+    (req as any).user = user;
+    next();
+  } catch (error) {
+    console.error("Authentication error:", error);
+    return res.status(500).json({ message: "Authentication error" });
   }
-  
-  // Attach user to request for use in route handlers
-  (req as any).user = user;
-  next();
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -84,17 +101,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
+      // Set user ID in session
+      (req as any).session.userId = user.id;
+      
       // Don't return the password
       const { password: _, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Error logging in" });
     }
   });
   
   app.post("/api/auth/logout", (req, res) => {
-    // In a real app, this would invalidate the session
-    res.status(200).json({ message: "Logged out successfully" });
+    // Clear session data
+    if ((req as any).session) {
+      (req as any).session.userId = null;
+      (req as any).session.destroy(() => {
+        res.status(200).json({ message: "Logged out successfully" });
+      });
+    } else {
+      res.status(200).json({ message: "Logged out successfully" });
+    }
   });
   
   app.get("/api/user/profile", authenticate, async (req, res) => {

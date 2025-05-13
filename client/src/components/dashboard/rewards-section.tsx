@@ -18,17 +18,19 @@ interface Reward {
 const RewardsSection = ({ userId }: RewardsSectionProps) => {
   const { toast } = useToast();
   const { data: rewards, isLoading } = useQuery({
-    queryKey: [`/api/rewards?userId=${userId}`],
+    queryKey: ['/api/rewards'],
     staleTime: 60000, // 1 minute
   });
   
   const { data: userProfile } = useQuery({
-    queryKey: [`/api/user/profile?userId=${userId}`],
+    queryKey: ['/api/user/profile'],
   });
 
   const redeemMutation = useMutation({
     mutationFn: async (rewardId: number) => {
-      return await apiRequest("POST", `/api/rewards/${rewardId}/redeem?userId=${userId}`, {});
+      return await apiRequest(`/api/rewards/${rewardId}/redeem`, {
+        method: "POST",
+      });
     },
     onSuccess: () => {
       toast({
