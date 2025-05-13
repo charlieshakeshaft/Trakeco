@@ -30,6 +30,17 @@ const authenticate = async (req: Request, res: Response, next: Function) => {
           return next();
         }
       }
+      
+      // For development mode, provide a default user 
+      if (process.env.NODE_ENV === "development") {
+        const defaultUser = await storage.getUser(7); // Use ID 7 from the seed data
+        if (defaultUser) {
+          console.log("Using default development user:", defaultUser.username);
+          (req as any).user = defaultUser;
+          return next();
+        }
+      }
+      
       return res.status(401).json({ message: "Not authenticated" });
     }
     
@@ -280,12 +291,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       weekStart.setDate(now.getDate() - now.getDay());
       weekStart.setHours(0, 0, 0, 0);
       
+      console.log("Getting commute logs for user:", userId, "with week start:", weekStart.toISOString());
       const commuteLogs = await storage.getCommuteLogsByUserId(userId);
       
       // Filter logs for current week
       const currentWeekLogs = commuteLogs.filter(log => {
-        const logWeekStart = new Date(log.week_start);
-        return logWeekStart.getTime() === weekStart.getTime();
+        // Handle potential parsing issues
+        try {
+          const logWeekStart = new Date(log.week_start);
+          // Use date comparison only, ignoring time
+          return logWeekStart.toDateString() === weekStart.toDateString();
+        } catch (error) {
+          console.error("Error parsing week_start", log.week_start, error);
+          return false;
+        }
       });
       
       res.json(currentWeekLogs);
