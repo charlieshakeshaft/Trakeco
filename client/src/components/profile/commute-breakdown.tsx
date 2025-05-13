@@ -4,6 +4,17 @@ interface CommuteBreakdownProps {
   userId: number;
 }
 
+interface CommuteBreakdownItem {
+  type: string;
+  days: number;
+  percentage: number;
+}
+
+interface CommuteBreakdownData {
+  breakdown: CommuteBreakdownItem[];
+  totalDays: number;
+}
+
 const commuteIcons: Record<string, string> = {
   cycle: "directions_bike",
   walk: "directions_walk",
@@ -44,6 +55,8 @@ const getOrdinal = (n: number): string => {
 
 const CommuteBreakdown = ({ userId }: CommuteBreakdownProps) => {
   const { data: breakdownData, isLoading } = useCommuteBreakdown(userId);
+  
+  const breakdownInfo = breakdownData || {} as CommuteBreakdownData;
 
   if (isLoading) {
     return (
@@ -55,7 +68,7 @@ const CommuteBreakdown = ({ userId }: CommuteBreakdownProps) => {
     );
   }
 
-  if (!breakdownData || !breakdownData.breakdown || breakdownData.breakdown.length === 0) {
+  if (!breakdownInfo.breakdown || breakdownInfo.breakdown.length === 0) {
     return (
       <div className="py-6 text-center bg-gray-50 rounded-lg">
         <span className="material-icons text-gray-400 text-3xl mb-2">directions_car</span>
@@ -67,7 +80,7 @@ const CommuteBreakdown = ({ userId }: CommuteBreakdownProps) => {
 
   return (
     <div className="space-y-4">
-      {breakdownData.breakdown.slice(0, 3).map((item, index) => {
+      {breakdownInfo.breakdown && breakdownInfo.breakdown.slice(0, 3).map((item, index) => {
         const colorClass = commuteColors[item.type] || "gray-600";
         
         return (
@@ -92,7 +105,7 @@ const CommuteBreakdown = ({ userId }: CommuteBreakdownProps) => {
         );
       })}
       
-      {breakdownData.totalDays === 0 && (
+      {breakdownInfo.totalDays === 0 && (
         <div className="text-center py-2 mt-4 bg-blue-50 rounded-lg text-sm text-blue-700">
           You haven't logged any commutes yet. Start logging to see your impact!
         </div>

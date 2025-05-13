@@ -15,6 +15,13 @@ interface Reward {
   cost_points: number;
 }
 
+interface UserProfile {
+  id?: number;
+  points_total?: number;
+  username?: string;
+  email?: string;
+}
+
 const RewardsSection = ({ userId }: RewardsSectionProps) => {
   const { toast } = useToast();
   const { data: rewards, isLoading } = useQuery({
@@ -22,9 +29,11 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
     staleTime: 60000, // 1 minute
   });
   
-  const { data: userProfile } = useQuery({
+  const { data: userProfile } = useQuery<UserProfile>({
     queryKey: ['/api/user/profile'],
   });
+  
+  const userProfileData = userProfile || {} as UserProfile;
 
   const redeemMutation = useMutation({
     mutationFn: async (rewardId: number) => {
@@ -73,8 +82,7 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
 
   // Get available rewards (up to 3)
   const availableRewards: Reward[] = Array.isArray(rewards) ? rewards.slice(0, 3) : [];
-  const userPoints = userProfile && typeof userProfile === 'object' && 'points_total' in userProfile
-    ? userProfile.points_total : 0;
+  const userPoints = userProfileData.points_total || 0;
   
   const getRewardIcon = (title: string) => {
     if (title.toLowerCase().includes('coffee')) return 'coffee';

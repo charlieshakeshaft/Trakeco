@@ -78,7 +78,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
               <div 
                 className="bg-accent h-1.5 rounded-full progress-bar" 
-                style={{ width: `${Math.min(Math.round((stats?.points || 0) / 10), 100)}%` }}
+                style={{ width: `${Math.min(Math.round((userStats.points || 0) / 10), 100)}%` }}
               ></div>
             </div>
           </div>
@@ -90,7 +90,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <div>
               <p className="text-gray-500 text-sm font-medium">Current Streak</p>
               <h3 className="text-3xl font-semibold text-gray-800 mt-1">
-                {stats?.streak || 0} <span className="text-lg font-normal text-gray-500">weeks</span>
+                {userStats.streak || 0} <span className="text-lg font-normal text-gray-500">weeks</span>
               </h3>
             </div>
             <IconBadge icon="local_fire_department" color="secondary" bgColor="blue-50" />
