@@ -250,7 +250,7 @@ const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(member.created_at).toLocaleDateString()}
+                      {member.created_at ? new Date(member.created_at).toLocaleDateString() : 'Unknown'}
                     </td>
                   </tr>
                 ))}

@@ -209,6 +209,11 @@ export class MemStorage implements IStorage {
     return company;
   }
   
+  async getUsersByCompany(companyId: number): Promise<User[]> {
+    return Array.from(this.users.values())
+      .filter(user => user.company_id === companyId);
+  }
+  
   // Commute operations
   async createCommuteLog(insertCommuteLog: InsertCommuteLog): Promise<CommuteLog> {
     const id = this.currentCommuteLogId++;
@@ -851,6 +856,12 @@ export class DatabaseStorage implements IStorage {
       .values(insertCompany)
       .returning();
     return company;
+  }
+  
+  async getUsersByCompany(companyId: number): Promise<User[]> {
+    return db.select()
+      .from(schema.users)
+      .where(eq(schema.users.company_id, companyId));
   }
   
   // Commute operations
