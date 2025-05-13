@@ -46,14 +46,17 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     setIsSubmitting(true);
     
     try {
+      console.log('Logging in with:', values);
       const user = await apiRequest("/api/auth/login", {
         method: "POST",
         body: JSON.stringify(values)
       });
       
+      console.log('Login response:', user);
+      
       toast({
         title: "Login successful",
-        description: `Welcome back, ${user.name}!`,
+        description: `Welcome back, ${user.username}!`,
       });
       
       onLoginSuccess(user);

@@ -23,11 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch('/api/user/profile');
         if (response.ok) {
           const userData = await response.json();
+          console.log('User data from profile:', userData);
           setUser(userData);
         } else {
+          console.log('Not authenticated:', await response.text());
           setUser(null);
         }
       } catch (error) {
+        console.error('Error fetching user profile:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
