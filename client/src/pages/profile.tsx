@@ -322,24 +322,26 @@ const Profile = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Commute Distance (km)
+                        Walking Distance (km)
                       </label>
                       <div className="flex items-center gap-2">
+                        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
+                          {locationSettings.commute_distance_km ? 
+                            `${locationSettings.commute_distance_km} km` : 
+                            'Enter home and work addresses above to calculate distance'
+                          }
+                        </div>
+                        {/* Keep as hidden input for form submission */}
                         <input 
-                          type="number" 
+                          type="hidden" 
                           name="commute_distance_km"
-                          min="0"
-                          step="0.1"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                          placeholder="Enter commute distance in kilometers"
                           value={locationSettings.commute_distance_km}
-                          onChange={handleLocationChange}
                         />
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        {(locationSettings.home_address && locationSettings.work_address) ? 
-                          "Distance is automatically calculated from your postcodes. You can manually adjust if needed." : 
-                          "Enter both postcodes above to automatically calculate your commute distance."}
+                        The walking distance will be automatically calculated when you save.
+                        <br/>
+                        <span className="font-medium">Note:</span> When logging commutes, distances for different transport modes will be adjusted accordingly.
                       </p>
                     </div>
                     

@@ -89,7 +89,28 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     staleTime: 60000, // 1 minute
   });
 
-  const commuteDistance = user?.commute_distance_km || 5;
+  // Base distance is the walking distance stored in user profile
+  const baseDistance = user?.commute_distance_km || 5;
+  
+  // Calculate adjusted distance based on transport mode
+  const getAdjustedDistance = (commuteType: string): number => {
+    // Different transport modes have different route efficiencies
+    const distanceFactors: Record<string, number> = {
+      walk: 1.0,                  // walking distance is the baseline
+      cycle: 0.8,                 // cycling routes can be more direct/efficient
+      public_transport: 1.2,      // public transport often has detours
+      carpool: 1.1,               // carpooling might take slight detours
+      electric_vehicle: 1.1,      // car routes might be slightly longer than walking
+      gas_vehicle: 1.1,           // same as electric
+      remote_work: 0              // no distance for remote work
+    };
+    
+    const factor = distanceFactors[commuteType] || 1.0;
+    const adjustedDistance = baseDistance * factor;
+    
+    // Round to 1 decimal place for readability
+    return Math.round(adjustedDistance * 10) / 10;
+  };
 
   const form = useForm<CommuteFormValues>({
     resolver: zodResolver(commuteSchema),
