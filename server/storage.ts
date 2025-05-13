@@ -644,23 +644,23 @@ export class MemStorage implements IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
     return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
     return user || undefined;
   }
   
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    const [user] = await db.select().from(schema.users).where(eq(schema.users.email, email));
     return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const [user] = await db
-      .insert(users)
+      .insert(schema.users)
       .values({
         ...insertUser,
         points_total: 0,
@@ -897,25 +897,33 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getRewards(companyId?: number): Promise<Reward[]> {
+    console.log("Getting rewards for company ID:", companyId);
+    
     if (companyId) {
-      return db
+      const result = await db
         .select()
-        .from(rewards)
+        .from(schema.rewards)
         .where(
           or(
-            eq(rewards.company_id, companyId),
-            isNull(rewards.company_id)
+            eq(schema.rewards.company_id, companyId),
+            isNull(schema.rewards.company_id)
           )
         );
+      
+      console.log(`Found ${result.length} rewards for company ${companyId}`);
+      return result;
     }
-    return db.select().from(rewards);
+    
+    const result = await db.select().from(schema.rewards);
+    console.log(`Found ${result.length} rewards across all companies`);
+    return result;
   }
   
   async getReward(id: number): Promise<Reward | undefined> {
     const [reward] = await db
       .select()
-      .from(rewards)
-      .where(eq(rewards.id, id));
+      .from(schema.rewards)
+      .where(eq(schema.rewards.id, id));
     
     return reward || undefined;
   }
@@ -923,7 +931,7 @@ export class DatabaseStorage implements IStorage {
   // Redemptions
   async redeemReward(insertRedemption: InsertRedemption): Promise<Redemption> {
     const [redemption] = await db
-      .insert(redemptions)
+      .insert(schema.redemptions)
       .values(insertRedemption)
       .returning();
     
@@ -941,8 +949,8 @@ export class DatabaseStorage implements IStorage {
   async getUserRedemptions(userId: number): Promise<{reward: Reward, redemption: Redemption}[]> {
     const userRedemptions = await db
       .select()
-      .from(redemptions)
-      .where(eq(redemptions.user_id, userId));
+      .from(schema.redemptions)
+      .where(eq(schema.redemptions.user_id, userId));
     
     const results: {reward: Reward, redemption: Redemption}[] = [];
     
