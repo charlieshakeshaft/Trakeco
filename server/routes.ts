@@ -342,6 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/challenges/:challengeId/join", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : user.id;
       const challengeId = parseInt(req.params.challengeId);
       
       // Check if challenge exists
@@ -351,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if user is already participating
-      const userChallenges = await storage.getUserChallenges(user.id);
+      const userChallenges = await storage.getUserChallenges(userId);
       const isAlreadyParticipating = userChallenges.some(
         uc => uc.challenge.id === challengeId
       );
@@ -362,7 +363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const participant = await storage.joinChallenge({
         challenge_id: challengeId,
-        user_id: user.id,
+        user_id: userId,
         progress: 0,
         completed: false
       });
@@ -376,7 +377,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/challenges", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
-      const userChallenges = await storage.getUserChallenges(user.id);
+      const userId = req.query.userId ? parseInt(req.query.userId as string) : user.id;
+      const userChallenges = await storage.getUserChallenges(userId);
       res.json(userChallenges);
     } catch (error) {
       res.status(500).json({ message: "Error fetching user challenges" });
