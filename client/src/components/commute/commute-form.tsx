@@ -63,12 +63,12 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       // Get the start of the current week (Sunday)
       const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
       
-      return await apiRequest("POST", `/api/commutes?userId=${userId}`, {
+      return await apiRequest(`/api/commutes?userId=${userId}`, {
         commute_type: data.commute_type,
         days_logged: data.days_logged,
         distance_km: data.distance_km,
         week_start: weekStart.toISOString(),
-      });
+      }, "POST");
     },
     onSuccess: () => {
       toast({
