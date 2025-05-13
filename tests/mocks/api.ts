@@ -1,4 +1,4 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { mockAdminUser, mockRegularUser, mockSoloUser, mockNewUser, mockTempPasswordUser } from '../test-utils';
 
@@ -102,52 +102,54 @@ const mockUserStatsData = {
 // Define API handlers
 export const handlers = [
   // User profile
-  rest.get('/api/user/profile', (req, res, ctx) => {
-    const userId = req.url.searchParams.get('userId');
+  http.get('/api/user/profile', ({ request }) => {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
     
     if (userId === '1' || !userId) {
-      return res(ctx.status(200), ctx.json(mockAdminUser));
+      return HttpResponse.json(mockAdminUser, { status: 200 });
     } else if (userId === '2') {
-      return res(ctx.status(200), ctx.json(mockRegularUser));
+      return HttpResponse.json(mockRegularUser, { status: 200 });
     } else if (userId === '3') {
-      return res(ctx.status(200), ctx.json(mockSoloUser));
+      return HttpResponse.json(mockSoloUser, { status: 200 });
     } else if (userId === '4') {
-      return res(ctx.status(200), ctx.json(mockNewUser));
+      return HttpResponse.json(mockNewUser, { status: 200 });
     } else if (userId === '5') {
-      return res(ctx.status(200), ctx.json(mockTempPasswordUser));
+      return HttpResponse.json(mockTempPasswordUser, { status: 200 });
     } else {
-      return res(ctx.status(404), ctx.json({ message: 'User not found' }));
+      return HttpResponse.json({ message: 'User not found' }, { status: 404 });
     }
   }),
   
   // User stats
-  rest.get('/api/user/stats', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockUserStatsData));
+  http.get('/api/user/stats', () => {
+    return HttpResponse.json(mockUserStatsData, { status: 200 });
   }),
   
   // Commute logs
-  rest.get('/api/commutes/current', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockCommuteData));
+  http.get('/api/commutes/current', () => {
+    return HttpResponse.json(mockCommuteData, { status: 200 });
   }),
   
   // Challenges
-  rest.get('/api/user/challenges', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockChallengeData));
+  http.get('/api/user/challenges', () => {
+    return HttpResponse.json(mockChallengeData, { status: 200 });
   }),
   
   // Rewards
-  rest.get('/api/rewards', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockRewardData));
+  http.get('/api/rewards', () => {
+    return HttpResponse.json(mockRewardData, { status: 200 });
   }),
   
   // Leaderboard
-  rest.get('/api/leaderboard', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json(mockLeaderboardData));
+  http.get('/api/leaderboard', () => {
+    return HttpResponse.json(mockLeaderboardData, { status: 200 });
   }),
   
   // Update user info (password, status)
-  rest.patch('/api/user/update', (req, res, ctx) => {
-    const userId = req.url.searchParams.get('userId');
+  http.patch('/api/user/update', async ({ request }) => {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
     let user;
     
     if (userId === '1' || !userId) {
@@ -161,21 +163,22 @@ export const handlers = [
     } else if (userId === '5') {
       user = {...mockTempPasswordUser};
     } else {
-      return res(ctx.status(404), ctx.json({ message: 'User not found' }));
+      return HttpResponse.json({ message: 'User not found' }, { status: 404 });
     }
     
     // Apply updates
-    const body = req.body as any;
+    const body = await request.json();
     if (body.password) user.password = body.password;
     if (body.is_new_user !== undefined) user.is_new_user = body.is_new_user;
     if (body.needs_password_change !== undefined) user.needs_password_change = body.needs_password_change;
     
-    return res(ctx.status(200), ctx.json(user));
+    return HttpResponse.json(user, { status: 200 });
   }),
   
   // Update profile location settings
-  rest.patch('/api/user/update-profile', (req, res, ctx) => {
-    const userId = req.url.searchParams.get('userId');
+  http.patch('/api/user/update-profile', async ({ request }) => {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
     let user;
     
     if (userId === '1' || !userId) {
@@ -189,11 +192,11 @@ export const handlers = [
     } else if (userId === '5') {
       user = {...mockTempPasswordUser};
     } else {
-      return res(ctx.status(404), ctx.json({ message: 'User not found' }));
+      return HttpResponse.json({ message: 'User not found' }, { status: 404 });
     }
     
     // Apply updates
-    const body = req.body as any;
+    const body = await request.json();
     if (body.home_address) user.home_address = body.home_address;
     if (body.home_latitude) user.home_latitude = body.home_latitude;
     if (body.home_longitude) user.home_longitude = body.home_longitude;
@@ -202,7 +205,7 @@ export const handlers = [
     if (body.work_longitude) user.work_longitude = body.work_longitude;
     if (body.commute_distance_km) user.commute_distance_km = body.commute_distance_km;
     
-    return res(ctx.status(200), ctx.json(user));
+    return HttpResponse.json(user, { status: 200 });
   }),
   
   // Log commute
