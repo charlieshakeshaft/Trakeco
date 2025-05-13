@@ -78,7 +78,7 @@ const Rewards = () => {
                   key={reward.id}
                   reward={reward}
                   userPoints={userPoints}
-                  userId={DEMO_USER_ID}
+                  userId={userId}
                   showDetails
                 />
               ))}
@@ -122,7 +122,7 @@ const Rewards = () => {
                   key={reward.id}
                   reward={reward}
                   userPoints={userPoints}
-                  userId={DEMO_USER_ID}
+                  userId={userId}
                   showDetails
                 />
               ))}
