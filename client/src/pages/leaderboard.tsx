@@ -4,11 +4,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TopUsers from "@/components/leaderboard/top-users";
 import RankingList from "@/components/leaderboard/ranking-list";
-import { DEMO_USER_ID } from "@/lib/constants";
+import { useAuth } from "@/contexts/auth-context";
 
 const Leaderboard = () => {
   const [timeFrame, setTimeFrame] = useState("month");
-  const { data: leaderboard, isLoading } = useLeaderboard(DEMO_USER_ID, 20);
+  const { user } = useAuth();
+  const userId = user?.id || 0;
+  
+  const { data: leaderboard, isLoading } = useLeaderboard(userId, 20);
   
   // Get top 3 users for the podium display
   const topThree = leaderboard ? leaderboard.slice(0, 3) : [];
@@ -17,7 +20,7 @@ const Leaderboard = () => {
   const otherUsers = leaderboard ? leaderboard.slice(3) : [];
   
   // Find the current user's rank
-  const currentUserRank = leaderboard ? findUserRank(leaderboard, DEMO_USER_ID) : -1;
+  const currentUserRank = leaderboard ? findUserRank(leaderboard, userId) : -1;
   
   // Check if current user is not in the top displayed users
   const isUserOutsideDisplayed = currentUserRank > 3 + otherUsers.length;
@@ -74,11 +77,11 @@ const Leaderboard = () => {
           ) : (
             <>
               {topThree.length > 0 && (
-                <TopUsers topUsers={topThree} currentUserId={DEMO_USER_ID} />
+                <TopUsers topUsers={topThree} currentUserId={userId} />
               )}
               
               {otherUsers.length > 0 && (
-                <RankingList users={otherUsers} currentUserId={DEMO_USER_ID} startRank={4} />
+                <RankingList users={otherUsers} currentUserId={userId} startRank={4} />
               )}
               
               {/* Display current user if they're not in the displayed list */}
@@ -86,8 +89,8 @@ const Leaderboard = () => {
                 <div className="mt-6 pt-6 border-t border-dashed border-gray-200">
                   <div className="text-sm text-gray-500 mb-2 text-center">Your Position</div>
                   <RankingList 
-                    users={[leaderboard.find(user => user.id === DEMO_USER_ID)!]} 
-                    currentUserId={DEMO_USER_ID} 
+                    users={[leaderboard.find(user => user.id === userId)!]} 
+                    currentUserId={userId} 
                     startRank={currentUserRank} 
                   />
                 </div>
