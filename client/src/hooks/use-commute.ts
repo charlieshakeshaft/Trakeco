@@ -43,8 +43,8 @@ export function useLogCommute(userId: number, onSuccess?: () => void) {
     },
     onSuccess: () => {
       toast({
-        title: "Commute logged successfully!",
-        description: "Your sustainable commute has been recorded.",
+        title: "Weekly commutes logged successfully!",
+        description: "Your sustainable commutes have been recorded.",
       });
       
       // Invalidate queries to refresh data

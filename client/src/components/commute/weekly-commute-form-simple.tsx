@@ -362,7 +362,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       // Success notification
       toast({
         title: "Success",
-        description: "Your commute has been logged successfully!",
+        description: "Your weekly commutes have been logged successfully!",
       });
       
       // Refresh commute logs data
@@ -375,7 +375,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to log commute: ${(error as Error).message}`,
+        description: `Failed to log weekly commutes: ${(error as Error).message}`,
         variant: "destructive",
       });
     } finally {
