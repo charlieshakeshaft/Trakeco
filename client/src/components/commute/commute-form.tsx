@@ -187,6 +187,14 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     }
   };
 
+  // Track the currently selected commute type
+  const [selectedCommuteType, setSelectedCommuteType] = useState<string>("");
+  
+  // Get the adjusted distance for the current commute type
+  const getDisplayDistance = () => {
+    return getAdjustedDistance(selectedCommuteType || form.getValues('commute_type'));
+  };
+  
   const commuteLogMutation = useMutation({
     mutationFn: async (data: CommuteFormValues) => {
       // Get the start of the current week (Sunday)
@@ -195,10 +203,13 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       // Calculate days logged from selected days
       const daysLogged = calculateSelectedDays();
       
+      // Calculate adjusted distance based on the selected commute type
+      const adjustedDistance = getAdjustedDistance(data.commute_type);
+      
       return await apiRequest(`/api/commutes?userId=${userId}`, {
         commute_type: data.commute_type,
         days_logged: daysLogged,
-        distance_km: commuteDistance,
+        distance_km: adjustedDistance,
         week_start: weekStart.toISOString(),
         user_id: userId,
         // Include day-specific fields
@@ -311,6 +322,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
+                      // Update the selected commute type to recalculate distance
+                      setSelectedCommuteType(value);
                       // Apply this commute type to all selected days if they don't have specific types set
                       form.getValues().monday && !form.getValues().monday_to_work && setDayCommute('monday', 'to_work', value);
                       form.getValues().monday && !form.getValues().monday_to_home && setDayCommute('monday', 'to_home', value);
