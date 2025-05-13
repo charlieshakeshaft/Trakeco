@@ -779,6 +779,60 @@ export class DatabaseStorage implements IStorage {
     return updatedUser;
   }
   
+  async updateUserLocationSettings(userId: number, locationSettings: {
+    home_address?: string;
+    home_latitude?: string;
+    home_longitude?: string;
+    work_address?: string;
+    work_latitude?: string;
+    work_longitude?: string;
+    commute_distance_km?: number;
+  }): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Create update data with only fields that are provided
+    const updateData: any = {};
+    
+    if (locationSettings.home_address !== undefined) {
+      updateData.home_address = locationSettings.home_address;
+    }
+    
+    if (locationSettings.home_latitude !== undefined) {
+      updateData.home_latitude = locationSettings.home_latitude;
+    }
+    
+    if (locationSettings.home_longitude !== undefined) {
+      updateData.home_longitude = locationSettings.home_longitude;
+    }
+    
+    if (locationSettings.work_address !== undefined) {
+      updateData.work_address = locationSettings.work_address;
+    }
+    
+    if (locationSettings.work_latitude !== undefined) {
+      updateData.work_latitude = locationSettings.work_latitude;
+    }
+    
+    if (locationSettings.work_longitude !== undefined) {
+      updateData.work_longitude = locationSettings.work_longitude;
+    }
+    
+    if (locationSettings.commute_distance_km !== undefined) {
+      updateData.commute_distance_km = locationSettings.commute_distance_km;
+    }
+    
+    const [updatedUser] = await db
+      .update(schema.users)
+      .set(updateData)
+      .where(eq(schema.users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+  
   // Company operations
   async getCompany(id: number): Promise<Company | undefined> {
     const [company] = await db.select().from(schema.companies).where(eq(schema.companies.id, id));
