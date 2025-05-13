@@ -107,7 +107,7 @@ function Router() {
   }
   
   // Authenticated routes
-  return <AuthenticatedApp user={user} />;
+  return <AuthenticatedApp user={user as User} />;
 }
 
 function App() {

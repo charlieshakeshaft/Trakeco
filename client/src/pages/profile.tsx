@@ -1,12 +1,26 @@
 import { useUserProfile } from "@/hooks/use-leaderboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import StatsSummary from "@/components/profile/stats-summary";
 import RedemptionHistory from "@/components/profile/redemption-history";
 import { DEMO_USER_ID } from "@/lib/constants";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 const Profile = () => {
   const { data: profile, isLoading } = useUserProfile(DEMO_USER_ID);
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account",
+    });
+    setLocation('/login');
+  };
 
   return (
     <div className="p-4 md:p-8">
@@ -54,6 +68,15 @@ const Profile = () => {
                     </span>
                   </div>
                 </div>
+                
+                <Button 
+                  variant="destructive" 
+                  className="w-full mt-4"
+                  onClick={handleLogout}
+                >
+                  <span className="material-icons mr-2 text-sm">logout</span>
+                  Log Out
+                </Button>
               </div>
             )}
           </CardContent>
