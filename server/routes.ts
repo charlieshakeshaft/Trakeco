@@ -299,6 +299,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update user info (password, status)
+  app.patch("/api/user/update", authenticate, async (req, res) => {
+    try {
+      const authenticatedUser = (req as any).user;
+      
+      // Get the user ID from query or use the authenticated user
+      const userId = req.query.userId ? Number(req.query.userId) : authenticatedUser.id;
+      
+      // Only allow users to update their own account unless they're admin
+      if (userId !== authenticatedUser.id && authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "You don't have permission to update this user" });
+      }
+      
+      const { password, is_new_user, needs_password_change } = req.body;
+      
+      // Create update data
+      const updateData: { 
+        password?: string; 
+        is_new_user?: boolean; 
+        needs_password_change?: boolean;
+      } = {};
+      
+      // Add only the fields that should be updated
+      if (password !== undefined) updateData.password = password;
+      if (is_new_user !== undefined) updateData.is_new_user = is_new_user;
+      if (needs_password_change !== undefined) updateData.needs_password_change = needs_password_change;
+      
+      // If nothing to update, return early
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "No data provided to update" });
+      }
+      
+      // Update the user
+      const updatedUser = await storage.updateUser(userId, updateData);
+      
+      // Remove sensitive data before sending response
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   // Invite new team member
   app.post("/api/company/invite", authenticate, async (req, res) => {
     try {

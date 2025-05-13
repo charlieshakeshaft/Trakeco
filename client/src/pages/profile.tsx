@@ -330,6 +330,37 @@ const Profile = () => {
           </div>
         </div>
       )}
+      {user?.is_new_user && (
+        <div className="bg-green-50 border-green-200 border rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <span className="material-icons text-green-500">waving_hand</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-lg font-medium text-green-800">Welcome to EcoCommute!</h3>
+              <div className="mt-2 text-green-700">
+                <p>Thanks for joining! To get started, please set up your home and work locations in your profile settings.</p>
+                <Button 
+                  className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    document.querySelector('[data-value="settings"]')?.dispatchEvent(
+                      new MouseEvent('click', { bubbles: true })
+                    );
+                    
+                    // Update the user to no longer be considered new
+                    updateUserMutation.mutate({
+                      is_new_user: false
+                    });
+                  }}
+                >
+                  Set up locations
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {user?.needs_password_change && (
         <div className="bg-blue-50 border-blue-200 border rounded-lg p-4 mb-6">
           <div className="flex items-start">
@@ -446,8 +477,94 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="settings">
-              {(user?.needs_password_change || true) && (
-                <Card className="mb-6 border-blue-200">
+              {/* Password change form - always visible in settings tab, but required for new users */}
+              {user?.needs_password_change ? (
+                <Card className="mb-6 border-blue-200 bg-blue-50">
+                  <CardContent className="pt-6">
+                    <div className="flex items-start mb-4">
+                      <div className="flex-shrink-0 pt-0.5">
+                        <span className="material-icons text-blue-500">lock</span>
+                      </div>
+                      <div className="ml-3">
+                        <h3 className="text-lg font-medium text-blue-800">Change Your Password</h3>
+                        <p className="mt-1 text-blue-700">
+                          You're using a temporary password. Please change it to a secure password you'll remember.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {passwordErrors.form && (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                        <p className="text-red-700 text-sm">{passwordErrors.form}</p>
+                      </div>
+                    )}
+                    
+                    <form onSubmit={handlePasswordSubmit} className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Current Password
+                        </label>
+                        <input 
+                          type="password" 
+                          name="current_password"
+                          value={passwordData.current_password}
+                          onChange={handlePasswordChange}
+                          className={`w-full px-3 py-2 border ${passwordErrors.current_password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
+                          placeholder="Enter your current password"
+                        />
+                        {passwordErrors.current_password && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.current_password}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          New Password
+                        </label>
+                        <input 
+                          type="password" 
+                          name="new_password"
+                          value={passwordData.new_password}
+                          onChange={handlePasswordChange}
+                          className={`w-full px-3 py-2 border ${passwordErrors.new_password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
+                          placeholder="Enter your new password"
+                        />
+                        {passwordErrors.new_password && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.new_password}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Confirm New Password
+                        </label>
+                        <input 
+                          type="password" 
+                          name="confirm_password"
+                          value={passwordData.confirm_password}
+                          onChange={handlePasswordChange}
+                          className={`w-full px-3 py-2 border ${passwordErrors.confirm_password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
+                          placeholder="Confirm your new password"
+                        />
+                        {passwordErrors.confirm_password && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.confirm_password}</p>
+                        )}
+                      </div>
+                      
+                      <div className="pt-4 flex justify-end">
+                        <Button 
+                          type="submit"
+                          className="bg-blue-600 hover:bg-blue-700"
+                          disabled={updateUserMutation.isPending}
+                        >
+                          {updateUserMutation.isPending ? 'Updating...' : 'Update Password'}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="mb-6">
                   <CardContent className="pt-6">
                     <h2 className="text-xl font-semibold mb-4 flex items-center">
                       <span className="material-icons mr-2 text-blue-500">lock</span>
