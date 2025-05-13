@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -34,10 +35,10 @@ interface CommuteFormProps {
 
 const commuteSchema = z.object({
   commute_type: z.string().min(1, "Please select a commute type"),
-  days_logged: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 1 && val <= 7, {
+  days_logged: z.coerce.number().gte(1).lte(7).refine((val) => val >= 1 && val <= 7, {
     message: "Days must be between 1 and 7",
   }),
-  distance_km: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 0, {
+  distance_km: z.coerce.number().gte(0).refine((val) => val >= 0, {
     message: "Distance must be a positive number",
   }),
   // Add day-specific fields
@@ -112,7 +113,15 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         days_logged: data.days_logged,
         distance_km: data.distance_km,
         week_start: weekStart.toISOString(),
-        user_id: userId // Explicitly include the user ID in the request body as well
+        user_id: userId, // Explicitly include the user ID in the request body as well
+        // Include day-specific fields
+        monday: data.monday,
+        tuesday: data.tuesday,
+        wednesday: data.wednesday,
+        thursday: data.thursday,
+        friday: data.friday,
+        saturday: data.saturday,
+        sunday: data.sunday
       }, "POST");
     },
     onSuccess: () => {
@@ -130,6 +139,13 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         commute_type: "",
         days_logged: "1",
         distance_km: "0",
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false,
       });
       
       if (onSuccess) {
@@ -192,6 +208,189 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-3">
+              <FormLabel>Select days you commuted this way:</FormLabel>
+              <div className="grid grid-cols-7 gap-2">
+                {/* Monday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="monday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Mon</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Tuesday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="tuesday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Tue</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Wednesday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="wednesday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Wed</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Thursday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="thursday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Thu</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Friday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="friday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Fri</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Saturday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="saturday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Sat</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                {/* Sunday */}
+                <div className="flex flex-col items-center">
+                  <FormField
+                    control={form.control}
+                    name="sunday"
+                    render={({ field }) => (
+                      <FormItem className="space-y-0 text-center">
+                        <FormControl>
+                          <div className="flex flex-col items-center space-y-1">
+                            <Checkbox 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                setTimeout(updateDaysLogged, 0);
+                              }} 
+                              className={field.value ? "border-primary" : ""}
+                            />
+                            <span className="text-xs">Sun</span>
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              {form.formState.errors.days_logged && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.days_logged.message}</p>
+              )}
+            </div>
 
             <FormField
               control={form.control}
@@ -210,7 +409,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {[1, 2, 3, 4, 5].map((day) => (
+                      {[1, 2, 3, 4, 5, 6, 7].map((day) => (
                         <SelectItem key={day} value={day.toString()}>
                           {day} {day === 1 ? "day" : "days"}
                         </SelectItem>

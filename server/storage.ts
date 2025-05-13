@@ -179,11 +179,27 @@ export class MemStorage implements IStorage {
       insertCommuteLog.days_logged
     );
     
+    // Set day-specific fields, ensuring they are boolean values
+    const monday = !!insertCommuteLog.monday;
+    const tuesday = !!insertCommuteLog.tuesday;
+    const wednesday = !!insertCommuteLog.wednesday;
+    const thursday = !!insertCommuteLog.thursday;
+    const friday = !!insertCommuteLog.friday;
+    const saturday = !!insertCommuteLog.saturday;
+    const sunday = !!insertCommuteLog.sunday;
+    
     const commuteLog: CommuteLog = { 
       ...insertCommuteLog, 
       id, 
       co2_saved_kg: co2SavedKg,
-      created_at: createdAt 
+      created_at: createdAt,
+      monday,
+      tuesday,
+      wednesday,
+      thursday,
+      friday,
+      saturday,
+      sunday
     };
     
     this.commuteLogs.set(id, commuteLog);
@@ -208,6 +224,15 @@ export class MemStorage implements IStorage {
       throw new Error("Commute log not found");
     }
     
+    // Handle day-specific fields
+    const monday = commuteLog.monday !== undefined ? !!commuteLog.monday : existingLog.monday;
+    const tuesday = commuteLog.tuesday !== undefined ? !!commuteLog.tuesday : existingLog.tuesday;
+    const wednesday = commuteLog.wednesday !== undefined ? !!commuteLog.wednesday : existingLog.wednesday;
+    const thursday = commuteLog.thursday !== undefined ? !!commuteLog.thursday : existingLog.thursday;
+    const friday = commuteLog.friday !== undefined ? !!commuteLog.friday : existingLog.friday;
+    const saturday = commuteLog.saturday !== undefined ? !!commuteLog.saturday : existingLog.saturday;
+    const sunday = commuteLog.sunday !== undefined ? !!commuteLog.sunday : existingLog.sunday;
+    
     const updatedLog: CommuteLog = {
       ...existingLog,
       ...commuteLog,
@@ -217,7 +242,14 @@ export class MemStorage implements IStorage {
             commuteLog.distance_km,
             commuteLog.days_logged
           ) 
-        : existingLog.co2_saved_kg
+        : existingLog.co2_saved_kg,
+      monday,
+      tuesday,
+      wednesday,
+      thursday,
+      friday,
+      saturday,
+      sunday
     };
     
     this.commuteLogs.set(id, updatedLog);

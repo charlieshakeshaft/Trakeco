@@ -177,6 +177,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const commuteSchema = insertCommuteLogSchema.extend({
         commute_type: z.string().refine(val => commuteTypes.options.includes(val as any), {
           message: "Invalid commute type"
+        }),
+        // Ensure days_logged matches the number of selected days
+        days_logged: z.number().superRefine((val, ctx) => {
+          // Access the containing object to check the selected days
+          const data = ctx.getData();
+          const selectedDays = [
+            !!data.monday,
+            !!data.tuesday,
+            !!data.wednesday,
+            !!data.thursday,
+            !!data.friday,
+            !!data.saturday,
+            !!data.sunday
+          ].filter(Boolean).length;
+          
+          if (val !== selectedDays) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Days logged (${val}) must match the number of selected days (${selectedDays})`
+            });
+            return false;
+          }
+          return true;
         })
       });
       
