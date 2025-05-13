@@ -16,9 +16,21 @@ const mockRoute = vi.fn().mockImplementation((props) => {
 const mockRouter = vi.fn().mockImplementation(({ children }) => children);
 mockRouter.useConfig = vi.fn();
 
+// Export mock functions so they can be used in tests and manipulated dynamically
+export {
+  mockUseLocation,
+  mockUseRoute,
+  mockLink,
+  mockRoute,
+  mockRouter,
+};
+
+// IMPORTANT: Export Router class to match the wouter API
+export const Router = mockRouter;
+
 // Create a mock for the wouter module
 vi.mock('wouter', () => {
-  return {
+  const actualModule = {
     default: mockRouter,
     Router: mockRouter,
     Route: mockRoute,
@@ -32,13 +44,5 @@ vi.mock('wouter', () => {
     Redirect: vi.fn().mockImplementation(() => null),
     Switch: vi.fn().mockImplementation(({ children }) => children),
   };
+  return actualModule;
 });
-
-// Export mock functions so they can be manipulated in tests
-export {
-  mockUseLocation,
-  mockUseRoute,
-  mockLink,
-  mockRoute,
-  mockRouter,
-};
