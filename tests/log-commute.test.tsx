@@ -5,21 +5,24 @@ import { mockRegularUser, mockNewUser } from './test-utils';
 import LogCommute from '../client/src/pages/log-commute';
 import React from 'react';
 
-// Mock wouter's Link component which is used in the LogCommute component
+// Mock wouter directly
 vi.mock('wouter', () => {
-  return {
-    __esModule: true,
-    default: vi.fn(),
-    Router: ({ children }) => children,
+  const actual = { 
+    // Mock all the necessary exports from wouter
+    Link: ({ href, children }) => React.createElement('a', { href }, children),
     Route: ({ children }) => children,
-    Link: ({ href, children }) => {
-      return <a href={href}>{children}</a>;
-    },
-    useLocation: () => ['/test-path', vi.fn()],
-    useRoute: () => [false, {}],
-    navigate: vi.fn(),
+    Router: ({ children }) => children,
     Switch: ({ children }) => children,
     Redirect: () => null,
+    useLocation: () => ['/mock-path', vi.fn()],
+    useRoute: () => [false, {}],
+    navigate: vi.fn(),
+  };
+  
+  return {
+    __esModule: true,
+    default: actual.Router,
+    ...actual
   };
 });
 
