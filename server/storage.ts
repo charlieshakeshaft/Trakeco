@@ -687,18 +687,18 @@ export class DatabaseStorage implements IStorage {
   
   // Company operations
   async getCompany(id: number): Promise<Company | undefined> {
-    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    const [company] = await db.select().from(schema.companies).where(eq(schema.companies.id, id));
     return company || undefined;
   }
   
   async getCompanyByDomain(domain: string): Promise<Company | undefined> {
-    const [company] = await db.select().from(companies).where(eq(companies.domain, domain));
+    const [company] = await db.select().from(schema.companies).where(eq(schema.companies.domain, domain));
     return company || undefined;
   }
   
   async createCompany(insertCompany: InsertCompany): Promise<Company> {
     const [company] = await db
-      .insert(companies)
+      .insert(schema.companies)
       .values(insertCompany)
       .returning();
     return company;
@@ -725,7 +725,7 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getCommuteLogsByUserId(userId: number): Promise<CommuteLog[]> {
-    return db.select().from(commuteLogs).where(eq(commuteLogs.user_id, userId));
+    return db.select().from(schema.commuteLogs).where(eq(schema.commuteLogs.user_id, userId));
   }
   
   async getCommuteLogByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog | undefined> {
