@@ -59,6 +59,12 @@ const Profile = () => {
                 
                 <div className="w-full p-4 rounded-lg bg-blue-50 mt-2">
                   <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">Company</span>
+                    <span className="text-sm text-primary font-medium">
+                      {profile?.company?.name || "No company"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Status</span>
                     <span className="text-xs px-2 py-1 rounded-full bg-primary text-white">
                       Active

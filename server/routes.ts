@@ -128,9 +128,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/user/profile", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
+      
+      // Get the company information if the user has a company_id
+      let company = null;
+      if (user.company_id) {
+        company = await storage.getCompany(user.company_id);
+      }
+      
       const { password, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
+      res.json({
+        ...userWithoutPassword,
+        company
+      });
     } catch (error) {
+      console.error("Error fetching user profile:", error);
       res.status(500).json({ message: "Error fetching user profile" });
     }
   });
