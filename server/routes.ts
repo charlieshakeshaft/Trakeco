@@ -296,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log("Total commute logs found:", commuteLogs.length);
       
-      // Filter logs for current week with better debugging
+      // Filter logs for current week with more robust date comparison
       const currentWeekLogs = commuteLogs.filter(log => {
         // Handle potential parsing issues
         try {
@@ -308,16 +308,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return false;
           }
           
-          const logWeekStart = new Date(log.week_start);
+          let logWeekStart;
+          
+          // Handle different formats of week_start
+          if (typeof log.week_start === 'string') {
+            logWeekStart = new Date(log.week_start);
+          } else if (log.week_start instanceof Date) {
+            logWeekStart = log.week_start;
+          } else {
+            console.log("Unsupported week_start format:", typeof log.week_start);
+            return false;
+          }
+          
           // Check if valid date
           if (isNaN(logWeekStart.getTime())) {
             console.log("Invalid date format for log:", log.id);
             return false;
           }
           
-          // Compare just the date part
-          const logDateStr = logWeekStart.toISOString().split('T')[0];
-          const weekStartStr = weekStart.toISOString().split('T')[0];
+          // Format dates for comparison in YYYY-MM-DD format
+          const formatDate = (date: Date): string => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          };
+          
+          const logDateStr = formatDate(logWeekStart);
+          const weekStartStr = formatDate(weekStart);
           const matches = logDateStr === weekStartStr;
           
           console.log("Log", log.id, "week start:", logDateStr, "current week start:", weekStartStr, "matches:", matches);

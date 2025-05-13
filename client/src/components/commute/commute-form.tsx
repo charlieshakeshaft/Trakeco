@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -133,8 +132,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       // Reset form
       form.reset({
         commute_type: "",
-        days_logged: 0,
-        distance_km: 0,
         monday: false,
         tuesday: false,
         wednesday: false,
@@ -221,7 +218,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -246,7 +242,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -271,7 +266,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -296,7 +290,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -321,7 +314,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -346,7 +338,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -371,7 +362,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                               checked={field.value} 
                               onCheckedChange={(checked) => {
                                 field.onChange(checked);
-                                setTimeout(updateDaysLogged, 0);
                               }} 
                               className={field.value ? "border-primary" : ""}
                             />
@@ -383,8 +373,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                   />
                 </div>
               </div>
-              {form.formState.errors.days_logged && (
-                <p className="text-sm text-red-500 mt-1">{form.formState.errors.days_logged.message}</p>
+              {form.formState.errors.monday && (
+                <p className="text-sm text-red-500 mt-1">{form.formState.errors.monday.message}</p>
               )}
             </div>
 
