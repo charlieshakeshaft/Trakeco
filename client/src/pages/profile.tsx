@@ -10,10 +10,10 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 
 const Profile = () => {
-  const { data: profile, isLoading } = useUserProfile(DEMO_USER_ID);
+  const { user, logout } = useAuth();
+  const { data: profile, isLoading } = useUserProfile(user?.id || 0);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const { logout } = useAuth();
   
   const handleLogout = async () => {
     try {
@@ -102,7 +102,7 @@ const Profile = () => {
             </TabsList>
             
             <TabsContent value="impact">
-              <StatsSummary userId={DEMO_USER_ID} />
+              <StatsSummary userId={user?.id || 0} />
               
               <Card>
                 <CardContent className="pt-6">
@@ -162,7 +162,7 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="history">
-              <RedemptionHistory userId={DEMO_USER_ID} />
+              <RedemptionHistory userId={user?.id || 0} />
             </TabsContent>
             
             <TabsContent value="settings">

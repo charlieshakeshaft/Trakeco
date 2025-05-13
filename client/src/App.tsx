@@ -18,6 +18,7 @@ import Leaderboard from "@/pages/leaderboard";
 import Profile from "@/pages/profile";
 import LoginPage from "@/pages/login";
 import SignupPage from "@/pages/signup";
+import CompanyPage from "@/pages/company";
 
 // Layout components
 import Sidebar from "@/components/layout/sidebar";
@@ -72,6 +73,7 @@ function AuthenticatedApp({ user }: { user: User }) {
           <Route path="/rewards" component={Rewards} />
           <Route path="/leaderboard" component={Leaderboard} />
           <Route path="/profile" component={Profile} />
+          <Route path="/company" component={CompanyPage} />
           <Route component={NotFound} />
         </Switch>
       </main>
