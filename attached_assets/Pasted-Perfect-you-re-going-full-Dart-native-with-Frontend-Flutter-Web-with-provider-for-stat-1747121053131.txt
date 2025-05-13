@@ -1,0 +1,232 @@
+Perfect — you’re going full Dart-native with:
+
+* **Frontend**: Flutter Web (with `provider` for state management)
+* **Backend**: Dart + **[Serverpod](https://serverpod.dev/)**
+* **Database**: SQL (PostgreSQL)
+
+That’s a powerful and cohesive stack. Here’s your **finalised technical spec** tailored to this exact setup.
+
+---
+
+## 🚀 Trak – Technical Requirements (Flutter + Serverpod + SQL)
+
+---
+
+### 🌐 Tech Stack Summary
+
+| Layer    | Tech                                     |
+| -------- | ---------------------------------------- |
+| Frontend | Flutter Web (Provider for state)         |
+| Backend  | Serverpod (Dart native server framework) |
+| Database | PostgreSQL (via Serverpod ORM)           |
+| Auth     | Email-based (Magic Link or Firebase)     |
+| Hosting  | Serverpod (Cloud Run or custom server)   |
+
+---
+
+### ⚙️ Core Functional Requirements
+
+#### 🧑‍💼 Authentication
+
+* Email-based sign-up / login
+* Role: `user` or `admin`
+* Option to:
+
+  * Register a new business
+  * Join existing business via company email domain or invite code
+
+#### 🚶 Commute Logging (Weekly)
+
+* Log commute method:
+
+  * Walk, Cycle, Public Transport, Carpool, EV, Petrol/Diesel, Remote Work
+* Optional:
+
+  * Distance, Days per week
+* Restrict to one log per user per week (editable until Sunday)
+
+#### 🏆 Points Engine
+
+* Assign points based on:
+
+  * Commute type
+  * Frequency (e.g., 3+ days/week = bonus)
+  * Streaks
+  * Joining challenges
+* Weekly reset mechanism for streak tracking
+
+#### 🧠 User Dashboard
+
+* View:
+
+  * Current & historical points
+  * Weekly commute logs
+  * Challenge participation
+  * Rewards available & redeemed
+  * CO₂ saved
+
+#### 🛠 Admin Dashboard
+
+* View company-wide metrics:
+
+  * CO₂ saved
+  * Participation rate
+  * Leaderboard
+* Create:
+
+  * Challenges (name, start/end, goal, bonus points)
+  * Rewards (title, cost, quantity limit)
+* Export data (CSV/JSON)
+
+#### 🎁 Rewards & Challenges
+
+* Users can:
+
+  * Join active challenges
+  * Redeem available rewards (based on point balance)
+  * View reward history
+* Admin-defined rules (duration, point value, caps)
+
+---
+
+### 📐 Architecture with Serverpod
+
+#### 🧱 Serverpod Modules
+
+* `UserModule`
+
+  * Register/login
+  * Role management
+* `CommuteModule`
+
+  * CRUD for commute logs
+  * CO₂ estimation logic
+* `PointsModule`
+
+  * Calculation engine
+  * Weekly processor
+* `ChallengeModule`
+
+  * Join/create/view challenges
+* `RewardModule`
+
+  * Redeem/view/manage rewards
+* `AnalyticsModule`
+
+  * Company dashboards
+  * Leaderboards
+
+#### 🗃 SQL Schema (via Serverpod ORM)
+
+```sql
+table users {
+  id serial primary key,
+  email text unique,
+  company_id int,
+  role text, -- 'admin' or 'user'
+  points_total int,
+  streak_count int,
+  created_at timestamp
+}
+
+table companies {
+  id serial primary key,
+  name text,
+  domain text
+}
+
+table commute_logs {
+  id serial primary key,
+  user_id int,
+  week_start date,
+  commute_type text,
+  days_logged int,
+  distance_km float,
+  created_at timestamp
+}
+
+table points_transactions {
+  id serial primary key,
+  user_id int,
+  source text,
+  points int,
+  created_at timestamp
+}
+
+table challenges {
+  id serial primary key,
+  company_id int,
+  title text,
+  start_date date,
+  end_date date,
+  points_reward int,
+  description text
+}
+
+table challenge_participants {
+  id serial primary key,
+  challenge_id int,
+  user_id int,
+  joined_at timestamp
+}
+
+table rewards {
+  id serial primary key,
+  company_id int,
+  title text,
+  description text,
+  cost_points int,
+  quantity_limit int
+}
+
+table redemptions {
+  id serial primary key,
+  user_id int,
+  reward_id int,
+  redeemed_at timestamp
+}
+```
+
+---
+
+### 🔄 State Management (Flutter + Provider)
+
+Use `provider` to manage:
+
+* Auth state (`UserProvider`)
+* Commute logging state (`CommuteProvider`)
+* Points & reward balance (`PointsProvider`)
+* Challenge & dashboard state (`ChallengeProvider`, `AdminProvider`)
+
+---
+
+### 📦 Deployment
+
+* **Backend**: Host Serverpod on:
+
+  * Google Cloud Run
+  * DigitalOcean Droplets
+  * Self-hosted Linux box
+* **Frontend**:
+
+  * Deploy Flutter Web via:
+
+    * Firebase Hosting
+    * Vercel
+    * Netlify
+
+---
+
+### 🧪 Dev Phases
+
+1. **Auth + Role Management**
+2. **Commute Logging + Points Engine**
+3. **Basic Dashboard (User + Admin)**
+4. **Challenge Creation & Joining**
+5. **Reward System**
+6. **Analytics + CSV Export**
+7. **Gamification / Notifications**
+
+---
+
+Would you like me to scaffold the folder structure or write some Serverpod model stubs + example Flutter `provider` boilerplate next?
