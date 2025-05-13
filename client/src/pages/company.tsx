@@ -16,6 +16,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateReward, useAllRewards } from "@/hooks/use-rewards";
+import { useCreateChallenge, useAllChallenges } from "@/hooks/use-challenges";
+
 import { useQuery } from "@tanstack/react-query";
 
 // Mock data for company members (to be replaced with real API data)
@@ -38,8 +40,22 @@ const CompanyPage = () => {
     quantity_limit: 0
   });
   
+  const [newChallenge, setNewChallenge] = useState({
+    title: "",
+    description: "",
+    start_date: new Date().toISOString().split('T')[0],
+    end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    points_reward: 500,
+    goal_type: "distance",
+    goal_value: 100,
+    commute_type: "cycle" as CommuteType, // Cast to CommuteType enum
+    company_id: null
+  });
+  
   const createRewardMutation = useCreateReward(user?.id || 0);
+  const createChallengeMutation = useCreateChallenge(user?.id || 0);
   const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(user?.id || 0);
+  const { data: challenges, isLoading: isLoadingChallenges } = useAllChallenges(user?.id || 0);
   
   // Check if user has admin role
   const isAdmin = user?.role === "admin";
@@ -239,6 +255,8 @@ const CompanyPage = () => {
                       id="challenge-title"
                       placeholder="e.g., Bike to Work Week"
                       className="col-span-3"
+                      value={newChallenge.title}
+                      onChange={(e) => setNewChallenge({...newChallenge, title: e.target.value})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -249,6 +267,8 @@ const CompanyPage = () => {
                       id="challenge-desc"
                       placeholder="Describe the challenge..."
                       className="col-span-3 flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                      value={newChallenge.description}
+                      onChange={(e) => setNewChallenge({...newChallenge, description: e.target.value})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -259,6 +279,8 @@ const CompanyPage = () => {
                       id="challenge-start"
                       type="date"
                       className="col-span-3"
+                      value={newChallenge.start_date}
+                      onChange={(e) => setNewChallenge({...newChallenge, start_date: e.target.value})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -269,6 +291,8 @@ const CompanyPage = () => {
                       id="challenge-end"
                       type="date"
                       className="col-span-3"
+                      value={newChallenge.end_date}
+                      onChange={(e) => setNewChallenge({...newChallenge, end_date: e.target.value})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -280,14 +304,34 @@ const CompanyPage = () => {
                       type="number"
                       placeholder="500"
                       className="col-span-3"
+                      value={newChallenge.points_reward}
+                      onChange={(e) => setNewChallenge({...newChallenge, points_reward: parseInt(e.target.value) || 0})}
                     />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button onClick={() => {
-                    toast({
-                      title: "Challenge Created",
-                      description: "The new challenge has been created successfully."
+                    // Set the company_id field to the user's company_id
+                    const challengeData = {
+                      ...newChallenge,
+                      commute_type: newChallenge.commute_type as CommuteType,
+                      company_id: user?.company_id || null
+                    };
+                    
+                    // Submit the data
+                    createChallengeMutation.mutate(challengeData);
+                    
+                    // Reset form and close dialog
+                    setNewChallenge({
+                      title: "",
+                      description: "",
+                      start_date: new Date().toISOString().split('T')[0],
+                      end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                      points_reward: 500,
+                      goal_type: "distance",
+                      goal_value: 100,
+                      commute_type: "cycle" as CommuteType,
+                      company_id: null
                     });
                     setIsAddChallengeOpen(false);
                   }}>Create Challenge</Button>
@@ -298,16 +342,58 @@ const CompanyPage = () => {
           
           <Card>
             <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <div className="text-gray-400 mb-2">
-                  <span className="material-icons text-4xl">emoji_events</span>
+              {isLoadingChallenges ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin text-primary mb-2">
+                    <span className="material-icons text-4xl">cached</span>
+                  </div>
+                  <p>Loading challenges...</p>
                 </div>
-                <h3 className="text-lg font-medium mb-2">No challenges yet</h3>
-                <p className="text-gray-500 mb-4">Create your first company challenge to motivate your team.</p>
-                <Button onClick={() => setIsAddChallengeOpen(true)}>
-                  Create Challenge
-                </Button>
-              </div>
+              ) : challenges && challenges.length > 0 ? (
+                <div className="space-y-4">
+                  {challenges.map(challenge => (
+                    <div key={challenge.id} className="border rounded-lg p-4 flex items-start">
+                      <div className="p-3 rounded-lg bg-primary/10 text-primary mr-4">
+                        <span className="material-icons">emoji_events</span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{challenge.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{challenge.description}</p>
+                        <div className="flex items-center text-xs text-gray-500 mt-2 space-x-4">
+                          <div>
+                            <span className="font-medium">Start:</span> {new Date(challenge.start_date).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="font-medium">End:</span> {new Date(challenge.end_date).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <span className="font-medium">Reward:</span> {challenge.points_reward} pts
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="ghost" size="sm">
+                          <span className="material-icons text-sm">edit</span>
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <span className="material-icons text-sm text-red-500">delete</span>
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-2">
+                    <span className="material-icons text-4xl">emoji_events</span>
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No challenges yet</h3>
+                  <p className="text-gray-500 mb-4">Create your first company challenge to motivate your team.</p>
+                  <Button onClick={() => setIsAddChallengeOpen(true)}>
+                    Create Challenge
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
