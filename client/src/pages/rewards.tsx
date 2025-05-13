@@ -18,6 +18,7 @@ const Rewards = () => {
   const { data: profile, isLoading: isLoadingProfile } = useUserProfile(userId);
   
   const isLoading = isLoadingRewards || isLoadingRedemptions || isLoadingProfile;
+  // Set points from profile or default to 0
   const userPoints = profile?.points_total || 0;
   
   // Filter rewards within user's point range
@@ -79,6 +80,7 @@ const Rewards = () => {
                   reward={reward}
                   userPoints={userPoints}
                   userId={userId}
+                  redemptions={redemptions || []}
                   showDetails
                 />
               ))}
@@ -123,6 +125,7 @@ const Rewards = () => {
                   reward={reward}
                   userPoints={userPoints}
                   userId={userId}
+                  redemptions={redemptions || []}
                   showDetails
                 />
               ))}

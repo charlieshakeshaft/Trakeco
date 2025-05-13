@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { LeaderboardUser } from "@/lib/types";
+import { LeaderboardUser, User } from "@/lib/types";
 
 export function useLeaderboard(userId: number, limit: number = 10) {
   return useQuery<LeaderboardUser[]>({
@@ -16,7 +16,7 @@ export function useUserStats(userId: number) {
 }
 
 export function useUserProfile(userId: number) {
-  return useQuery({
+  return useQuery<User>({
     queryKey: [`/api/user/profile?userId=${userId}`],
   });
 }
