@@ -12,12 +12,28 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateReward, useAllRewards } from "@/hooks/use-rewards";
-import { useCreateChallenge, useAllChallenges } from "@/hooks/use-challenges";
-import { CommuteType } from "@/lib/types";
+import { 
+  useCreateChallenge, 
+  useAllChallenges, 
+  useUpdateChallenge,
+  useDeleteChallenge 
+} from "@/hooks/use-challenges";
+import { CommuteType, Challenge } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -33,7 +49,11 @@ const CompanyPage = () => {
   const [newMember, setNewMember] = useState({ name: "", email: "", role: "User" });
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isAddChallengeOpen, setIsAddChallengeOpen] = useState(false);
+  const [isEditChallengeOpen, setIsEditChallengeOpen] = useState(false);
   const [isAddRewardOpen, setIsAddRewardOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [challengeToDelete, setChallengeToDelete] = useState<Challenge | null>(null);
+  const [editingChallenge, setEditingChallenge] = useState<Challenge | null>(null);
   const [newReward, setNewReward] = useState({
     title: "",
     description: "",
@@ -56,14 +76,65 @@ const CompanyPage = () => {
   // Get user ID from auth context
   const userId = user?.id || 0;
   
+
+  
   // Create mutations and fetch data
   const createRewardMutation = useCreateReward(userId);
   const createChallengeMutation = useCreateChallenge(userId);
+  const updateChallengeMutation = useUpdateChallenge(userId);
+  const deleteChallengeMutation = useDeleteChallenge(userId);
   const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
   const { data: challenges, isLoading: isLoadingChallenges } = useAllChallenges(userId);
   
   // Check if user has admin role
   const isAdmin = user?.role === "admin";
+  
+  // Handler for editing a challenge
+  const handleEditChallenge = (challenge: Challenge) => {
+    setEditingChallenge({
+      ...challenge,
+      // Ensure dates are in the right format for the form
+      start_date: new Date(challenge.start_date).toISOString().split('T')[0],
+      end_date: new Date(challenge.end_date).toISOString().split('T')[0],
+    });
+    setIsEditChallengeOpen(true);
+  };
+  
+  // Handler for saving edited challenge
+  const handleSaveChallenge = () => {
+    if (!editingChallenge) return;
+    
+    updateChallengeMutation.mutate({
+      id: editingChallenge.id,
+      data: {
+        title: editingChallenge.title,
+        description: editingChallenge.description,
+        start_date: editingChallenge.start_date,
+        end_date: editingChallenge.end_date,
+        points_reward: editingChallenge.points_reward,
+        goal_type: editingChallenge.goal_type,
+        goal_value: editingChallenge.goal_value,
+        commute_type: editingChallenge.commute_type,
+      }
+    });
+    
+    setIsEditChallengeOpen(false);
+  };
+  
+  // Handler for deleting a challenge
+  const handleDeleteClick = (challenge: Challenge) => {
+    setChallengeToDelete(challenge);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  // Handler for confirming challenge deletion
+  const handleConfirmDelete = () => {
+    if (!challengeToDelete) return;
+    
+    deleteChallengeMutation.mutate(challengeToDelete.id);
+    setIsDeleteDialogOpen(false);
+    setChallengeToDelete(null);
+  };
   
   if (!isAdmin) {
     return (
@@ -424,10 +495,10 @@ const CompanyPage = () => {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleEditChallenge(challenge)}>
                           <span className="material-icons text-sm">edit</span>
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(challenge)}>
                           <span className="material-icons text-sm text-red-500">delete</span>
                         </Button>
                       </div>
@@ -616,6 +687,175 @@ const CompanyPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Edit Challenge Dialog */}
+      <Dialog open={isEditChallengeOpen} onOpenChange={setIsEditChallengeOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Challenge</DialogTitle>
+            <DialogDescription>
+              Update challenge details. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-title" className="text-right">
+                Title
+              </Label>
+              <Input
+                id="edit-title"
+                className="col-span-3"
+                value={editingChallenge?.title || ""}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, title: e.target.value} : prev
+                  )
+                }
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-description" className="text-right">
+                Description
+              </Label>
+              <Input
+                id="edit-description"
+                className="col-span-3"
+                value={editingChallenge?.description || ""}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, description: e.target.value} : prev
+                  )
+                }
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-start-date" className="text-right">
+                Start Date
+              </Label>
+              <Input
+                id="edit-start-date"
+                type="date"
+                className="col-span-3"
+                value={editingChallenge?.start_date || ""}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, start_date: e.target.value} : prev
+                  )
+                }
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-end-date" className="text-right">
+                End Date
+              </Label>
+              <Input
+                id="edit-end-date"
+                type="date"
+                className="col-span-3"
+                value={editingChallenge?.end_date || ""}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, end_date: e.target.value} : prev
+                  )
+                }
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-points" className="text-right">
+                Points
+              </Label>
+              <Input
+                id="edit-points"
+                type="number"
+                className="col-span-3"
+                value={editingChallenge?.points_reward || 0}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, points_reward: parseInt(e.target.value)} : prev
+                  )
+                }
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-goal-type" className="text-right">
+                Goal Type
+              </Label>
+              <select
+                id="edit-goal-type"
+                className="col-span-3 p-2 border rounded"
+                value={editingChallenge?.goal_type || "distance"}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, goal_type: e.target.value} : prev
+                  )
+                }
+              >
+                <option value="distance">Distance (km)</option>
+                <option value="days">Days</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-goal-value" className="text-right">
+                Goal Value
+              </Label>
+              <Input
+                id="edit-goal-value"
+                type="number"
+                className="col-span-3"
+                value={editingChallenge?.goal_value || 0}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, goal_value: parseInt(e.target.value)} : prev
+                  )
+                }
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="edit-commute-type" className="text-right">
+                Commute Type
+              </Label>
+              <select
+                id="edit-commute-type"
+                className="col-span-3 p-2 border rounded"
+                value={editingChallenge?.commute_type || "cycle"}
+                onChange={(e) => 
+                  setEditingChallenge(prev => 
+                    prev ? {...prev, commute_type: e.target.value as CommuteType} : prev
+                  )
+                }
+              >
+                <option value="cycle">Cycling</option>
+                <option value="walk">Walking</option>
+                <option value="run">Running</option>
+                <option value="public_transport">Public Transport</option>
+                <option value="carpool">Carpooling</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={handleSaveChallenge}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Challenge Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the challenge
+              "{challengeToDelete?.title}" and remove it from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-red-500 hover:bg-red-600">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
