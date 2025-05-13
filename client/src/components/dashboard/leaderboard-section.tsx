@@ -12,13 +12,13 @@ interface LeaderboardUser {
 
 const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
   const { data: leaderboard, isLoading } = useQuery({
-    queryKey: ['/api/leaderboard'],
+    queryKey: [`/api/leaderboard?userId=${userId}`],
     staleTime: 60000, // 1 minute
   });
   
   // Get user profile to check role
   const { data: userProfile } = useQuery<{id: number, role?: string, company_id?: number}>({
-    queryKey: ['/api/user/profile']
+    queryKey: [`/api/user/profile?userId=${userId}`]
   });
   
   const isAdmin = userProfile?.role === 'admin';

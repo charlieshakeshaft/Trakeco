@@ -30,7 +30,7 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
   const { data: rewards, isLoading } = useAllRewards(userId);
   
   const { data: userProfile } = useQuery<UserProfile>({
-    queryKey: ['/api/user/profile'],
+    queryKey: [`/api/user/profile?userId=${userId}`],
   });
   
   const userProfileData = userProfile || {} as UserProfile;
