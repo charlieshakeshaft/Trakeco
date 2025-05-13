@@ -180,14 +180,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
       });
       
+      // Prefer the user_id from the request body if provided, otherwise use the authenticated user's ID
+      // This helps in development when using query param authentication
+      const userId = req.body.user_id || user.id;
+      
       const commuteData = commuteSchema.parse({
         ...req.body,
-        user_id: user.id
+        user_id: Number(userId) // Ensure it's a number
       });
       
       // Check if user already has a commute log for this week
       const weekStart = new Date(commuteData.week_start);
-      const existingLog = await storage.getCommuteLogByUserIdAndWeek(user.id, weekStart);
+      const existingLog = await storage.getCommuteLogByUserIdAndWeek(Number(userId), weekStart);
       
       if (existingLog) {
         // Check if it's still the same week
@@ -227,7 +231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/commutes", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
-      const commuteLogs = await storage.getCommuteLogsByUserId(user.id);
+      // Use query param userId if provided, otherwise use authenticated user
+      const userId = req.query.userId ? Number(req.query.userId) : user.id;
+      const commuteLogs = await storage.getCommuteLogsByUserId(userId);
       res.json(commuteLogs);
     } catch (error) {
       res.status(500).json({ message: "Error fetching commute logs" });
@@ -238,13 +244,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = (req as any).user;
       
+      // Use query param userId if provided, otherwise use authenticated user
+      const userId = req.query.userId ? Number(req.query.userId) : user.id;
+      
       // Get the start of the current week
       const now = new Date();
       const weekStart = new Date(now);
       weekStart.setDate(now.getDate() - now.getDay());
       weekStart.setHours(0, 0, 0, 0);
       
-      const commuteLogs = await storage.getCommuteLogsByUserId(user.id);
+      const commuteLogs = await storage.getCommuteLogsByUserId(userId);
       
       // Filter logs for current week
       const currentWeekLogs = commuteLogs.filter(log => {

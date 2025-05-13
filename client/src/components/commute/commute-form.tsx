@@ -68,6 +68,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         days_logged: data.days_logged,
         distance_km: data.distance_km,
         week_start: weekStart.toISOString(),
+        user_id: userId // Explicitly include the user ID in the request body as well
       }, "POST");
     },
     onSuccess: () => {
