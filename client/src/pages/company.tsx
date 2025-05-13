@@ -309,6 +309,53 @@ const CompanyPage = () => {
                       onChange={(e) => setNewChallenge({...newChallenge, points_reward: parseInt(e.target.value) || 0})}
                     />
                   </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="challenge-goal-type" className="text-right">
+                      Goal Type
+                    </Label>
+                    <select
+                      id="challenge-goal-type"
+                      className="col-span-3 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      value={newChallenge.goal_type}
+                      onChange={(e) => setNewChallenge({...newChallenge, goal_type: e.target.value})}
+                    >
+                      <option value="distance">Distance (km)</option>
+                      <option value="days">Days</option>
+                      <option value="co2">CO2 Saved (kg)</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="challenge-goal-value" className="text-right">
+                      Goal Target
+                    </Label>
+                    <Input
+                      id="challenge-goal-value"
+                      type="number"
+                      placeholder="100"
+                      className="col-span-3"
+                      value={newChallenge.goal_value}
+                      onChange={(e) => setNewChallenge({...newChallenge, goal_value: parseInt(e.target.value) || 0})}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="challenge-commute-type" className="text-right">
+                      Commute Type
+                    </Label>
+                    <select
+                      id="challenge-commute-type"
+                      className="col-span-3 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                      value={newChallenge.commute_type}
+                      onChange={(e) => setNewChallenge({...newChallenge, commute_type: e.target.value as CommuteType})}
+                    >
+                      <option value="walk">Walking</option>
+                      <option value="cycle">Cycling</option>
+                      <option value="public_transport">Public Transport</option>
+                      <option value="carpool">Carpooling</option>
+                      <option value="electric_vehicle">Electric Vehicle</option>
+                      <option value="gas_vehicle">Gas Vehicle</option>
+                      <option value="remote_work">Remote Work</option>
+                    </select>
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button onClick={() => {
