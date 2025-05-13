@@ -1,8 +1,8 @@
 # Green Commute - Technical Architecture
 
-## Technology Stack
+## Technology Stack (Current Implementation)
 
-### Frontend
+### Frontend (Web - Current)
 - **Framework**: React with TypeScript
 - **State Management**: TanStack Query (React Query) for server state
 - **Routing**: Wouter for lightweight client-side routing
@@ -11,7 +11,7 @@
 - **Styling**: Tailwind CSS for utility-first styling
 - **Icons**: Lucide React for consistent iconography
 
-### Backend
+### Backend (Current)
 - **Server Framework**: Express.js with TypeScript
 - **API Architecture**: RESTful API design
 - **Authentication**: Custom session-based authentication
@@ -19,18 +19,53 @@
 - **Validation**: Zod for schema validation
 - **Password Security**: Crypto library for password hashing and comparison
 
-### Database
+### Database (Current)
 - **PostgreSQL**: Relational database for data persistence
 - **Schemas**: Drizzle schema definitions with relations
 
-### Development Tools
+### Development Tools (Current)
 - **Bundler**: Vite for fast development and optimized production builds
 - **Testing**: Vitest for unit and integration testing
 - **Mocking**: MSW (Mock Service Worker) for API mocking in tests
 
+## Proposed Technology Stack (Flutter Migration)
+
+### Frontend (Mobile & Web)
+- **Framework**: Flutter for cross-platform development
+- **Language**: Dart programming language
+- **State Management**: Provider package for reactive state management
+- **Routing**: Flutter Navigator 2.0 for declarative routing
+- **Forms**: Flutter Form widgets with custom validation
+- **UI Components**: Material Design and custom Flutter widgets
+- **Styling**: Flutter's built-in styling system with Themes
+- **Network**: Dio/http package for API requests
+- **Local Storage**: Shared Preferences and Hive for local data persistence
+- **Authentication**: JWT token storage in secure storage
+
+### Backend (Replit-hosted)
+- **Server Framework**: Express.js with TypeScript (unchanged)
+- **API Architecture**: RESTful API design (unchanged)
+- **Authentication**: JWT-based authentication (migration from session-based)
+- **Database ORM**: Drizzle ORM (unchanged)
+- **Hosting**: Replit for cloud hosting and deployment
+- **Deployment**: Replit Deployments for continuous deployment
+
+### Backend Modifications
+- **Authentication System**: Migrate from cookie-based sessions to JWT tokens
+- **CORS Configuration**: Enable cross-origin support for mobile clients
+- **API Versioning**: Introduce versioning for API endpoints
+- **Rate Limiting**: Enhanced rate limiting for public API endpoints
+
+### Development Tools (Flutter)
+- **IDE**: Android Studio / VS Code with Flutter plugins
+- **Testing**: Flutter test framework for unit and widget tests
+- **Mocking**: Mockito for mocking dependencies in tests
+- **CI/CD**: GitHub Actions for continuous integration and deployment
+- **Code Quality**: Dart analyzer and linter for code quality
+
 ## System Architecture
 
-### Client-Side Architecture
+### Current Client-Side Architecture (Web)
 
 #### Component Structure
 - **Layout Components**: Define the overall page layout and navigation
@@ -39,12 +74,36 @@
 - **Form Components**: Handle user inputs with validation
 - **Context Providers**: Provide global state and functionality
 
-#### State Management
+#### Current State Management
 - **Server State**: TanStack Query for fetching, caching, and updating server data
 - **Form State**: React Hook Form for managing form inputs and validation
 - **User Authentication State**: Context API for global auth state
 
-### Server-Side Architecture
+### Proposed Flutter Architecture
+
+#### App Structure
+- **Presentation Layer**: 
+  - **Screens**: Full application views (Dashboard, Profile, Challenges, etc.)
+  - **Widgets**: Reusable UI components for consistent design
+  - **Navigation**: Navigator 2.0 for declarative routing
+
+- **Business Logic Layer**:
+  - **Providers**: Global state management with Provider package
+  - **Models**: Dart classes that represent business entities
+  - **Services**: Encapsulated business logic and operations
+
+- **Data Layer**:
+  - **Repositories**: Abstract interfaces for data operations
+  - **API Clients**: Implementation of API communication
+  - **Local Storage**: Persistence of app data and user preferences
+
+#### Flutter State Management
+- **Provider Package**: For reactive state management across the app
+- **ChangeNotifier**: For observable state objects
+- **Repository Pattern**: Centralized data access
+- **Local State**: StatefulWidget for component-level state
+
+### Server-Side Architecture (Current)
 
 #### API Layer
 - **Route Handlers**: Process incoming requests and return appropriate responses
@@ -60,6 +119,23 @@
 - **Schema Definitions**: Define database tables and relationships
 - **Migrations**: Handle database schema changes
 - **Query Building**: Build and execute database queries
+
+### Proposed Server-Side Changes for Flutter Integration
+
+#### API Layer Modifications
+- **JWT Authentication**: Replace session-based auth with JWT token authentication
+- **CORS Configuration**: Enable cross-origin requests from mobile clients
+- **API Versioning**: Introduce `/api/v1/` prefix for backward compatibility
+- **Error Handling**: Enhanced error responses with consistent format for mobile clients
+
+#### Service Layer Modifications
+- **Auth Service**: Update to issue and verify JWT tokens instead of sessions
+- **Rate Limiting**: Implement tiered rate limiting for different API endpoints
+- **Caching Layer**: Add Redis-based caching for high-traffic endpoints (optional)
+
+#### Data Layer (Unchanged)
+- Continue using Drizzle ORM with PostgreSQL
+- Maintain existing database schema with potential optimizations
 
 ## Database Schema
 
@@ -206,6 +282,8 @@ sessions (
 
 ## Authentication Flow
 
+### Current Web Authentication Flow
+
 1. **Registration**:
    - User submits registration form with username, email, password, and user type
    - Server validates the input data
@@ -231,6 +309,34 @@ sessions (
    - Server destroys the session
    - Client clears authentication state
    - User is redirected to login page
+
+### Proposed Flutter Authentication Flow
+
+1. **Registration**:
+   - User submits registration form with username, email, password, and user type
+   - Server validates the input data
+   - Password is hashed using scrypt
+   - User record is created in the database
+   - Server generates and returns JWT token with user data payload
+   - Flutter client stores token in secure storage
+
+2. **Login**:
+   - User submits login credentials through Flutter UI
+   - Server validates credentials and generates JWT token
+   - Token contains user ID and essential claims with expiration
+   - Flutter client stores token in secure storage
+   - App configures all future API requests with bearer token
+
+3. **Token Management**:
+   - Access token stored in secure storage
+   - Refresh token mechanism for extending sessions
+   - Token verification on protected API endpoints
+   - Token invalidation for security events
+
+4. **Logout**:
+   - Client deletes token from secure storage
+   - Server adds token to blocklist (optional)
+   - App navigates to login screen
 
 ## API Endpoints
 
