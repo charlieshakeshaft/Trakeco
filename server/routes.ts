@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
+import { isAuthenticated } from "./replitAuth";
 import { 
   insertUserSchema, 
   insertCompanySchema, 
@@ -14,44 +15,41 @@ import {
   commuteTypes
 } from "@shared/schema";
 
-// Authentication middleware
+// Legacy authentication middleware for backward compatibility with non-Replit auth parts
 const authenticate = async (req: Request, res: Response, next: Function) => {
   try {
-    // Check if user is logged in via the session
-    const userId = (req as any).session?.userId;
-    
-    if (!userId) {
-      // If no session, check if userId is provided as a query param (for development)
-      // In production, we would remove this fallback
-      if (req.query.userId) {
-        const user = await storage.getUser(Number(req.query.userId));
+    // If user is already authenticated via Replit, use that
+    if (req.isAuthenticated && req.isAuthenticated() && req.user) {
+      const userId = req.user?.claims?.sub;
+      if (userId) {
+        const user = await storage.getUser(Number(userId));
         if (user) {
           (req as any).user = user;
           return next();
         }
       }
-      
-      // For development mode, provide a default user 
-      if (process.env.NODE_ENV === "development") {
-        const defaultUser = await storage.getUser(7); // Use ID 7 from the seed data
-        if (defaultUser) {
-          console.log("Using default development user:", defaultUser.username);
-          (req as any).user = defaultUser;
-          return next();
-        }
+    }
+    
+    // Fallbacks for development mode
+    if (req.query.userId) {
+      const user = await storage.getUser(Number(req.query.userId));
+      if (user) {
+        (req as any).user = user;
+        return next();
       }
-      
-      return res.status(401).json({ message: "Not authenticated" });
     }
     
-    const user = await storage.getUser(userId);
-    if (!user) {
-      return res.status(401).json({ message: "User not found" });
+    // For development mode, provide a default user 
+    if (process.env.NODE_ENV === "development") {
+      const defaultUser = await storage.getUser(7); // Use ID 7 from the seed data
+      if (defaultUser) {
+        console.log("Using default development user:", defaultUser.username);
+        (req as any).user = defaultUser;
+        return next();
+      }
     }
     
-    // Attach user to request for use in route handlers
-    (req as any).user = user;
-    next();
+    return res.status(401).json({ message: "Not authenticated" });
   } catch (error) {
     console.error("Authentication error:", error);
     return res.status(500).json({ message: "Authentication error" });
@@ -60,6 +58,20 @@ const authenticate = async (req: Request, res: Response, next: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
+  
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      // Get the user ID from the Replit auth claims
+      const userId = req.user.claims.sub;
+      // Fetch the user from the database
+      const user = await storage.getUser(Number(userId));
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
   
   // User routes
   app.post("/api/auth/register", async (req, res) => {

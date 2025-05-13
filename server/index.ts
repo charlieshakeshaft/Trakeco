@@ -2,22 +2,14 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { seedDatabase } from "./seed";
-import session from "express-session";
+import { setupAuth, getSession } from "./replitAuth";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Set up session middleware
-app.use(session({
-  secret: 'trak-session-secret', // In production, use environment variable for this
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: false, // Set to true if using HTTPS
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
-}));
+// Use secure session middleware from replitAuth
+app.use(getSession());
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -52,6 +44,9 @@ app.use((req, res, next) => {
 (async () => {
   // Seed the database with initial data
   await seedDatabase();
+
+  // Setup Replit Authentication
+  await setupAuth(app);
   
   const server = await registerRoutes(app);
 
