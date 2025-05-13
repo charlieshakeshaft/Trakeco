@@ -57,15 +57,15 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
               {topThree.length > 1 && (
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent">
-                    <img
-                      src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100"
-                      alt="User avatar"
-                      className="w-full h-full object-cover"
-                    />
+                    <div className={`w-full h-full flex items-center justify-center bg-gray-200 text-gray-700 text-lg font-bold ${topThree[1].id === userId ? "bg-primary text-white" : ""}`}>
+                      {topThree[1].name.charAt(0).toUpperCase()}
+                    </div>
                   </div>
                   <div className="flex items-center mt-2">
                     <span className="material-icons text-accent">looks_two</span>
-                    <span className="text-sm font-medium ml-1">{topThree[1].name.split(' ')[0]}</span>
+                    <span className="text-sm font-medium ml-1">
+                      {topThree[1].id === userId ? "You" : topThree[1].name.split(' ')[0]}
+                    </span>
                   </div>
                   <div className="text-sm text-gray-500">{topThree[1].points_total} pts</div>
                 </div>
@@ -74,15 +74,15 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
               {/* 1st place */}
               <div className="flex flex-col items-center">
                 <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-accent">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100"
-                    alt="User avatar"
-                    className="w-full h-full object-cover"
-                  />
+                  <div className={`w-full h-full flex items-center justify-center bg-gray-200 text-gray-700 text-xl font-bold ${topThree[0].id === userId ? "bg-primary text-white" : ""}`}>
+                    {topThree[0].name.charAt(0).toUpperCase()}
+                  </div>
                 </div>
                 <div className="flex items-center mt-2">
                   <span className="material-icons text-accent">looks_one</span>
-                  <span className="text-sm font-medium ml-1">{topThree[0].name.split(' ')[0]}</span>
+                  <span className="text-sm font-medium ml-1">
+                    {topThree[0].id === userId ? "You" : topThree[0].name.split(' ')[0]}
+                  </span>
                 </div>
                 <div className="text-sm text-gray-500">{topThree[0].points_total} pts</div>
               </div>
@@ -91,15 +91,15 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
               {topThree.length > 2 && (
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-accent">
-                    <img
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100"
-                      alt="User avatar"
-                      className="w-full h-full object-cover"
-                    />
+                    <div className={`w-full h-full flex items-center justify-center bg-gray-200 text-gray-700 text-lg font-bold ${topThree[2].id === userId ? "bg-primary text-white" : ""}`}>
+                      {topThree[2].name.charAt(0).toUpperCase()}
+                    </div>
                   </div>
                   <div className="flex items-center mt-2">
                     <span className="material-icons text-accent">looks_3</span>
-                    <span className="text-sm font-medium ml-1">{topThree[2].name.split(' ')[0]}</span>
+                    <span className="text-sm font-medium ml-1">
+                      {topThree[2].id === userId ? "You" : topThree[2].name.split(' ')[0]}
+                    </span>
                   </div>
                   <div className="text-sm text-gray-500">{topThree[2].points_total} pts</div>
                 </div>
@@ -130,11 +130,13 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
                     >
                       {rank}
                     </div>
-                    <img 
-                      src={`https://images.unsplash.com/photo-${isCurrentUser ? '1534528741775-53994a69daeb' : '1494790108377-be9c29b29330'}?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=50&h=50`} 
-                      alt="User avatar" 
-                      className="w-8 h-8 rounded-full ml-3" 
-                    />
+                    <div 
+                      className={`w-8 h-8 rounded-full ml-3 flex items-center justify-center ${
+                        isCurrentUser ? "bg-primary text-white" : "bg-gray-200 text-gray-700"
+                      } font-semibold text-sm`}
+                    >
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
                     <span className="ml-3 text-sm font-medium">
                       {isCurrentUser ? "You" : user.name}
                     </span>

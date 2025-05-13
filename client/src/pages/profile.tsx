@@ -49,11 +49,11 @@ const Profile = () => {
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || profile?.username || "User")}&background=0D8ABC&color=fff`}
-                  alt={`${profile?.name || profile?.username}'s avatar`}
-                  className="w-24 h-24 rounded-full object-cover mb-4"
-                />
+                <div
+                  className="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-bold mb-4"
+                >
+                  {(profile?.name || profile?.username || "U").charAt(0).toUpperCase()}
+                </div>
                 <h2 className="text-xl font-semibold text-gray-800">{profile?.name || profile?.username}</h2>
                 <p className="text-gray-500 mb-4">{profile?.email}</p>
                 

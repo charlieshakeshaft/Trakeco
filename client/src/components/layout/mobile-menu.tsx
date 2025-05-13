@@ -45,11 +45,11 @@ const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
         <div className="flex flex-col h-full">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center mb-4">
-              <img
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username || "User")}&background=0D8ABC&color=fff&size=96`}
-                alt={`${user.name || user.username}'s avatar`}
-                className="w-12 h-12 rounded-full object-cover mr-3"
-              />
+              <div
+                className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold mr-3"
+              >
+                {(user.name || user.username || "U").charAt(0).toUpperCase()}
+              </div>
               <div>
                 <h3 className="font-semibold text-gray-800">{user.name || user.username}</h3>
                 <p className="text-sm text-gray-500">{user.email}</p>
