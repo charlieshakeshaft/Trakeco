@@ -8,12 +8,12 @@ export default function SignupPage() {
   const [signupType, setSignupType] = useState<string>("individual");
 
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col items-center min-h-screen">
-      <div className="max-w-md w-full">
+    <div className="container mx-auto px-4 py-6 md:py-8 flex flex-col items-center min-h-screen">
+      <div className="w-full max-w-lg">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-          <p className="text-muted-foreground mt-2">
-            Join our community and start tracking your sustainable commuting
+          <p className="text-muted-foreground mt-2 px-4">
+            Join Trak and start tracking your sustainable commuting
           </p>
         </div>
         
@@ -23,16 +23,16 @@ export default function SignupPage() {
           value={signupType}
           onValueChange={setSignupType}
         >
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="individual">Individual</TabsTrigger>
             <TabsTrigger value="business">Business</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="individual">
+          <TabsContent value="individual" className="w-full">
             <IndividualSignupForm />
           </TabsContent>
           
-          <TabsContent value="business">
+          <TabsContent value="business" className="w-full">
             <BusinessSignupForm />
           </TabsContent>
         </Tabs>

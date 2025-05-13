@@ -80,16 +80,16 @@ export function IndividualSignupForm() {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Create an Individual Account</CardTitle>
-        <CardDescription>
-          Track your commutes and earn rewards for sustainable transportation
+    <Card className="w-full">
+      <CardHeader className="p-4 sm:p-6">
+        <CardTitle className="text-xl">Individual Account</CardTitle>
+        <CardDescription className="text-sm break-words">
+          Track commutes and earn rewards for sustainable travel
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
             <FormField
               control={form.control}
               name="name"
@@ -99,7 +99,7 @@ export function IndividualSignupForm() {
                   <FormControl>
                     <Input placeholder="Enter your full name" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -113,7 +113,7 @@ export function IndividualSignupForm() {
                   <FormControl>
                     <Input type="email" placeholder="you@example.com" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
@@ -127,41 +127,43 @@ export function IndividualSignupForm() {
                   <FormControl>
                     <Input placeholder="Choose a username" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
             
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Create a password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Create a password" {...field} />
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Confirm password" {...field} />
+                    </FormControl>
+                    <FormMessage className="text-xs" />
+                  </FormItem>
+                )}
+              />
+            </div>
             
-            <FormField
-              control={form.control}
-              name="confirmPassword"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Confirm Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="Confirm your password" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating Account..." : "Create Account"}
+            <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Account"}
             </Button>
           </form>
         </Form>
