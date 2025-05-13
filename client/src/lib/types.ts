@@ -100,4 +100,5 @@ export interface LeaderboardUser {
   email: string;
   points_total: number;
   streak_count: number;
+  profileImageUrl?: string;
 }
