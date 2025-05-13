@@ -1121,33 +1121,49 @@ async function updateChallengeProgressForCommute(userId: number, commuteData: an
     // Get all user's active challenges
     const userChallenges = await storage.getUserChallenges(userId);
     
+    if (!userChallenges || userChallenges.length === 0) {
+      console.log('No active challenges found for user:', userId);
+      return;
+    }
+    
     // For each challenge, check if this commute contributes to progress
-    for (const { challenge, participant } of userChallenges) {
+    for (const userChallenge of userChallenges) {
+      if (!userChallenge || !userChallenge.challenge || !userChallenge.participant) {
+        console.log('Invalid challenge data structure:', userChallenge);
+        continue;
+      }
+      
+      const { challenge, participant } = userChallenge;
+      
       // Skip completed challenges
       if (participant.completed) {
         continue;
       }
       
       let shouldUpdate = false;
-      let newProgress = participant.progress;
+      // Initialize with 0 if progress is undefined/null
+      let newProgress = typeof participant.progress === 'number' ? participant.progress : 0;
       
       // Check if challenge is specific to commute type
       if (challenge.commute_type && challenge.commute_type === commuteData.commute_type) {
         // Commute type specific challenge
         if (challenge.goal_type === 'days') {
           // Add days logged to progress
-          newProgress = Math.min(participant.progress + commuteData.days_logged, challenge.goal_value);
+          const daysLogged = commuteData.days_logged || 0;
+          newProgress = Math.min(newProgress + daysLogged, challenge.goal_value);
           shouldUpdate = true;
-        } else if (challenge.goal_type === 'km') {
+        } else if (challenge.goal_type === 'km' && commuteData.distance_km) {
           // Add distance to progress
-          newProgress = Math.min(participant.progress + commuteData.distance_km, challenge.goal_value);
+          const distance = commuteData.distance_km || 0;
+          newProgress = Math.min(newProgress + distance, challenge.goal_value);
           shouldUpdate = true;
         }
       } else if (!challenge.commute_type) {
         // General challenge for any sustainable commute
         if (challenge.goal_type === 'days') {
           // Add days logged to progress
-          newProgress = Math.min(participant.progress + commuteData.days_logged, challenge.goal_value);
+          const daysLogged = commuteData.days_logged || 0;
+          newProgress = Math.min(newProgress + daysLogged, challenge.goal_value);
           shouldUpdate = true;
         }
       }
@@ -1155,15 +1171,20 @@ async function updateChallengeProgressForCommute(userId: number, commuteData: an
       // Update the challenge progress if needed
       if (shouldUpdate) {
         const completed = newProgress >= challenge.goal_value;
-        await storage.updateChallengeProgress(participant.id, newProgress, completed);
-        
-        // If challenge is completed, award points
-        if (completed && !participant.completed) {
-          await storage.createPointsTransaction({
-            user_id: userId,
-            source: `Completed challenge: ${challenge.title}`,
-            points: challenge.points_reward
-          });
+        try {
+          await storage.updateChallengeProgress(participant.id, newProgress, completed);
+          
+          // If challenge is completed, award points
+          if (completed && !participant.completed) {
+            await storage.createPointsTransaction({
+              user_id: userId,
+              source: `Completed challenge: ${challenge.title}`,
+              points: challenge.points_reward
+            });
+          }
+        } catch (updateError) {
+          console.error('Error updating specific challenge progress:', updateError);
+          // Continue with other challenges
         }
       }
     }
