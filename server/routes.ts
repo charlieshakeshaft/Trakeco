@@ -419,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Commute routes
-  app.post("/api/commutes", authenticate, async (req, res) => {
+  app.post("/api/commutes/log", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
       
