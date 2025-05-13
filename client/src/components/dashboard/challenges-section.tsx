@@ -2,6 +2,47 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 
+// Function to determine appropriate image based on challenge type
+function getChallengeImage(challenge?: any): string {
+  if (!challenge) {
+    return "https://images.pexels.com/photos/4347936/pexels-photo-4347936.jpeg"; // Default image
+  }
+  
+  // Maps commute type to appropriate images
+  const commuteImages: Record<string, string> = {
+    'cycle': "https://images.pexels.com/photos/5700269/pexels-photo-5700269.jpeg", // Cycling image
+    'walk': "https://images.pexels.com/photos/7194591/pexels-photo-7194591.jpeg", // Walking image
+    'public_transport': "https://images.pexels.com/photos/2031755/pexels-photo-2031755.jpeg", // Public transport image
+    'carpool': "https://images.pexels.com/photos/175696/pexels-photo-175696.jpeg", // Carpool image
+    'electric_vehicle': "https://images.pexels.com/photos/6238050/pexels-photo-6238050.jpeg", // Electric vehicle image
+    'remote_work': "https://images.pexels.com/photos/5711267/pexels-photo-5711267.jpeg" // Remote work image
+  };
+  
+  // Select image based on challenge's commute type
+  if (challenge.commute_type && commuteImages[challenge.commute_type]) {
+    return commuteImages[challenge.commute_type];
+  } 
+  // Fallback to keyword-based selection if no commute type specified
+  else if (challenge.title) {
+    const title = challenge.title.toLowerCase();
+    if (title.includes('cycle') || title.includes('bike')) {
+      return commuteImages['cycle'];
+    } else if (title.includes('walk')) {
+      return commuteImages['walk'];
+    } else if (title.includes('transit') || title.includes('bus') || title.includes('train')) {
+      return commuteImages['public_transport'];
+    } else if (title.includes('carpool') || title.includes('shared')) {
+      return commuteImages['carpool'];
+    } else if (title.includes('electric') || title.includes('ev')) {
+      return commuteImages['electric_vehicle'];
+    } else if (title.includes('remote') || title.includes('home')) {
+      return commuteImages['remote_work'];
+    }
+  }
+  
+  return "https://images.pexels.com/photos/4347936/pexels-photo-4347936.jpeg"; // Default image
+}
+
 interface ChallengesSectionProps {
   userId: number;
 }
@@ -126,8 +167,8 @@ const ChallengesSection = ({ userId }: ChallengesSectionProps) => {
           {activeUserChallenges.length > 1 && (
             <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 card-hover transition-all duration-200">
               <img
-                src="https://pixabay.com/get/gb65d2ebce1af42dfe65b0ee69d037acb57d762dbe84c26f00344db1302bbaa3bbc8837c0cde1f1c01ee64ee09741798424ff6d99e4be7ea9968a505bda090dab_1280.jpg"
-                alt="Public transportation bus"
+                src={getChallengeImage(activeUserChallenges[1]?.challenge)}
+                alt={activeUserChallenges[1]?.challenge.title || "Active challenge"}
                 className="w-full h-32 object-cover"
               />
               <div className="p-5">

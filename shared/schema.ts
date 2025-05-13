@@ -58,6 +58,14 @@ export const commuteLogs = pgTable("commute_logs", {
   distance_km: integer("distance_km").default(0),
   co2_saved_kg: integer("co2_saved_kg").default(0),
   created_at: timestamp("created_at").defaultNow().notNull(),
+  // Day-specific tracking (booleans for each day of the week)
+  monday: boolean("monday").default(false),
+  tuesday: boolean("tuesday").default(false),
+  wednesday: boolean("wednesday").default(false),
+  thursday: boolean("thursday").default(false),
+  friday: boolean("friday").default(false),
+  saturday: boolean("saturday").default(false),
+  sunday: boolean("sunday").default(false),
 });
 
 export const insertCommuteLogSchema = createInsertSchema(commuteLogs).pick({
@@ -66,6 +74,13 @@ export const insertCommuteLogSchema = createInsertSchema(commuteLogs).pick({
   commute_type: true,
   days_logged: true,
   distance_km: true,
+  monday: true,
+  tuesday: true,
+  wednesday: true,
+  thursday: true,
+  friday: true,
+  saturday: true,
+  sunday: true,
 });
 
 // Points transactions

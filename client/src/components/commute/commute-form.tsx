@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { commuteTypeOptions } from "@/lib/constants";
-import { startOfWeek } from "date-fns";
+import { startOfWeek, getDay } from "date-fns";
 
 import {
   Form,
@@ -34,12 +34,31 @@ interface CommuteFormProps {
 
 const commuteSchema = z.object({
   commute_type: z.string().min(1, "Please select a commute type"),
-  days_logged: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 1 && val <= 5, {
-    message: "Days must be between 1 and 5",
+  days_logged: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 1 && val <= 7, {
+    message: "Days must be between 1 and 7",
   }),
   distance_km: z.string().transform((val) => parseInt(val, 10)).refine((val) => val >= 0, {
     message: "Distance must be a positive number",
   }),
+  // Add day-specific fields
+  monday: z.boolean().default(false),
+  tuesday: z.boolean().default(false),
+  wednesday: z.boolean().default(false),
+  thursday: z.boolean().default(false),
+  friday: z.boolean().default(false),
+  saturday: z.boolean().default(false),
+  sunday: z.boolean().default(false),
+}).refine((data) => {
+  // Ensure the number of selected days matches days_logged
+  const selectedDays = [
+    data.monday, data.tuesday, data.wednesday, data.thursday, 
+    data.friday, data.saturday, data.sunday
+  ].filter(Boolean).length;
+  
+  return selectedDays === parseInt(data.days_logged as unknown as string, 10);
+}, {
+  message: "The number of selected days must match the days logged",
+  path: ["days_logged"],
 });
 
 type CommuteFormValues = z.infer<typeof commuteSchema>;
@@ -55,8 +74,33 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       commute_type: "",
       days_logged: "1",
       distance_km: "0",
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false,
     },
   });
+  
+  // Get today's day of the week
+  const today = getDay(new Date());
+  
+  // Update days_logged based on selected days
+  const updateDaysLogged = () => {
+    const selectedDays = [
+      form.getValues('monday'),
+      form.getValues('tuesday'),
+      form.getValues('wednesday'),
+      form.getValues('thursday'),
+      form.getValues('friday'),
+      form.getValues('saturday'),
+      form.getValues('sunday')
+    ].filter(Boolean).length;
+    
+    form.setValue('days_logged', selectedDays.toString());
+  };
 
   const commuteLogMutation = useMutation({
     mutationFn: async (data: CommuteFormValues) => {
