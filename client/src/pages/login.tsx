@@ -143,20 +143,20 @@ export default function LoginPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4">
                     <Button asChild variant="outline" className="w-full py-6">
-                      <Link href="/signup" className="flex flex-col items-center text-center px-2">
-                        <p className="text-base font-medium truncate w-full">Individual</p>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      <Link href="/signup" className="flex flex-col w-full text-center px-2">
+                        <span className="text-base font-medium">Sign Up as Individual</span>
+                        <span className="text-xs text-muted-foreground mt-1">
                           Track your personal commuting data and earn rewards
-                        </p>
+                        </span>
                       </Link>
                     </Button>
                     
                     <Button asChild variant="default" className="w-full py-6">
-                      <Link href="/signup?type=business" className="flex flex-col items-center text-center px-2">
-                        <p className="text-base font-medium truncate w-full">Business</p>
-                        <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
+                      <Link href="/signup?type=business" className="flex flex-col w-full text-center px-2">
+                        <span className="text-base font-medium">Sign Up for Business</span>
+                        <span className="text-xs text-foreground/80 mt-1">
                           Create a company account for your organization
-                        </p>
+                        </span>
                       </Link>
                     </Button>
                   </div>
