@@ -31,10 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const login = async (username: string, password: string): Promise<User> => {
     try {
-      const response = await apiRequest("POST", "/api/login", { username, password });
-      const userData = await response.json();
+      const response = await apiRequest("/api/login", { username, password }, "POST");
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      return userData;
+      return response;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -43,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const logout = async () => {
     try {
-      await apiRequest("POST", "/api/logout");
+      await apiRequest("/api/logout", null, "POST");
       queryClient.clear();
       window.location.href = '/login';
     } catch (error) {
