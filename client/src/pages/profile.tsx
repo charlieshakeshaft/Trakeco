@@ -239,7 +239,7 @@ const Profile = () => {
         </Card>
         
         <div className="md:col-span-2">
-          <Tabs defaultValue="impact">
+          <Tabs defaultValue={window.location.search.includes('tab=settings') ? 'settings' : 'impact'}>
             <TabsList className="mb-6">
               <TabsTrigger value="impact">Your Impact</TabsTrigger>
               <TabsTrigger value="history">Redemption History</TabsTrigger>

@@ -193,7 +193,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
               </div>
               <AlertDescription className="text-amber-700">
                 <p className="mb-2">For accurate distance tracking, please set your home and work locations first.</p>
-                <Link href="/profile">
+                <Link href="/profile?tab=settings">
                   <Button variant="outline" size="sm" className="border-amber-300 text-amber-700 hover:bg-amber-100">
                     <span className="material-icons mr-1 text-sm">settings</span>
                     Set Locations
