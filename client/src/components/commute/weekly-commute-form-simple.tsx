@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -80,6 +80,32 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedWeek, setSelectedWeek] = useState<"current" | "previous">("current");
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => {
+    // Get current week's start date (Monday)
+    return startOfWeek(new Date(), { weekStartsOn: 1 });
+  });
+  const [previousWeekStart, setPreviousWeekStart] = useState(() => {
+    // Get previous week's start date
+    return startOfWeek(subWeeks(new Date(), 1), { weekStartsOn: 1 });
+  });
+  
+  // Fetch existing commute logs
+  const { data: commuteLogs } = useQuery({
+    queryKey: [`/api/commutes/current?userId=${userId}`],
+    staleTime: 0, // Always get fresh data
+  });
+  
+  // Determine which week's logs to display based on the selected week
+  const activeWeekStart = selectedWeek === "current" ? currentWeekStart : previousWeekStart;
+  
+  // Find log for the selected week
+  const weekLog = commuteLogs?.find(log => {
+    const logDate = new Date(log.week_start);
+    const formattedLogDate = format(logDate, 'yyyy-MM-dd');
+    const formattedActiveDate = format(activeWeekStart, 'yyyy-MM-dd');
+    return formattedLogDate === formattedActiveDate;
+  });
   
   // Fetch user profile to get commute distance and location settings
   const { data: user } = useQuery({
@@ -96,20 +122,50 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
   const commuteDistance = user && typeof user === 'object' && 'commute_distance_km' in user ? 
     (user.commute_distance_km || 5) : 5;
 
+  // Initialize form with any existing values for the selected week
   const form = useForm<CommuteFormValues>({
     resolver: zodResolver(commuteSchema),
     defaultValues: {
       week_selection: "current",
-      commute_type: "",
-      monday: false,
-      tuesday: false,
-      wednesday: false,
-      thursday: false,
-      friday: false,
-      saturday: false,
-      sunday: false,
+      commute_type: weekLog?.commute_type || "",
+      monday: weekLog?.monday || false,
+      tuesday: weekLog?.tuesday || false,
+      wednesday: weekLog?.wednesday || false,
+      thursday: weekLog?.thursday || false,
+      friday: weekLog?.friday || false,
+      saturday: weekLog?.saturday || false,
+      sunday: weekLog?.sunday || false,
     },
   });
+  
+  // Update form values when week selection changes or when commute logs are loaded
+  useEffect(() => {
+    if (weekLog) {
+      // Update the form with the days that are already logged
+      form.setValue("monday", weekLog.monday || false);
+      form.setValue("tuesday", weekLog.tuesday || false);
+      form.setValue("wednesday", weekLog.wednesday || false);
+      form.setValue("thursday", weekLog.thursday || false);
+      form.setValue("friday", weekLog.friday || false);
+      form.setValue("saturday", weekLog.saturday || false);
+      form.setValue("sunday", weekLog.sunday || false);
+      
+      // If there's a commute type already set, use it
+      if (weekLog.commute_type) {
+        form.setValue("commute_type", weekLog.commute_type);
+      }
+    } else {
+      // Reset form when switching to a week with no logs
+      form.setValue("monday", false);
+      form.setValue("tuesday", false);
+      form.setValue("wednesday", false);
+      form.setValue("thursday", false);
+      form.setValue("friday", false);
+      form.setValue("saturday", false);
+      form.setValue("sunday", false);
+      form.setValue("commute_type", "");
+    }
+  }, [form, weekLog]);
 
   const commuteLogMutation = useMutation({
     mutationFn: async (data: CommuteFormValues) => {
@@ -232,7 +288,11 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
                   <FormLabel>Which week are you logging for?</FormLabel>
                   <FormControl>
                     <RadioGroup
-                      onValueChange={field.onChange}
+                      onValueChange={(value) => {
+                        // Update both the form value and the state variable
+                        field.onChange(value);
+                        setSelectedWeek(value as "current" | "previous");
+                      }}
                       defaultValue={field.value}
                       className="flex flex-col space-y-1"
                     >
@@ -311,7 +371,15 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="cursor-pointer">{day.name}</FormLabel>
+                        <FormLabel className="cursor-pointer flex items-center">
+                          {day.name}
+                          {/* Show indicator if day is already logged */}
+                          {weekLog && weekLog[day.id as keyof typeof weekLog] && (
+                            <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                              Logged
+                            </span>
+                          )}
+                        </FormLabel>
                       </FormItem>
                     )}
                   />
