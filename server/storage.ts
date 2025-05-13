@@ -196,6 +196,30 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
   
+  async updateUser(userId: number, updateData: {
+    is_new_user?: boolean;
+    needs_password_change?: boolean;
+    password?: string;
+  }): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Update user flags in the user object
+    const updatedUser: User = {
+      ...user,
+      is_new_user: updateData.is_new_user !== undefined ? updateData.is_new_user : user.is_new_user,
+      needs_password_change: updateData.needs_password_change !== undefined ? updateData.needs_password_change : user.needs_password_change,
+      password: updateData.password !== undefined ? updateData.password : user.password
+    };
+    
+    // Update the user in the map
+    this.users.set(userId, updatedUser);
+    
+    return updatedUser;
+  }
+  
   // Company operations
   async getCompany(id: number): Promise<Company | undefined> {
     return this.companies.get(id);
@@ -838,6 +862,40 @@ export class DatabaseStorage implements IStorage {
     const [updatedUser] = await db
       .update(schema.users)
       .set(updateData)
+      .where(eq(schema.users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+  
+  async updateUser(userId: number, updateData: {
+    is_new_user?: boolean;
+    needs_password_change?: boolean;
+    password?: string;
+  }): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Create update data with only fields that are provided
+    const userData: any = {};
+    
+    if (updateData.is_new_user !== undefined) {
+      userData.is_new_user = updateData.is_new_user;
+    }
+    
+    if (updateData.needs_password_change !== undefined) {
+      userData.needs_password_change = updateData.needs_password_change;
+    }
+    
+    if (updateData.password !== undefined) {
+      userData.password = updateData.password;
+    }
+    
+    const [updatedUser] = await db
+      .update(schema.users)
+      .set(userData)
       .where(eq(schema.users.id, userId))
       .returning();
     
