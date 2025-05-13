@@ -1,12 +1,14 @@
 import React, { createContext, useContext } from 'react';
-import { queryClient } from '@/lib/queryClient';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 import { User } from '@/lib/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  login: (username: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   // Backward compatibility
   setCurrentUser: (user: User) => void;
@@ -15,8 +17,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/auth/user'],
+  const { toast } = useToast();
+  
+  const { data: user, isLoading, refetch } = useQuery({
+    queryKey: ['/api/user'],
     retry: false,
     staleTime: 5 * 60 * 1000,
     onError: () => {
@@ -25,19 +29,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   });
   
+  const login = async (username: string, password: string): Promise<User> => {
+    try {
+      const response = await apiRequest("POST", "/api/login", { username, password });
+      const userData = await response.json();
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      return userData;
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
+  };
+  
   const logout = async () => {
     try {
-      window.location.href = '/api/logout';
+      await apiRequest("POST", "/api/logout");
       queryClient.clear();
+      window.location.href = '/login';
     } catch (error) {
       console.error('Logout error:', error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: "There was a problem logging out. Please try again."
+      });
     }
   };
 
   // For backward compatibility
   const setCurrentUser = (updatedUser: User) => {
     console.warn('setCurrentUser is deprecated. Use query invalidation instead.');
-    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/user'] });
   };
 
   return (
@@ -46,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: user as User | null,
         isLoading,
         isAuthenticated: !!user,
+        login,
         logout,
         setCurrentUser,
       }}
