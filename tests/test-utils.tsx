@@ -1,8 +1,17 @@
-import { ReactElement } from 'react';
+import React, { ReactElement, createContext } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { Router } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AuthContext } from '@/contexts/auth-context';
+
+// Mock AuthContext since we can't import directly from the client src
+export const AuthContext = createContext<any>({
+  user: null,
+  isLoading: false,
+  isAuthenticated: false,
+  login: () => Promise.resolve(),
+  logout: () => Promise.resolve(),
+  setCurrentUser: () => {}
+});
 
 // Mock user data for different user types
 export const mockAdminUser = {
@@ -157,20 +166,21 @@ function customRender(
   const authContextValue = {
     user,
     isLoading,
-    setCurrentUser: vi.fn(),
-    login: vi.fn().mockResolvedValue({}),
-    logout: vi.fn(),
+    isAuthenticated: !!user,
+    setCurrentUser: () => {},
+    login: () => Promise.resolve({}),
+    logout: () => {},
     path: route,
   };
   
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[route]}>
+        <Router base="">
           <AuthContext.Provider value={authContextValue}>
             {children}
           </AuthContext.Provider>
-        </MemoryRouter>
+        </Router>
       </QueryClientProvider>
     );
   }
