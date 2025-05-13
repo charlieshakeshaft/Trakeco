@@ -479,8 +479,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         weekEnd.setDate(weekEnd.getDate() + 7);
         
         if (currentDate <= weekEnd) {
+          // Merge day selections to avoid overwriting previous days
+          // Only set a day to false if it's explicitly set to false in the request
+          // Otherwise, preserve the existing value
+          const dayFields = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+          
+          const mergedData = { ...commuteData };
+          
+          // Preserve any existing day selections that aren't explicitly set to false
+          dayFields.forEach(day => {
+            // If the day is not in the request or is undefined, use the existing value
+            if (mergedData[day] === undefined || mergedData[day] === null) {
+              mergedData[day] = existingLog[day];
+            }
+          });
+          
+          // Recalculate days_logged based on merged selections
+          mergedData.days_logged = dayFields.filter(day => mergedData[day]).length;
+          
+          console.log("Merging commute log:", {
+            existing: existingLog,
+            newData: commuteData,
+            merged: mergedData
+          });
+          
           // Update existing log instead of creating a new one
-          const updatedLog = await storage.updateCommuteLog(existingLog.id, commuteData);
+          const updatedLog = await storage.updateCommuteLog(existingLog.id, mergedData);
           return res.json(updatedLog);
         }
       }
