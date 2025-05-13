@@ -4,15 +4,15 @@ import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import CommuteForm from "@/components/commute/commute-form";
 import { commuteTypeConfig } from "@/lib/constants";
-
-// Using userId 1 for demonstration
-const DEMO_USER_ID = 1;
+import { useAuth } from "@/contexts/auth-context";
 
 const LogCommute = () => {
   const [submitted, setSubmitted] = useState(false);
+  const { user } = useAuth();
+  const userId = user?.id || 0;
   
   const { data: currentCommutes, isLoading } = useQuery({
-    queryKey: [`/api/commutes/current?userId=${DEMO_USER_ID}`],
+    queryKey: [`/api/commutes/current?userId=${userId}`],
     staleTime: 60000, // 1 minute
   });
 
@@ -26,7 +26,7 @@ const LogCommute = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <CommuteForm userId={DEMO_USER_ID} onSuccess={handleSuccess} />
+          <CommuteForm userId={userId} onSuccess={handleSuccess} />
           
           {submitted && (
             <Card className="mt-6 bg-green-50 border-green-200">
