@@ -76,27 +76,36 @@ const StreakDisplay = ({ userId }: StreakDisplayProps) => {
   const commuteByDay: Record<string, { commute: string, forWork: boolean, forHome: boolean }> = {};
   
   if (commuteLogs && Array.isArray(commuteLogs) && commuteLogs.length > 0) {
-    const currentLog = commuteLogs[0]; // Get the most recent log
-    
-    // Process each day
-    orderedDays.forEach(day => {
-      const isDayTracked = currentLog[day]; // Boolean indicating if this day was tracked
-      if (isDayTracked) {
-        // Check for to_work and to_home commute types
-        const toWorkCommute = currentLog[`${day}_to_work`];
-        const toHomeCommute = currentLog[`${day}_to_home`];
-        
-        commuteByDay[day] = {
-          commute: currentLog.commute_type as string, // Default to the main commute type
-          forWork: !!toWorkCommute,
-          forHome: !!toHomeCommute
-        };
-        
-        // If specific commute types are set, use those instead
-        if (toWorkCommute && typeof toWorkCommute === 'string') {
-          commuteByDay[day].commute = toWorkCommute;
+    // Process all logs for each day (not just the first log)
+    commuteLogs.forEach(log => {
+      // Process each day in this log
+      orderedDays.forEach(day => {
+        const isDayTracked = log[day]; // Boolean indicating if this day was tracked
+        if (isDayTracked) {
+          // Check for to_work and to_home commute types
+          const toWorkCommute = log[`${day}_to_work`];
+          const toHomeCommute = log[`${day}_to_home`];
+          
+          // Only set the day if it hasn't been set yet or update as needed
+          if (!commuteByDay[day]) {
+            commuteByDay[day] = {
+              commute: log.commute_type as string, // Default to the main commute type
+              forWork: !!toWorkCommute,
+              forHome: !!toHomeCommute
+            };
+          } else if (log.commute_type === 'electric_vehicle' || 
+                    log.commute_type === 'remote_work' ||
+                    (commuteByDay[day].commute === 'gas_vehicle' && log.commute_type !== 'gas_vehicle')) {
+            // Override with more sustainable commute types
+            commuteByDay[day].commute = log.commute_type as string;
+          }
+          
+          // If specific commute types are set, use those instead
+          if (toWorkCommute && typeof toWorkCommute === 'string') {
+            commuteByDay[day].commute = toWorkCommute;
+          }
         }
-      }
+      });
     });
   }
 
