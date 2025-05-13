@@ -8,8 +8,8 @@ export default mergeConfig(
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: './tests/setup.ts',
-      include: ['./tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
+      setupFiles: 'tests/setup.ts',
+      include: ['tests/**/*.{test,spec}.{js,jsx,ts,tsx}'],
       exclude: ['**/node_modules/**', '**/dist/**'],
       coverage: {
         reporter: ['text', 'json', 'html'],
