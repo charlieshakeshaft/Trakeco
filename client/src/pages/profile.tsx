@@ -13,13 +13,27 @@ const Profile = () => {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
-  const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    toast({
-      title: "Logged out successfully",
-      description: "You have been logged out of your account",
-    });
-    setLocation('/login');
+  const handleLogout = async () => {
+    try {
+      // Call logout API endpoint
+      await fetch('/api/auth/logout', { method: 'POST' });
+      
+      // Clear any stored user data
+      localStorage.removeItem('currentUser');
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      });
+      
+      // Force a hard redirect to the login page
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout error:', error);
+      
+      // Even if the API call fails, still log out on the client
+      window.location.href = '/login';
+    }
   };
 
   return (

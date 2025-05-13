@@ -92,6 +92,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.post("/api/auth/logout", (req, res) => {
+    // In a real app, this would invalidate the session
+    res.status(200).json({ message: "Logged out successfully" });
+  });
+  
   app.get("/api/user/profile", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;

@@ -96,13 +96,15 @@ function Router() {
   // Public routes
   if (!user) {
     return (
-      <Switch>
-        <Route path="/login" component={LoginPage} />
-        <Route path="/signup" component={SignupPage} />
-        <Route>
-          <Redirect to="/login" />
-        </Route>
-      </Switch>
+      <div className="min-h-screen">
+        <Switch>
+          <Route path="/login" component={LoginPage} />
+          <Route path="/signup" component={SignupPage} />
+          <Route path="*">
+            <Redirect to="/login" />
+          </Route>
+        </Switch>
+      </div>
     );
   }
   
