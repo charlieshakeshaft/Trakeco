@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import StatsSummary from "@/components/profile/stats-summary";
 import RedemptionHistory from "@/components/profile/redemption-history";
+import CommuteBreakdown from "@/components/profile/commute-breakdown";
 import { DEMO_USER_ID } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -114,55 +115,7 @@ const Profile = () => {
                 <CardContent className="pt-6">
                   <h2 className="text-xl font-semibold mb-4">Commute Breakdown</h2>
                   
-                  <div className="space-y-4">
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary mr-3">
-                        <span className="material-icons">directions_bike</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">Cycling</h3>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Most frequent sustainable mode</span>
-                          <span>12 days in the last month</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                          <div className="bg-primary h-1.5 rounded-full" style={{ width: '60%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary mr-3">
-                        <span className="material-icons">train</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">Public Transit</h3>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Second most frequent</span>
-                          <span>4 days in the last month</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                          <div className="bg-secondary h-1.5 rounded-full" style={{ width: '20%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent-dark mr-3">
-                        <span className="material-icons">home</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-800">Remote Work</h3>
-                        <div className="flex justify-between text-xs text-gray-500">
-                          <span>Third most frequent</span>
-                          <span>4 days in the last month</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                          <div className="bg-accent h-1.5 rounded-full" style={{ width: '20%' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <CommuteBreakdown userId={user?.id || 0} />
                 </CardContent>
               </Card>
             </TabsContent>

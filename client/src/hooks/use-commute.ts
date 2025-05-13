@@ -33,10 +33,13 @@ export function useLogCommute(userId: number, onSuccess?: () => void) {
       // Get the start of the current week (Sunday)
       const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
       
-      return await apiRequest("POST", `/api/commutes?userId=${userId}`, {
+      // Add week_start to the data before sending
+      const commuteData = {
         ...data,
         week_start: weekStart.toISOString(),
-      });
+      };
+      
+      return await apiRequest(`/api/commutes?userId=${userId}`, commuteData, "POST");
     },
     onSuccess: () => {
       toast({
@@ -64,6 +67,13 @@ export function useLogCommute(userId: number, onSuccess?: () => void) {
 }
 
 // Calculate CO2 saved based on commute type and distance
+export function useCommuteBreakdown(userId: number) {
+  return useQuery({
+    queryKey: [`/api/commutes/breakdown?userId=${userId}`],
+    staleTime: 60000, // 1 minute
+  });
+}
+
 export function calculateCO2Saved(commuteType: CommuteType, distanceKm: number, daysLogged: number): number {
   // Average CO2 emissions in kg per km for different transport modes
   const emissionFactors: Record<string, number> = {

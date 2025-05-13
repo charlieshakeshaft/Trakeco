@@ -258,6 +258,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Commute breakdown for profile page
+  app.get("/api/commutes/breakdown", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const commuteLogs = await storage.getCommuteLogsByUserId(user.id);
+      
+      // Count occurrences of each commute type
+      const commuteTypeCounts: Record<string, number> = {};
+      let totalDays = 0;
+      
+      commuteLogs.forEach(log => {
+        if (!commuteTypeCounts[log.commute_type]) {
+          commuteTypeCounts[log.commute_type] = 0;
+        }
+        commuteTypeCounts[log.commute_type] += log.days_logged;
+        totalDays += log.days_logged;
+      });
+      
+      // Convert to array and sort by frequency
+      const breakdown = Object.entries(commuteTypeCounts)
+        .map(([type, days]) => ({
+          type,
+          days,
+          percentage: totalDays > 0 ? Math.round((days / totalDays) * 100) : 0
+        }))
+        .sort((a, b) => b.days - a.days);
+      
+      res.json({
+        breakdown,
+        totalDays
+      });
+    } catch (error) {
+      console.error("Error getting commute breakdown:", error);
+      res.status(500).json({ message: "Error fetching commute breakdown" });
+    }
+  });
+  
   // Challenge routes
   app.get("/api/challenges", authenticate, async (req, res) => {
     try {
