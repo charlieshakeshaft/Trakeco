@@ -53,6 +53,21 @@ const Profile = () => {
     commute_distance_km: user?.commute_distance_km || 0
   });
   
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: ""
+  });
+  
+  // Password validation state
+  const [passwordErrors, setPasswordErrors] = useState({
+    current_password: "",
+    new_password: "",
+    confirm_password: "",
+    form: ""
+  });
+  
   // Calculate distance between postcodes
   const calculateDistance = async (homePostcode: string, workPostcode: string) => {
     if (!homePostcode || !workPostcode) return;
@@ -120,6 +135,59 @@ const Profile = () => {
       ...prev,
       [name]: value
     }));
+  };
+  
+  // Handle password field changes
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear error for the field being edited
+    if (passwordErrors[name as keyof typeof passwordErrors]) {
+      setPasswordErrors(prev => ({
+        ...prev,
+        [name]: ""
+      }));
+    }
+  };
+  
+  // Validate password fields
+  const validatePasswordChange = () => {
+    const errors = {
+      current_password: "",
+      new_password: "",
+      confirm_password: "",
+      form: ""
+    };
+    
+    let isValid = true;
+    
+    if (!passwordData.current_password) {
+      errors.current_password = "Current password is required";
+      isValid = false;
+    }
+    
+    if (!passwordData.new_password) {
+      errors.new_password = "New password is required";
+      isValid = false;
+    } else if (passwordData.new_password.length < 6) {
+      errors.new_password = "Password must be at least 6 characters";
+      isValid = false;
+    }
+    
+    if (!passwordData.confirm_password) {
+      errors.confirm_password = "Please confirm your new password";
+      isValid = false;
+    } else if (passwordData.new_password !== passwordData.confirm_password) {
+      errors.confirm_password = "Passwords do not match";
+      isValid = false;
+    }
+    
+    setPasswordErrors(errors);
+    return isValid;
   };
   
   // Mutation for updating user's location settings
