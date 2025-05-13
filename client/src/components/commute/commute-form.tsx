@@ -98,10 +98,16 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       // Get the start of the current week (Sunday)
       const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 });
       
+      // Calculate days logged from selected days
+      const daysLogged = calculateSelectedDays();
+      
+      // Set a default distance for simplicity - this is a fixed value since we removed the field
+      const defaultDistanceKm = 5;
+      
       return await apiRequest(`/api/commutes?userId=${userId}`, {
         commute_type: data.commute_type,
-        days_logged: data.days_logged,
-        distance_km: data.distance_km,
+        days_logged: daysLogged,
+        distance_km: defaultDistanceKm,
         week_start: weekStart.toISOString(),
         user_id: userId, // Explicitly include the user ID in the request body as well
         // Include day-specific fields
