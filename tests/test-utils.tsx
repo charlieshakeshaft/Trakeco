@@ -1,17 +1,23 @@
-import React, { ReactElement, createContext } from 'react';
+import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
 import { Router } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { vi } from 'vitest';
 
-// Mock AuthContext since we can't import directly from the client src
-export const AuthContext = createContext<any>({
+// Mock the useAuth hook and AuthProvider component
+import * as AuthModule from '../client/src/contexts/auth-context';
+
+// Create a mock useAuth function
+const mockUseAuth = vi.fn().mockReturnValue({
   user: null,
   isLoading: false,
   isAuthenticated: false,
-  login: () => Promise.resolve(),
-  logout: () => Promise.resolve(),
-  setCurrentUser: () => {}
+  logout: vi.fn(),
+  setCurrentUser: vi.fn()
 });
+
+// Replace the real useAuth with our mock
+vi.spyOn(AuthModule, 'useAuth').mockImplementation(mockUseAuth);
 
 // Mock user data for different user types
 export const mockAdminUser = {
