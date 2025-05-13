@@ -7,7 +7,8 @@ import {
   type Challenge, type InsertChallenge,
   type ChallengeParticipant, type InsertChallengeParticipant,
   type Reward, type InsertReward,
-  type Redemption, type InsertRedemption
+  type Redemption, type InsertRedemption,
+  type UpsertUser
 } from "@shared/schema";
 import { db } from "./db";
 import { and, asc, desc, eq, isNull, or } from "drizzle-orm";
@@ -33,6 +34,8 @@ export interface IStorage {
     needs_password_change?: boolean;
     password?: string;
   }): Promise<User>;
+  // For Replit Auth integration
+  upsertUser(user: UpsertUser): Promise<User>;
   
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
