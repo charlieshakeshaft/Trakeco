@@ -1,4 +1,6 @@
 import { useAuth } from "@/contexts/auth-context";
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import ImpactStats from "@/components/dashboard/impact-stats";
 import CommuteSummary from "@/components/dashboard/commute-summary";
 import ChallengesSection from "@/components/dashboard/challenges-section";
@@ -8,6 +10,21 @@ import TeamSection from "@/components/dashboard/team-section";
 
 const Dashboard = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const queryClient = useQueryClient();
+  
+  // Refresh all dashboard data when component mounts
+  useEffect(() => {
+    if (user && user.id) {
+      // Invalidate all relevant query keys to ensure fresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/user/stats`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/user/stats?userId=${user.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/commutes/current`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/commutes/current?userId=${user.id}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/user/challenges`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/leaderboard`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/rewards`] });
+    }
+  }, [user, queryClient]);
   
   // If still loading auth state or not authenticated, show loading
   if (isLoading) {

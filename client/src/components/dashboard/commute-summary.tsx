@@ -17,7 +17,7 @@ interface CommuteLogSummary {
 const CommuteSummary = ({ userId }: CommuteSummaryProps) => {
   const { data: commuteLogs, isLoading, refetch } = useQuery({
     queryKey: [`/api/commutes/current?userId=${userId}`],
-    staleTime: 60000, // 1 minute
+    staleTime: 0, // Don't cache this query to ensure we always get fresh data
   });
   
   // Add effect to refetch on mount - helps with cache issues
