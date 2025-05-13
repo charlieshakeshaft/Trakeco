@@ -10,9 +10,21 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
 
+// Define interfaces for the profile data
+interface Company {
+  name: string;
+}
+
+interface ProfileData {
+  company?: Company;
+  created_at?: string | Date;
+  points_total?: number;
+}
+
 const Profile = () => {
   const { user, logout } = useAuth();
   const { data: profile, isLoading } = useUserProfile(user?.id || 0);
+  const profileData: ProfileData = profile as ProfileData || {};
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   
@@ -63,7 +75,7 @@ const Profile = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Company</span>
                     <span className="text-sm text-primary font-medium truncate ml-2 max-w-[120px]">
-                      {profile && typeof profile === 'object' && 'company' in profile && profile.company?.name || "No company"}
+                      {profileData.company?.name || "No company"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mb-2">
@@ -75,15 +87,16 @@ const Profile = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Since</span>
                     <span className="text-sm text-gray-600">
-                      {profile && typeof profile === 'object' && 'created_at' in profile 
-                        ? new Date(String(profile.created_at)).toLocaleDateString() 
+                      {profileData.created_at 
+                        ? new Date(String(profileData.created_at)).toLocaleDateString() 
                         : new Date().toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">Points</span>
                     <span className="text-sm font-semibold text-primary">
-                      {profile?.points_total || 0} pts
+                      {profileData.points_total !== undefined
+                        ? String(profileData.points_total) : "0"} pts
                     </span>
                   </div>
                 </div>

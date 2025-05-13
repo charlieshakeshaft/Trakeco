@@ -714,7 +714,7 @@ export class DatabaseStorage implements IStorage {
     );
     
     const [commuteLog] = await db
-      .insert(commuteLogs)
+      .insert(schema.commuteLogs)
       .values({
         ...insertCommuteLog,
         co2_saved_kg: co2SavedKg
