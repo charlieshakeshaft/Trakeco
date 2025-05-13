@@ -100,20 +100,13 @@ const Profile = () => {
     }));
   };
   
-  // Handle postcode changes
-  const handlePostcodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle form field changes
+  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setLocationSettings(prev => ({
       ...prev,
       [name]: value
     }));
-    
-    // When both postcodes are available, calculate the distance
-    if (name === 'home_address' && value && locationSettings.work_address) {
-      calculateDistance(value, locationSettings.work_address);
-    } else if (name === 'work_address' && value && locationSettings.home_address) {
-      calculateDistance(locationSettings.home_address, value);
-    }
   };
   
   // Mutation for updating user's location settings
@@ -279,7 +272,7 @@ const Profile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                           placeholder="Enter your home postcode"
                           value={locationSettings.home_address}
-                          onChange={handlePostcodeChange}
+                          onChange={handleFieldChange}
                         />
                         <p className="text-xs text-gray-500">
                           Enter your home postcode to automatically calculate your commute distance
@@ -302,7 +295,7 @@ const Profile = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                           placeholder="Enter your work postcode"
                           value={locationSettings.work_address}
-                          onChange={handlePostcodeChange}
+                          onChange={handleFieldChange}
                         />
                         <p className="text-xs text-gray-500">
                           Enter your work postcode to automatically calculate your commute distance
@@ -329,17 +322,6 @@ const Profile = () => {
                           value={locationSettings.commute_distance_km}
                           onChange={handleLocationChange}
                         />
-                        {locationSettings.home_address && locationSettings.work_address && (
-                          <Button 
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => calculateDistance(locationSettings.home_address, locationSettings.work_address)}
-                            className="whitespace-nowrap"
-                          >
-                            Recalculate
-                          </Button>
-                        )}
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
                         {(locationSettings.home_address && locationSettings.work_address) ? 
@@ -351,7 +333,24 @@ const Profile = () => {
                     <div className="pt-4 flex justify-end">
                       <Button 
                         className="bg-primary hover:bg-primary-dark"
-                        onClick={saveLocationSettings}
+                        onClick={async (e) => {
+                          e.preventDefault();
+                          // Calculate distance if both addresses are provided before saving
+                          if (locationSettings.home_address && locationSettings.work_address) {
+                            try {
+                              await calculateDistance(locationSettings.home_address, locationSettings.work_address);
+                              // Give a moment for the state to update with the new distance
+                              setTimeout(() => {
+                                updateLocationMutation.mutate(locationSettings);
+                              }, 100);
+                            } catch (error) {
+                              console.error('Error calculating distance:', error);
+                              updateLocationMutation.mutate(locationSettings);
+                            }
+                          } else {
+                            updateLocationMutation.mutate(locationSettings);
+                          }
+                        }}
                         disabled={updateLocationMutation.isPending}
                       >
                         {updateLocationMutation.isPending ? (
