@@ -950,20 +950,28 @@ export class DatabaseStorage implements IStorage {
   
   // Leaderboard
   async getLeaderboard(companyId?: number, limit: number = 10): Promise<User[]> {
+    console.log("Getting leaderboard for company ID:", companyId);
+    
     if (companyId) {
-      return db
+      const users = await db
         .select()
-        .from(users)
-        .where(eq(users.company_id, companyId))
-        .orderBy(desc(users.points_total))
+        .from(schema.users)
+        .where(eq(schema.users.company_id, companyId))
+        .orderBy(desc(schema.users.points_total))
         .limit(limit);
+      
+      console.log(`Found ${users.length} users for company ${companyId}`);
+      return users;
     }
     
-    return db
+    const users = await db
       .select()
-      .from(users)
-      .orderBy(desc(users.points_total))
+      .from(schema.users)
+      .orderBy(desc(schema.users.points_total))
       .limit(limit);
+    
+    console.log(`Found ${users.length} users across all companies`);
+    return users;
   }
   
   // Helper methods
