@@ -731,7 +731,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
               className="w-full bg-primary hover:bg-primary-dark"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "Logging..." : "Log Commute"}
+              {isSubmitting ? "Saving..." : "Save Weekly Commutes"}
             </Button>
           </form>
         </Form>

@@ -386,9 +386,9 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
   return (
     <Card className="overflow-hidden">
       <CardHeader className="bg-primary/5">
-        <CardTitle className="text-xl">Log Your Commute</CardTitle>
+        <CardTitle className="text-xl">Log Weekly Commutes</CardTitle>
         <CardDescription>
-          Track different commute methods for different days
+          Track different commute methods across your week
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-6">
@@ -570,7 +570,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
             disabled={isSubmitting} 
             onClick={submitCommuteEntries}
           >
-            {isSubmitting ? "Saving..." : "Save All Commute Data"}
+            {isSubmitting ? "Saving..." : "Save Weekly Commutes"}
           </Button>
         )}
         
