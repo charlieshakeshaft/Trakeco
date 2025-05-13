@@ -39,6 +39,8 @@ export interface IStorage {
   createChallenge(challenge: InsertChallenge): Promise<Challenge>;
   getChallenges(companyId?: number): Promise<Challenge[]>;
   getChallenge(id: number): Promise<Challenge | undefined>;
+  updateChallenge(id: number, updateData: Partial<InsertChallenge>): Promise<Challenge | undefined>;
+  deleteChallenge(id: number): Promise<boolean>;
   
   // Challenge participants
   joinChallenge(participant: InsertChallengeParticipant): Promise<ChallengeParticipant>;
@@ -263,6 +265,25 @@ export class MemStorage implements IStorage {
   
   async getChallenge(id: number): Promise<Challenge | undefined> {
     return this.challenges.get(id);
+  }
+  
+  async updateChallenge(id: number, updateData: Partial<InsertChallenge>): Promise<Challenge | undefined> {
+    const existingChallenge = this.challenges.get(id);
+    if (!existingChallenge) {
+      return undefined;
+    }
+    
+    const updatedChallenge: Challenge = {
+      ...existingChallenge,
+      ...updateData
+    };
+    
+    this.challenges.set(id, updatedChallenge);
+    return updatedChallenge;
+  }
+  
+  async deleteChallenge(id: number): Promise<boolean> {
+    return this.challenges.delete(id);
   }
   
   // Challenge participants

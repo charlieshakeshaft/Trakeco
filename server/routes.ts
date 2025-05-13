@@ -315,6 +315,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.put("/api/challenges/:challengeId", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const challengeId = parseInt(req.params.challengeId);
+      
+      // Check if user is an admin
+      if (user.role !== "admin") {
+        return res.status(403).json({ message: "Only admins can update challenges" });
+      }
+      
+      // Get the challenge
+      const challenge = await storage.getChallenge(challengeId);
+      if (!challenge) {
+        return res.status(404).json({ message: "Challenge not found" });
+      }
+      
+      // Check if challenge belongs to the user's company
+      if (challenge.company_id !== user.company_id) {
+        return res.status(403).json({ message: "You can only update challenges for your company" });
+      }
+      
+      // Update the challenge
+      const updatedChallenge = await storage.updateChallenge(challengeId, req.body);
+      if (!updatedChallenge) {
+        return res.status(404).json({ message: "Failed to update challenge" });
+      }
+      
+      res.json(updatedChallenge);
+    } catch (error) {
+      res.status(500).json({ message: "Error updating challenge" });
+    }
+  });
+  
+  app.delete("/api/challenges/:challengeId", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const challengeId = parseInt(req.params.challengeId);
+      
+      // Check if user is an admin
+      if (user.role !== "admin") {
+        return res.status(403).json({ message: "Only admins can delete challenges" });
+      }
+      
+      // Get the challenge
+      const challenge = await storage.getChallenge(challengeId);
+      if (!challenge) {
+        return res.status(404).json({ message: "Challenge not found" });
+      }
+      
+      // Check if challenge belongs to the user's company
+      if (challenge.company_id !== user.company_id) {
+        return res.status(403).json({ message: "You can only delete challenges for your company" });
+      }
+      
+      // Delete the challenge
+      const success = await storage.deleteChallenge(challengeId);
+      if (!success) {
+        return res.status(404).json({ message: "Failed to delete challenge" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      res.status(500).json({ message: "Error deleting challenge" });
+    }
+  });
+  
   app.post("/api/challenges", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
