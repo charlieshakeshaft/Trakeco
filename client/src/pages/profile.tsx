@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useUserProfile } from "@/hooks/use-leaderboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +10,8 @@ import { DEMO_USER_ID } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/auth-context";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 // Define interfaces for the profile data
 interface Company {
@@ -21,12 +24,79 @@ interface ProfileData {
   points_total?: number;
 }
 
+interface LocationSettings {
+  home_address: string;
+  home_latitude: string;
+  home_longitude: string;
+  work_address: string;
+  work_latitude: string;
+  work_longitude: string;
+  commute_distance_km: number;
+}
+
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, setCurrentUser } = useAuth();
   const { data: profile, isLoading } = useUserProfile(user?.id || 0);
   const profileData: ProfileData = profile as ProfileData || {};
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
+
+  // State for location settings
+  const [locationSettings, setLocationSettings] = useState<LocationSettings>({
+    home_address: user?.home_address || "",
+    home_latitude: user?.home_latitude || "",
+    home_longitude: user?.home_longitude || "",
+    work_address: user?.work_address || "",
+    work_latitude: user?.work_latitude || "",
+    work_longitude: user?.work_longitude || "",
+    commute_distance_km: user?.commute_distance_km || 0
+  });
+  
+  // Handle location form input changes
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setLocationSettings(prev => ({
+      ...prev,
+      [name]: name === 'commute_distance_km' ? Number(value) : value
+    }));
+  };
+  
+  // Mutation for updating user's location settings
+  const updateLocationMutation = useMutation({
+    mutationFn: async (data: LocationSettings) => {
+      return await apiRequest(`/api/user/update-profile?userId=${user?.id}`, data, "PATCH");
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Location settings updated",
+        description: "Your commute location settings have been saved successfully.",
+      });
+      
+      // Update the user in the auth context
+      if (user) {
+        setCurrentUser({
+          ...user,
+          ...locationSettings
+        });
+      }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to update location settings",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Save location settings
+  const saveLocationSettings = () => {
+    updateLocationMutation.mutate(locationSettings);
+  };
   
   const handleLogout = async () => {
     try {
@@ -139,6 +209,139 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="settings">
+              <Card className="mb-6">
+                <CardContent className="pt-6">
+                  <h2 className="text-xl font-semibold mb-4">Commute Locations</h2>
+                  
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Home Address
+                      </label>
+                      <div className="flex flex-col space-y-4">
+                        <input 
+                          type="text" 
+                          name="home_address"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter your home address"
+                          value={locationSettings.home_address}
+                          onChange={handleLocationChange}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Latitude
+                            </label>
+                            <input 
+                              type="text" 
+                              name="home_latitude"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                              placeholder="Latitude"
+                              value={locationSettings.home_latitude}
+                              onChange={handleLocationChange}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Longitude
+                            </label>
+                            <input 
+                              type="text" 
+                              name="home_longitude"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                              placeholder="Longitude"
+                              value={locationSettings.home_longitude}
+                              onChange={handleLocationChange}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Work Address
+                      </label>
+                      <div className="flex flex-col space-y-4">
+                        <input 
+                          type="text" 
+                          name="work_address"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter your work address"
+                          value={locationSettings.work_address}
+                          onChange={handleLocationChange}
+                        />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Latitude
+                            </label>
+                            <input 
+                              type="text" 
+                              name="work_latitude"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                              placeholder="Latitude"
+                              value={locationSettings.work_latitude}
+                              onChange={handleLocationChange}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">
+                              Longitude
+                            </label>
+                            <input 
+                              type="text" 
+                              name="work_longitude"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                              placeholder="Longitude"
+                              value={locationSettings.work_longitude}
+                              onChange={handleLocationChange}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Commute Distance (km)
+                      </label>
+                      <input 
+                        type="number" 
+                        name="commute_distance_km"
+                        min="0"
+                        step="0.1"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                        placeholder="Enter commute distance in kilometers"
+                        value={locationSettings.commute_distance_km}
+                        onChange={handleLocationChange}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        This will be used to calculate your environmental impact. 
+                        If you don't know the exact distance, provide an estimate.
+                      </p>
+                    </div>
+                    
+                    <div className="pt-4 flex justify-end">
+                      <Button 
+                        className="bg-primary hover:bg-primary-dark"
+                        onClick={saveLocationSettings}
+                        disabled={updateLocationMutation.isPending}
+                      >
+                        {updateLocationMutation.isPending ? (
+                          <>
+                            <span className="mr-2">Saving...</span>
+                            <span className="animate-spin">⟳</span>
+                          </>
+                        ) : (
+                          "Save Location Settings"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
               <Card>
                 <CardContent className="pt-6">
                   <h2 className="text-xl font-semibold mb-4">Account Settings</h2>
@@ -201,9 +404,9 @@ const Profile = () => {
                     </div>
                     
                     <div className="pt-4 flex justify-end">
-                      <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark">
-                        Save Settings
-                      </button>
+                      <Button className="bg-primary hover:bg-primary-dark">
+                        Save Account Settings
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

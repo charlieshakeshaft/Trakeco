@@ -157,6 +157,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update user profile with location settings
+  app.patch("/api/user/update-profile", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      
+      // Use query param userId if provided (for development), otherwise use authenticated user
+      const userId = req.query.userId ? Number(req.query.userId) : user.id;
+      
+      // Define the location settings schema
+      const locationSettingsSchema = z.object({
+        home_address: z.string().optional(),
+        home_latitude: z.string().optional(),
+        home_longitude: z.string().optional(),
+        work_address: z.string().optional(),
+        work_latitude: z.string().optional(),
+        work_longitude: z.string().optional(),
+        commute_distance_km: z.number().optional(),
+      });
+      
+      const locationData = locationSettingsSchema.parse(req.body);
+      
+      // Update the user with location settings
+      const updatedUser = await storage.updateUserLocationSettings(userId, locationData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't return the password
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      
+      res.status(500).json({ message: "Error updating user profile" });
+    }
+  });
+  
   // Company routes
   app.post("/api/companies", async (req, res) => {
     try {
