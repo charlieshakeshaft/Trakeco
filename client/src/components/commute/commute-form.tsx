@@ -300,7 +300,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Log Your Commute</CardTitle>
+        <CardTitle>Log Weekly Commutes</CardTitle>
       </CardHeader>
       <CardContent>
         {!locationConfigured && (

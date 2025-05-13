@@ -86,7 +86,7 @@ const CommuteSummary = ({ userId }: CommuteSummaryProps) => {
         <div className="mt-4 text-center">
           <Link to="/log-commute">
             <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-              Log Today's Commute
+              Log My Commutes
             </button>
           </Link>
         </div>
