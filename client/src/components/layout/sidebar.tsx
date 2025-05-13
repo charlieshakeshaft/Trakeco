@@ -57,7 +57,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         </Link>
 
         <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-          Settings
+          Account
         </div>
         <Link href="/profile" className={linkClasses("/profile")}>
           <span className="material-icons text-gray-500 mr-3">account_circle</span>
@@ -69,10 +69,7 @@ const Sidebar = ({ user }: SidebarProps) => {
             Company
           </Link>
         )}
-        <Link href="/settings" className={linkClasses("/settings")}>
-          <span className="material-icons text-gray-500 mr-3">settings</span>
-          Settings
-        </Link>
+
       </nav>
 
       <div className="p-4 border-t border-gray-200">
