@@ -24,7 +24,7 @@ interface UserChallenge {
 
 const ChallengesSection = ({ userId }: ChallengesSectionProps) => {
   const { data: challenges, isLoading } = useQuery({
-    queryKey: [`/api/user/challenges?userId=${userId}`],
+    queryKey: ['/api/user/challenges'],
     staleTime: 60000, // 1 minute
   });
 

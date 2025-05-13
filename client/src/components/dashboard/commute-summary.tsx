@@ -15,7 +15,7 @@ interface CommuteLogSummary {
 
 const CommuteSummary = ({ userId }: CommuteSummaryProps) => {
   const { data: commuteLogs, isLoading } = useQuery({
-    queryKey: [`/api/commutes/current?userId=${userId}`],
+    queryKey: ['/api/commutes/current'],
     staleTime: 60000, // 1 minute
   });
 

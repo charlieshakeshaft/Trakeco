@@ -12,7 +12,7 @@ interface LeaderboardUser {
 
 const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
   const { data: leaderboard, isLoading } = useQuery({
-    queryKey: [`/api/leaderboard?userId=${userId}`],
+    queryKey: ['/api/leaderboard'],
     staleTime: 60000, // 1 minute
   });
 

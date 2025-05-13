@@ -8,7 +8,7 @@ interface ImpactStatsProps {
 
 const ImpactStats = ({ userId }: ImpactStatsProps) => {
   const { data: stats, isLoading } = useQuery({
-    queryKey: [`/api/user/stats?userId=${userId}`],
+    queryKey: ['/api/user/stats'],
     staleTime: 60000, // 1 minute
   });
 
