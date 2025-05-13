@@ -5,15 +5,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import RewardCard from "@/components/rewards/reward-card";
 import { getRewardIcon } from "@/lib/constants";
-import { DEMO_USER_ID } from "@/lib/constants";
+import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
 
 const Rewards = () => {
   const [activeTab, setActiveTab] = useState("available");
+  const { user } = useAuth();
+  const userId = user?.id || 0;
   
-  const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(DEMO_USER_ID);
-  const { data: redemptions, isLoading: isLoadingRedemptions } = useUserRedemptions(DEMO_USER_ID);
-  const { data: profile, isLoading: isLoadingProfile } = useUserProfile(DEMO_USER_ID);
+  const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
+  const { data: redemptions, isLoading: isLoadingRedemptions } = useUserRedemptions(userId);
+  const { data: profile, isLoading: isLoadingProfile } = useUserProfile(userId);
   
   const isLoading = isLoadingRewards || isLoadingRedemptions || isLoadingProfile;
   const userPoints = profile?.points_total || 0;

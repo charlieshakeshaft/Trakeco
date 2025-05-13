@@ -94,7 +94,14 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
   return (
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-700">Available Rewards</h2>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-700">Available Rewards</h2>
+          {rewards && rewards.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {rewards.length} {rewards.length === 1 ? 'reward' : 'rewards'} available at your company
+            </p>
+          )}
+        </div>
         <Link to="/rewards" className="text-primary hover:text-primary-dark text-sm font-medium">
           View All
         </Link>
