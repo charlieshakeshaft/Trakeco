@@ -67,20 +67,33 @@ const Profile = () => {
       // For now, simulate a distance calculation
       
       // Simulating API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // For demonstration, use a simple algorithm to generate a reasonable distance
-      // This would be replaced with actual API call results in production
-      const randomDistance = Math.round((Math.random() * 15 + 5) * 10) / 10; // Between 5 and 20 km
+      // Create a deterministic but reasonable distance based on the postcodes
+      // This ensures the same postcodes always yield the same distance
+      const homeHash = [...homePostcode.replace(/\s+/g, '')].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const workHash = [...workPostcode.replace(/\s+/g, '')].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      
+      // Use the difference between hashes to create a reasonable distance (3-25 km)
+      const hashDiff = Math.abs(homeHash - workHash);
+      const baseDistance = 3 + (hashDiff % 22); // Between 3 and 25 km
+      
+      // Round to 1 decimal place for realism
+      const calculatedDistance = Math.round(baseDistance * 10) / 10;
       
       setLocationSettings(prev => ({
         ...prev,
-        commute_distance_km: randomDistance
+        commute_distance_km: calculatedDistance,
+        // Save the hash values as fake coordinates for consistency
+        home_latitude: (homeHash % 90).toString(),
+        home_longitude: (homeHash % 180).toString(),
+        work_latitude: (workHash % 90).toString(),
+        work_longitude: (workHash % 180).toString()
       }));
       
       toast({
         title: "Distance calculated",
-        description: `Estimated commute is ${randomDistance} km`,
+        description: `Estimated commute is ${calculatedDistance} km`,
       });
     } catch (error) {
       toast({
