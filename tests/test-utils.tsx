@@ -3,21 +3,7 @@ import { render, RenderOptions } from '@testing-library/react';
 import { Router } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi } from 'vitest';
-
-// Mock the useAuth hook and AuthProvider component
-import * as AuthModule from '../client/src/contexts/auth-context';
-
-// Create a mock useAuth function
-const mockUseAuth = vi.fn().mockReturnValue({
-  user: null,
-  isLoading: false,
-  isAuthenticated: false,
-  logout: vi.fn(),
-  setCurrentUser: vi.fn()
-});
-
-// Replace the real useAuth with our mock
-vi.spyOn(AuthModule, 'useAuth').mockImplementation(mockUseAuth);
+import { mockAuthContextValue } from './mocks/auth-context';
 
 // Mock user data for different user types
 export const mockAdminUser = {
@@ -168,24 +154,16 @@ function customRender(
     },
   });
   
-  // Mock auth context methods
-  const authContextValue = {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    setCurrentUser: () => {},
-    login: () => Promise.resolve({}),
-    logout: () => {},
-    path: route,
-  };
+  // Update the mockAuthContextValue for this test
+  mockAuthContextValue.user = user;
+  mockAuthContextValue.isLoading = isLoading;
+  mockAuthContextValue.isAuthenticated = !!user;
   
   function Wrapper({ children }: { children: React.ReactNode }) {
     return (
       <QueryClientProvider client={queryClient}>
         <Router base="">
-          <AuthContext.Provider value={authContextValue}>
-            {children}
-          </AuthContext.Provider>
+          {children}
         </Router>
       </QueryClientProvider>
     );
@@ -193,8 +171,7 @@ function customRender(
   
   return {
     ...render(ui, { wrapper: Wrapper, ...renderOptions }),
-    queryClient,
-    authContextValue,
+    queryClient
   };
 }
 

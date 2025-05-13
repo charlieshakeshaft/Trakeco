@@ -1,20 +1,9 @@
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Redirect all imports for auth-context
-vi.mock('../client/src/contexts/auth-context', () => {
-  return {
-    useAuth: () => ({
-      user: null,
-      isLoading: false,
-      isAuthenticated: false,
-      logout: vi.fn(),
-      setCurrentUser: vi.fn()
-    }),
-    AuthProvider: ({ children }: { children: React.ReactNode }) => children
-  };
-});
+// Import the auth context mock
+import './mocks/auth-context';
 
 // Cleanup after each test case (e.g., clearing jsdom)
 afterEach(() => {
