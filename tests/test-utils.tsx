@@ -1,9 +1,9 @@
 import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react';
-import { Router } from 'wouter';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi } from 'vitest';
 import { mockAuthContextValue } from './mocks/auth-context';
+import { Router } from './mocks/wouter';
 
 // Mock user data for different user types
 export const mockAdminUser = {

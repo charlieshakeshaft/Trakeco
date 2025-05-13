@@ -4,8 +4,11 @@ import React from 'react';
 // Create a mock for the useLocation hook and Link component
 const mockUseLocation = vi.fn().mockImplementation(() => ['/test-path', vi.fn()]);
 const mockUseRoute = vi.fn().mockImplementation(() => [false, {}]);
-const mockLink = vi.fn().mockImplementation(({ to, children }) => {
-  return React.createElement('a', { href: to, 'data-testid': 'mock-link' }, children);
+const mockLink = vi.fn().mockImplementation(({ href, to, children }) => {
+  return React.createElement('a', { 
+    href: href || to || '#', 
+    'data-testid': 'mock-link' 
+  }, children);
 });
 
 const mockRoute = vi.fn().mockImplementation((props) => {
@@ -25,12 +28,21 @@ export {
   mockRouter,
 };
 
-// IMPORTANT: Export Router class to match the wouter API
+// IMPORTANT: Export needed components to match wouter API
 export const Router = mockRouter;
+export const Link = mockLink;
+export const Route = mockRoute;
+export const Switch = ({ children }) => children;
+export const Redirect = () => null;
+export const useLocation = mockUseLocation;
+export const useRoute = mockUseRoute;
+export const navigate = vi.fn();
 
 // Create a mock for the wouter module
 vi.mock('wouter', () => {
-  const actualModule = {
+  // Return all the exported mocks
+  return {
+    __esModule: true,
     default: mockRouter,
     Router: mockRouter,
     Route: mockRoute,
@@ -44,5 +56,4 @@ vi.mock('wouter', () => {
     Redirect: vi.fn().mockImplementation(() => null),
     Switch: vi.fn().mockImplementation(({ children }) => children),
   };
-  return actualModule;
 });

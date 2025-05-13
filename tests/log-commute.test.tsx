@@ -3,6 +3,25 @@ import { render, screen, waitFor, fireEvent } from './test-utils';
 import { server } from './mocks/api';
 import { mockRegularUser, mockNewUser } from './test-utils';
 import LogCommute from '../client/src/pages/log-commute';
+import React from 'react';
+
+// Mock wouter's Link component which is used in the LogCommute component
+vi.mock('wouter', () => {
+  return {
+    __esModule: true,
+    default: vi.fn(),
+    Router: ({ children }) => children,
+    Route: ({ children }) => children,
+    Link: ({ href, children }) => {
+      return <a href={href}>{children}</a>;
+    },
+    useLocation: () => ['/test-path', vi.fn()],
+    useRoute: () => [false, {}],
+    navigate: vi.fn(),
+    Switch: ({ children }) => children,
+    Redirect: () => null,
+  };
+});
 
 // Start mock server before all tests
 beforeAll(() => server.listen());
