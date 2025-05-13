@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useCreateReward, useAllRewards } from "@/hooks/use-rewards";
 import { useCreateChallenge, useAllChallenges } from "@/hooks/use-challenges";
+import { CommuteType } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -48,7 +49,7 @@ const CompanyPage = () => {
     points_reward: 500,
     goal_type: "distance",
     goal_value: 100,
-    commute_type: "cycle" as CommuteType, // Cast to CommuteType enum
+    commute_type: "cycle" as CommuteType, // Use type from client-side types
     company_id: null
   });
   
