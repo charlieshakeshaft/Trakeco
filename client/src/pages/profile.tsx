@@ -221,6 +221,65 @@ const Profile = () => {
     }
   });
   
+  // Mutation for updating user status and password
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: { 
+      password?: string; 
+      is_new_user?: boolean; 
+      needs_password_change?: boolean;
+    }) => {
+      return await apiRequest(`/api/user/update?userId=${user?.id}`, data, "PATCH");
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Password updated",
+        description: "Your password has been changed successfully.",
+      });
+      
+      // Update the user in the auth context
+      if (user) {
+        setCurrentUser({
+          ...user,
+          ...data
+        });
+      }
+      
+      // Reset password form
+      setPasswordData({
+        current_password: "",
+        new_password: "",
+        confirm_password: ""
+      });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
+    },
+    onError: (error: Error) => {
+      setPasswordErrors(prev => ({
+        ...prev,
+        form: "Failed to update password. Please try again."
+      }));
+      
+      toast({
+        title: "Failed to update password",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Handle password form submission
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (validatePasswordChange()) {
+      updateUserMutation.mutate({
+        password: passwordData.new_password,
+        needs_password_change: false
+      });
+    }
+  };
+  
   // Save location settings
   const saveLocationSettings = () => {
     updateLocationMutation.mutate(locationSettings);
@@ -387,7 +446,7 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="settings">
-              {user?.needs_password_change && (
+              {(user?.needs_password_change || true) && (
                 <Card className="mb-6 border-blue-200">
                   <CardContent className="pt-6">
                     <h2 className="text-xl font-semibold mb-4 flex items-center">
@@ -395,7 +454,13 @@ const Profile = () => {
                       Change Your Password
                     </h2>
                     
-                    <div className="space-y-6">
+                    {passwordErrors.form && (
+                      <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-4">
+                        <p className="text-red-700 text-sm">{passwordErrors.form}</p>
+                      </div>
+                    )}
+                    
+                    <form onSubmit={handlePasswordSubmit} className="space-y-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Current Password
@@ -403,9 +468,14 @@ const Profile = () => {
                         <input 
                           type="password" 
                           name="current_password"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          value={passwordData.current_password}
+                          onChange={handlePasswordChange}
+                          className={`w-full px-3 py-2 border ${passwordErrors.current_password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
                           placeholder="Enter your current password"
                         />
+                        {passwordErrors.current_password && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.current_password}</p>
+                        )}
                       </div>
                       
                       <div>
@@ -415,9 +485,14 @@ const Profile = () => {
                         <input 
                           type="password" 
                           name="new_password"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          value={passwordData.new_password}
+                          onChange={handlePasswordChange}
+                          className={`w-full px-3 py-2 border ${passwordErrors.new_password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
                           placeholder="Enter your new password"
                         />
+                        {passwordErrors.new_password && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.new_password}</p>
+                        )}
                       </div>
                       
                       <div>
@@ -427,33 +502,26 @@ const Profile = () => {
                         <input 
                           type="password" 
                           name="confirm_password"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          value={passwordData.confirm_password}
+                          onChange={handlePasswordChange}
+                          className={`w-full px-3 py-2 border ${passwordErrors.confirm_password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
                           placeholder="Confirm your new password"
                         />
+                        {passwordErrors.confirm_password && (
+                          <p className="text-red-500 text-xs mt-1">{passwordErrors.confirm_password}</p>
+                        )}
                       </div>
                       
                       <div className="pt-4 flex justify-end">
                         <Button 
+                          type="submit"
                           className="bg-blue-600 hover:bg-blue-700"
-                          onClick={() => {
-                            toast({
-                              title: "Password functionality coming soon",
-                              description: "This feature will be available in a future update.",
-                            });
-                            
-                            // For now, just mark the password as changed
-                            if (user) {
-                              setCurrentUser({
-                                ...user,
-                                needs_password_change: false
-                              });
-                            }
-                          }}
+                          disabled={updateUserMutation.isPending}
                         >
-                          Update Password
+                          {updateUserMutation.isPending ? 'Updating...' : 'Update Password'}
                         </Button>
                       </div>
-                    </div>
+                    </form>
                   </CardContent>
                 </Card>
               )}
