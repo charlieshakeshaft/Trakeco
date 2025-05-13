@@ -161,11 +161,12 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
         description: "Your sustainable commute has been recorded.",
       });
       
-      // Invalidate queries to refresh data
+      // Invalidate queries to refresh data - use exact query key patterns
       queryClient.invalidateQueries({ queryKey: [`/api/commutes`] });
       queryClient.invalidateQueries({ queryKey: [`/api/commutes/current`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/commutes/current?userId=${userId}`] });
       queryClient.invalidateQueries({ queryKey: [`/api/user/stats`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/challenges`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/user/stats?userId=${userId}`] });
       
       // Reset form
       form.reset();

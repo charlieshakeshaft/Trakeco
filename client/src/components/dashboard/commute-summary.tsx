@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import CommuteModeCard from "@/components/ui/commute-mode-card";
 import { CommuteType } from "@/lib/types";
 
@@ -14,10 +15,16 @@ interface CommuteLogSummary {
 }
 
 const CommuteSummary = ({ userId }: CommuteSummaryProps) => {
-  const { data: commuteLogs, isLoading } = useQuery({
+  const { data: commuteLogs, isLoading, refetch } = useQuery({
     queryKey: [`/api/commutes/current?userId=${userId}`],
     staleTime: 60000, // 1 minute
   });
+  
+  // Add effect to refetch on mount - helps with cache issues
+  useEffect(() => {
+    // Immediately refetch on component mount to ensure fresh data
+    refetch();
+  }, [refetch]);
   
   console.log("Dashboard commute logs:", commuteLogs);
 
