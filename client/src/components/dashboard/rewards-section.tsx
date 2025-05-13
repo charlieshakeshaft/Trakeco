@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAllRewards } from "@/hooks/use-rewards";
 import IconBadge from "@/components/ui/icon-badge";
 
 interface RewardsSectionProps {
@@ -26,10 +27,7 @@ interface UserProfile {
 
 const RewardsSection = ({ userId }: RewardsSectionProps) => {
   const { toast } = useToast();
-  const { data: rewards, isLoading } = useQuery({
-    queryKey: ['/api/rewards'],
-    staleTime: 60000, // 1 minute
-  });
+  const { data: rewards, isLoading } = useAllRewards(userId);
   
   const { data: userProfile } = useQuery<UserProfile>({
     queryKey: ['/api/user/profile'],
