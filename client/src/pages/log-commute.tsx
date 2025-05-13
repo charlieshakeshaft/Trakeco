@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
-import CommuteForm from "@/components/commute/commute-form";
-import { commuteTypeConfig } from "@/lib/constants";
+import { Link } from "wouter";
+import WeeklyCommuteFormSimple from "@/components/commute/weekly-commute-form-simple";
 import { useAuth } from "@/contexts/auth-context";
+import { commuteTypeOptions } from "@/lib/constants";
 
 const LogCommute = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -24,21 +24,21 @@ const LogCommute = () => {
     <div className="p-4 md:p-8">
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Log Your Commute</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <CommuteForm userId={userId} onSuccess={handleSuccess} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <WeeklyCommuteFormSimple userId={userId} onSuccess={handleSuccess} />
           
           {submitted && (
             <Card className="mt-6 bg-green-50 border-green-200">
               <CardContent className="pt-6">
-                <div className="flex items-center text-success mb-2">
+                <div className="flex items-center text-green-600 mb-2">
                   <span className="material-icons mr-2">check_circle</span>
                   <span className="font-semibold">Commute Logged Successfully!</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
                   Thank you for logging your sustainable commute. You're making a positive impact on the environment!
                 </p>
-                <Link to="/">
+                <Link href="/">
                   <button className="text-primary hover:text-primary-dark font-medium">
                     Return to Dashboard
                   </button>
@@ -48,20 +48,22 @@ const LogCommute = () => {
           )}
         </div>
         
-        <div>
+        <div className="lg:col-span-1">
           <Card>
             <CardContent className="pt-6">
               <h2 className="text-xl font-semibold mb-4">Commute Types & Benefits</h2>
               
               <div className="space-y-4">
-                {Object.entries(commuteTypeConfig).map(([type, config]) => (
-                  <div key={type} className="flex items-start p-3 rounded-lg border border-gray-100">
-                    <div className={`p-2 rounded-lg bg-${config.backgroundColor} mr-3`}>
-                      <span className={`material-icons text-${config.iconColor}`}>{config.icon}</span>
+                {commuteTypeOptions.map((option) => (
+                  <div key={option.value} className="flex items-start p-3 rounded-lg border border-gray-100">
+                    <div className="p-2 rounded-lg bg-gray-100 mr-3">
+                      <span className="material-icons text-gray-700">{option.icon}</span>
                     </div>
                     <div>
-                      <h3 className="font-medium">{config.label}</h3>
-                      <p className="text-sm text-gray-600 mt-1">{config.description}</p>
+                      <h3 className="font-medium">{option.label}</h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Eco-friendly commute option
+                      </p>
                     </div>
                   </div>
                 ))}
