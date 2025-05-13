@@ -58,7 +58,7 @@ export function useLogCommute(userId: number, onSuccess?: () => void) {
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to log commute",
+        title: "Failed to log weekly commutes",
         description: error.message,
         variant: "destructive",
       });

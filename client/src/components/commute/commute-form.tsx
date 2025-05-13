@@ -239,8 +239,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     },
     onSuccess: () => {
       toast({
-        title: "Commute logged successfully!",
-        description: "Your sustainable commute has been recorded.",
+        title: "Weekly commutes logged successfully!",
+        description: "Your sustainable commutes have been recorded.",
       });
       
       // Invalidate queries to refresh data
@@ -279,7 +279,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to log commute",
+        title: "Failed to log weekly commutes",
         description: error.message,
         variant: "destructive",
       });
