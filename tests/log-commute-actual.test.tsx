@@ -1,12 +1,11 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi } from 'vitest';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { mockRegularUser } from './test-utils';
-import LogCommute from '../client/src/pages/log-commute';
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { server } from './mocks/api';
-import { mockAuthContextValue } from './mocks/auth-context';
 
+// IMPORTANT: All mocks must be defined before importing the components that use them
 // Create a mock for wouter
 vi.mock('wouter', () => ({
   __esModule: true,
@@ -35,15 +34,20 @@ vi.mock('@/components/ui/tabs', () => ({
 
 // Create a flexible mock for the auth context
 const mockUser = { ...mockRegularUser };
-vi.mock('@/contexts/auth-context', () => {
-  return {
-    useAuth: vi.fn().mockImplementation(() => ({
-      user: mockUser,
-      isLoading: false,
-      isAuthenticated: !!mockUser
-    }))
-  };
-});
+const useAuthMock = vi.fn();
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => useAuthMock()
+}));
+
+// Default mock implementation
+useAuthMock.mockImplementation(() => ({
+  user: mockUser,
+  isLoading: false,
+  isAuthenticated: !!mockUser
+}));
+
+// Now it's safe to import the component that depends on these mocks
+import LogCommute from '../client/src/pages/log-commute';
 
 describe('LogCommute Page with Mocks', () => {
   // Start mock server before all tests
@@ -96,17 +100,12 @@ describe('LogCommute Page with Mocks', () => {
   });
   
   it('should handle loading state', async () => {
-    // Mock the auth context to return loading state
-    const useAuth = vi.fn().mockReturnValueOnce({
+    // Set up the mock to return loading state for this specific test
+    useAuthMock.mockReturnValueOnce({
       user: null,
       isLoading: true,
       isAuthenticated: false
     });
-    
-    // Override the module mock for this test only
-    vi.mock('@/contexts/auth-context', () => ({
-      useAuth
-    }));
     
     render(<LogCommute />, { wrapper: createWrapper() });
     

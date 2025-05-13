@@ -1,26 +1,58 @@
 import { describe, it, expect, beforeAll, afterEach, afterAll, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from './test-utils';
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { server } from './mocks/api';
 import { mockRegularUser, mockNewUser } from './test-utils';
-import LogCommute from '../client/src/pages/log-commute';
-import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Import and use our existing mocks
-import { Link, Router, Route, Switch, Redirect, useLocation, useRoute, navigate } from './test-utils';
-
-// Mock wouter directly
+// IMPORTANT: All mocks must be defined before importing the components that use them
+// Create a mock for wouter
+const mockNavigate = vi.fn();
 vi.mock('wouter', () => ({
   __esModule: true,
-  default: Router,
-  Link,
-  Router,
-  Route,
-  Switch,
-  Redirect,
-  useLocation,
-  useRoute,
-  navigate
+  default: ({ children }) => children,
+  Link: ({ href, children }) => <a href={href} data-testid="mock-link">{children}</a>,
+  Router: ({ children }) => children,
+  Route: ({ children }) => children,
+  Switch: ({ children }) => children,
+  Redirect: () => null,
+  useLocation: () => ['/test-path', mockNavigate],
+  useRoute: () => [false, {}],
+  navigate: mockNavigate
 }));
+
+// Mock any components that might use ResizeObserver
+vi.mock('@/components/commute/weekly-commute-form', () => ({
+  default: () => <div data-testid="mock-weekly-commute-form">Weekly Commute Form Mocked</div>
+}));
+
+vi.mock('@/components/commute/weekly-commute-form-simple', () => ({
+  default: () => <div data-testid="mock-weekly-commute-form-simple">Weekly Commute Form Simple Mocked</div>
+}));
+
+vi.mock('@/components/ui/tabs', () => ({
+  Tabs: ({ children }) => <div data-testid="mock-tabs">{children}</div>,
+  TabsContent: ({ children }) => <div>{children}</div>,
+  TabsList: ({ children }) => <div>{children}</div>,
+  TabsTrigger: ({ children }) => <button>{children}</button>
+}));
+
+// Create a flexible mock for the auth context
+const mockUser = { ...mockRegularUser };
+const useAuthMock = vi.fn();
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: () => useAuthMock()
+}));
+
+// Default mock implementation
+useAuthMock.mockImplementation(() => ({
+  user: mockUser,
+  isLoading: false,
+  isAuthenticated: !!mockUser
+}));
+
+// Now it's safe to import the component that depends on these mocks
+import LogCommute from '../client/src/pages/log-commute';
 
 // Start mock server before all tests
 beforeAll(() => server.listen());
