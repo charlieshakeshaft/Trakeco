@@ -142,20 +142,20 @@ export default function LoginPage() {
               <TabsContent value="signup">
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 gap-4">
-                    <Button asChild variant="outline" className="w-full py-6">
-                      <Link href="/signup" className="flex flex-col w-full text-center px-2">
-                        <span className="text-base font-medium">Sign Up as Individual</span>
-                        <span className="text-xs text-muted-foreground mt-1">
-                          Track your personal commuting data and earn rewards
+                    <Button asChild variant="outline" className="w-full h-auto py-4">
+                      <Link href="/signup" className="flex flex-col w-full text-center px-3">
+                        <span className="text-base font-medium mb-1">Individual</span>
+                        <span className="text-xs text-muted-foreground leading-tight">
+                          Track commutes and earn rewards
                         </span>
                       </Link>
                     </Button>
                     
-                    <Button asChild variant="default" className="w-full py-6">
-                      <Link href="/signup?type=business" className="flex flex-col w-full text-center px-2">
-                        <span className="text-base font-medium">Sign Up for Business</span>
-                        <span className="text-xs text-foreground/80 mt-1">
-                          Create a company account for your organization
+                    <Button asChild variant="default" className="w-full h-auto py-4">
+                      <Link href="/signup?type=business" className="flex flex-col w-full text-center px-3">
+                        <span className="text-base font-medium mb-1">Business</span>
+                        <span className="text-xs text-foreground/80 leading-tight">
+                          For company accounts
                         </span>
                       </Link>
                     </Button>
