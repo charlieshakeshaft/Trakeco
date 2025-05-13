@@ -19,6 +19,15 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserPoints(userId: number, points: number): Promise<User>;
+  updateUserLocationSettings(userId: number, locationSettings: {
+    home_address?: string;
+    home_latitude?: string;
+    home_longitude?: string;
+    work_address?: string;
+    work_latitude?: string;
+    work_longitude?: string;
+    commute_distance_km?: number;
+  }): Promise<User>;
   
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
@@ -146,6 +155,38 @@ export class MemStorage implements IStorage {
     };
     
     this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserLocationSettings(userId: number, locationSettings: {
+    home_address?: string;
+    home_latitude?: string;
+    home_longitude?: string;
+    work_address?: string;
+    work_latitude?: string;
+    work_longitude?: string;
+    commute_distance_km?: number;
+  }): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Update location settings in the user object
+    const updatedUser: User = {
+      ...user,
+      home_address: locationSettings.home_address !== undefined ? locationSettings.home_address : user.home_address,
+      home_latitude: locationSettings.home_latitude !== undefined ? locationSettings.home_latitude : user.home_latitude,
+      home_longitude: locationSettings.home_longitude !== undefined ? locationSettings.home_longitude : user.home_longitude,
+      work_address: locationSettings.work_address !== undefined ? locationSettings.work_address : user.work_address,
+      work_latitude: locationSettings.work_latitude !== undefined ? locationSettings.work_latitude : user.work_latitude,
+      work_longitude: locationSettings.work_longitude !== undefined ? locationSettings.work_longitude : user.work_longitude,
+      commute_distance_km: locationSettings.commute_distance_km !== undefined ? locationSettings.commute_distance_km : user.commute_distance_km,
+    };
+    
+    // Update the user in the map
+    this.users.set(userId, updatedUser);
+    
     return updatedUser;
   }
   
