@@ -285,10 +285,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use query param userId if provided, otherwise use authenticated user
       const userId = req.query.userId ? Number(req.query.userId) : user.id;
       
-      // Get the start of the current week
+      // Get the start of the current week (Sunday)
       const now = new Date();
+      
+      // For better usability, include commuteLog from current month (previous 30 days)
+      // This makes the dashboard show recent activity regardless of week boundaries
       const weekStart = new Date(now);
-      weekStart.setDate(now.getDate() - now.getDay());
+      weekStart.setDate(now.getDate() - 30); // Show logs from past 30 days
       weekStart.setHours(0, 0, 0, 0);
       
       console.log("Getting commute logs for user:", userId, "with week start:", weekStart.toISOString());
