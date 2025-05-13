@@ -23,7 +23,7 @@ export function useRedeemReward(userId: number) {
   
   return useMutation({
     mutationFn: async (rewardId: number) => {
-      return await apiRequest("POST", `/api/rewards/${rewardId}/redeem?userId=${userId}`, {});
+      return await apiRequest(`/api/rewards/${rewardId}/redeem?userId=${userId}`, null, "POST");
     },
     onSuccess: (data) => {
       toast({
@@ -67,7 +67,7 @@ export function useCreateReward(userId: number) {
   
   return useMutation({
     mutationFn: async (data: Omit<Reward, 'id' | 'created_at'>) => {
-      return await apiRequest("POST", `/api/rewards?userId=${userId}`, data);
+      return await apiRequest(`/api/rewards?userId=${userId}`, data, "POST");
     },
     onSuccess: () => {
       toast({
