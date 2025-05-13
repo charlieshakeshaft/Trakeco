@@ -292,63 +292,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       weekStart.setHours(0, 0, 0, 0);
       
       console.log("Getting commute logs for user:", userId, "with week start:", weekStart.toISOString());
-      const commuteLogs = await storage.getCommuteLogsByUserId(userId);
       
-      console.log("Total commute logs found:", commuteLogs.length);
-      
-      // Filter logs for current week with more robust date comparison
-      const currentWeekLogs = commuteLogs.filter(log => {
-        // Handle potential parsing issues
-        try {
-          console.log("Processing log:", log.id, "week_start:", log.week_start);
-          
-          // If week_start is empty or invalid, skip this log
-          if (!log.week_start) {
-            console.log("Skipping log with invalid week_start:", log.id);
+      try {
+        const commuteLogs: any[] = await storage.getCommuteLogsByUserId(userId);
+        
+        console.log("Total commute logs found:", commuteLogs.length);
+        
+        // Filter logs for current week with more robust date comparison
+        const currentWeekLogs = commuteLogs.filter(log => {
+          // Handle potential parsing issues
+          try {
+            console.log("Processing log:", log.id, "week_start:", log.week_start);
+            
+            // If week_start is empty or invalid, skip this log
+            if (!log.week_start) {
+              console.log("Skipping log with invalid week_start:", log.id);
+              return false;
+            }
+            
+            let logWeekStart;
+            
+            // Handle different formats of week_start
+            if (typeof log.week_start === 'string') {
+              logWeekStart = new Date(log.week_start);
+            } else if (typeof log.week_start === 'object' && log.week_start !== null && 'getTime' in log.week_start) {
+              // Safe check for Date object without using instanceof
+              logWeekStart = log.week_start;
+            } else {
+              console.log("Unsupported week_start format:", typeof log.week_start);
+              return false;
+            }
+            
+            // Check if valid date
+            if (isNaN(logWeekStart.getTime())) {
+              console.log("Invalid date format for log:", log.id);
+              return false;
+            }
+            
+            // Format dates for comparison in YYYY-MM-DD format
+            const formatDate = (date: Date): string => {
+              const year = date.getFullYear();
+              const month = String(date.getMonth() + 1).padStart(2, '0');
+              const day = String(date.getDate()).padStart(2, '0');
+              return `${year}-${month}-${day}`;
+            };
+            
+            const logDateStr = formatDate(logWeekStart);
+            const weekStartStr = formatDate(weekStart);
+            const matches = logDateStr === weekStartStr;
+            
+            console.log("Log", log.id, "week start:", logDateStr, "current week start:", weekStartStr, "matches:", matches);
+            return matches;
+          } catch (error) {
+            console.error("Error processing log:", log.id, error);
             return false;
           }
-          
-          let logWeekStart;
-          
-          // Handle different formats of week_start
-          if (typeof log.week_start === 'string') {
-            logWeekStart = new Date(log.week_start);
-          } else if (log.week_start instanceof Date) {
-            logWeekStart = log.week_start;
-          } else {
-            console.log("Unsupported week_start format:", typeof log.week_start);
-            return false;
-          }
-          
-          // Check if valid date
-          if (isNaN(logWeekStart.getTime())) {
-            console.log("Invalid date format for log:", log.id);
-            return false;
-          }
-          
-          // Format dates for comparison in YYYY-MM-DD format
-          const formatDate = (date: Date): string => {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-          };
-          
-          const logDateStr = formatDate(logWeekStart);
-          const weekStartStr = formatDate(weekStart);
-          const matches = logDateStr === weekStartStr;
-          
-          console.log("Log", log.id, "week start:", logDateStr, "current week start:", weekStartStr, "matches:", matches);
-          return matches;
-        } catch (error) {
-          console.error("Error processing log:", log.id, error);
-          return false;
-        }
-      });
-      
-      console.log("Filtered logs for current week:", currentWeekLogs.length);
-      res.json(currentWeekLogs);
+        });
+        
+        console.log("Filtered logs for current week:", currentWeekLogs.length);
+        res.json(currentWeekLogs);
+      } catch (logError) {
+        console.error("Error fetching or processing commute logs:", logError);
+        // Return empty array instead of error to prevent client-side issues
+        res.json([]);
+      }
     } catch (error) {
+      console.error("Error in current commute logs route:", error);
       res.status(500).json({ message: "Error fetching current commute logs" });
     }
   });
@@ -637,28 +646,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const user = (req as any).user;
       
-      // Get commute logs
-      const commuteLogs = await storage.getCommuteLogsByUserId(user.id);
+      // Get userId from query params if provided, otherwise use authenticated user
+      const userId = req.query.userId ? Number(req.query.userId) : user.id;
       
-      // Calculate total CO2 saved
+      console.log("Fetching stats for user:", userId);
+      
+      // Get commute logs with better error handling
+      let commuteLogs: any[] = [];
+      try {
+        commuteLogs = await storage.getCommuteLogsByUserId(userId);
+        console.log(`Retrieved ${commuteLogs.length} commute logs for user ${userId}`);
+      } catch (e) {
+        console.error("Error fetching commute logs:", e);
+        commuteLogs = [];
+      }
+      
+      // Calculate total CO2 saved with more robust error handling
       const totalCO2Saved = commuteLogs.reduce((total, log) => {
-        // Handle null values safely
-        const co2Saved = log.co2_saved_kg || 0; 
-        return total + co2Saved;
+        try {
+          // Handle null, undefined, or NaN values safely
+          if (log.co2_saved_kg === null || log.co2_saved_kg === undefined || isNaN(log.co2_saved_kg)) {
+            console.log(`Skipping log ${log.id} with invalid CO2 value:`, log.co2_saved_kg);
+            return total;
+          }
+          return total + log.co2_saved_kg;
+        } catch (e) {
+          console.error("Error processing log for CO2:", log.id, e);
+          return total;
+        }
       }, 0);
       
-      // Get user challenges
-      const userChallenges = await storage.getUserChallenges(user.id);
-      const completedChallenges = userChallenges.filter(uc => uc.participant.completed).length;
+      console.log("Total CO2 saved calculated:", totalCO2Saved);
+      
+      // Get user challenges with error handling
+      let userChallenges = [];
+      let completedChallenges = 0;
+      try {
+        userChallenges = await storage.getUserChallenges(userId);
+        completedChallenges = userChallenges.filter(uc => 
+          uc.participant && uc.participant.completed === true
+        ).length;
+        console.log(`Found ${completedChallenges} completed challenges out of ${userChallenges.length} total`);
+      } catch (e) {
+        console.error("Error fetching user challenges:", e);
+      }
+      
+      // Get the actual user to ensure we have correct points
+      let userPoints = 0;
+      let userStreak = 0;
+      try {
+        const userData = await storage.getUser(userId);
+        if (userData) {
+          userPoints = userData.points_total;
+          userStreak = userData.streak_count;
+        }
+      } catch (e) {
+        console.error("Error fetching user data for stats:", e);
+        // Use the authenticated user's data as fallback
+        userPoints = user.points_total;
+        userStreak = user.streak_count;
+      }
       
       // Response with stats
       res.json({
-        points: user.points_total,
-        streak: user.streak_count,
-        co2_saved: totalCO2Saved,
+        points: userPoints,
+        streak: userStreak,
+        co2_saved: totalCO2Saved || 0,
         completed_challenges: completedChallenges
       });
     } catch (error) {
+      console.error("Error in user stats route:", error);
       res.status(500).json({ message: "Error fetching user stats" });
     }
   });
