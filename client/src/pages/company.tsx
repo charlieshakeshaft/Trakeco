@@ -29,6 +29,12 @@ const CompanyPage = () => {
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isAddChallengeOpen, setIsAddChallengeOpen] = useState(false);
   const [isAddRewardOpen, setIsAddRewardOpen] = useState(false);
+  const [newReward, setNewReward] = useState({
+    title: "",
+    description: "",
+    cost_points: 100,
+    quantity_limit: 0
+  });
   
   // Check if user has admin role
   const isAdmin = user?.role === "admin";
@@ -327,6 +333,8 @@ const CompanyPage = () => {
                       id="reward-title"
                       placeholder="e.g., Free Coffee Voucher"
                       className="col-span-3"
+                      value={newReward.title}
+                      onChange={(e) => setNewReward({...newReward, title: e.target.value})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -337,6 +345,8 @@ const CompanyPage = () => {
                       id="reward-desc"
                       placeholder="Describe the reward..."
                       className="col-span-3 flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                      value={newReward.description}
+                      onChange={(e) => setNewReward({...newReward, description: e.target.value})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -348,6 +358,8 @@ const CompanyPage = () => {
                       type="number"
                       placeholder="200"
                       className="col-span-3"
+                      value={newReward.cost_points}
+                      onChange={(e) => setNewReward({...newReward, cost_points: parseInt(e.target.value) || 0})}
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
@@ -359,6 +371,8 @@ const CompanyPage = () => {
                       type="number"
                       placeholder="50"
                       className="col-span-3"
+                      value={newReward.quantity_limit}
+                      onChange={(e) => setNewReward({...newReward, quantity_limit: parseInt(e.target.value) || 0})}
                     />
                   </div>
                 </div>
