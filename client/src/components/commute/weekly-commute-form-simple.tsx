@@ -376,7 +376,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
                           {/* Show indicator if day is already logged */}
                           {weekLog && weekLog[day.id as keyof typeof weekLog] && (
                             <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
-                              Logged
+                              {weekLog.commute_type}
                             </span>
                           )}
                         </FormLabel>
@@ -386,8 +386,16 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
                 ))}
               </div>
               <FormDescription>
-                Select all days you used this commute method for travel to or from work.
+                Select the days you used this commute method. You can log different commute types for different days of the week.
               </FormDescription>
+              {weekLog && (
+                <div className="mt-2 text-sm text-muted-foreground">
+                  <p className="flex items-center gap-1">
+                    <span className="material-icons text-sm">info</span>
+                    Days with a badge already have a logged commute type. You can change these by selecting them again.
+                  </p>
+                </div>
+              )}
               {form.formState.errors.monday && (
                 <p className="text-sm font-medium text-destructive">{form.formState.errors.monday.message}</p>
               )}

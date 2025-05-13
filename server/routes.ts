@@ -479,32 +479,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         weekEnd.setDate(weekEnd.getDate() + 7);
         
         if (currentDate <= weekEnd) {
-          // Merge day selections to avoid overwriting previous days
-          // Only set a day to false if it's explicitly set to false in the request
-          // Otherwise, preserve the existing value
+          // When tracking different commute types within the same week,
+          // we need special handling to preserve different commute types for different days
           const dayFields = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
           
-          const mergedData = { ...commuteData };
+          // Only update fields that have been explicitly set in the request
+          const updateData: any = { 
+            // Always update commute type for the selected days only
+            commute_type: commuteData.commute_type
+          };
           
-          // Preserve any existing day selections that aren't explicitly set to false
+          // Store which days were actually selected in this submission
+          const selectedDays: string[] = [];
+          
+          // Only set days that were explicitly selected to true
           dayFields.forEach(day => {
-            // If the day is not in the request or is undefined, use the existing value
-            if (mergedData[day] === undefined || mergedData[day] === null) {
-              mergedData[day] = existingLog[day];
+            if (commuteData[day] === true) {
+              updateData[day] = true;
+              selectedDays.push(day);
             }
           });
           
-          // Recalculate days_logged based on merged selections
-          mergedData.days_logged = dayFields.filter(day => mergedData[day]).length;
+          // If the commute type is different, only update the selected days
+          if (existingLog.commute_type !== commuteData.commute_type) {
+            // Only include days that were explicitly selected 
+            // This preserves different commute types for different days
+            console.log(`Commute type changed from ${existingLog.commute_type} to ${commuteData.commute_type} for days: ${selectedDays.join(', ')}`);
+          } else {
+            // Same commute type, we can safely merge all values
+            dayFields.forEach(day => {
+              if (commuteData[day] === undefined || commuteData[day] === null) {
+                updateData[day] = existingLog[day];
+              } else {
+                updateData[day] = commuteData[day];
+              }
+            });
+          }
           
-          console.log("Merging commute log:", {
+          // Calculate days_logged based on the resulting data
+          // We need to consider the original log plus our updates
+          const updatedDays = { ...existingLog, ...updateData };
+          updateData.days_logged = dayFields.filter(day => updatedDays[day]).length;
+          
+          console.log("Updating commute log:", {
             existing: existingLog,
             newData: commuteData,
-            merged: mergedData
+            updateData: updateData
           });
           
           // Update existing log instead of creating a new one
-          const updatedLog = await storage.updateCommuteLog(existingLog.id, mergedData);
+          const updatedLog = await storage.updateCommuteLog(existingLog.id, updateData);
           return res.json(updatedLog);
         }
       }
