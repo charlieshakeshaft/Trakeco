@@ -119,7 +119,7 @@ const StreakDisplay = ({ userId }: StreakDisplayProps) => {
         const dayLabel = dayMapping[dayName as keyof typeof dayMapping]?.label || dayName[0].toUpperCase();
         
         // Determine icon and styling based on commute data
-        let iconName = "directions_bike";
+        let iconName = "";
         let iconColor = "text-gray-400";
         let bgColor = "bg-gray-200";
         let tooltipText = "No commute logged";
@@ -142,7 +142,9 @@ const StreakDisplay = ({ userId }: StreakDisplayProps) => {
           <div key={dayName} className="flex flex-col items-center group relative">
             <div className="text-xs mb-1 text-gray-500">{dayLabel}</div>
             <div className={`w-8 h-8 rounded-full ${bgColor} border border-gray-300 flex items-center justify-center`}>
-              <span className={`material-icons text-sm ${iconColor}`}>{iconName}</span>
+              {iconName && (
+                <span className={`material-icons text-sm ${iconColor}`}>{iconName}</span>
+              )}
             </div>
             
             {/* Tooltip */}
