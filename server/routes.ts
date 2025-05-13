@@ -329,19 +329,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
               return false;
             }
             
-            // Format dates for comparison in YYYY-MM-DD format
-            const formatDate = (date: Date): string => {
-              const year = date.getFullYear();
-              const month = String(date.getMonth() + 1).padStart(2, '0');
-              const day = String(date.getDate()).padStart(2, '0');
-              return `${year}-${month}-${day}`;
-            };
+            // Check if the date is in the current week
+            // The date is in the current week if it falls between weekStart and weekStart + 7 days
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 7);
             
-            const logDateStr = formatDate(logWeekStart);
-            const weekStartStr = formatDate(weekStart);
-            const matches = logDateStr === weekStartStr;
+            // Compare if the log date is in the current week range
+            const matches = logWeekStart >= weekStart && logWeekStart < weekEnd;
             
-            console.log("Log", log.id, "week start:", logDateStr, "current week start:", weekStartStr, "matches:", matches);
+            console.log(
+              "Log", log.id, 
+              "log date:", logWeekStart.toISOString().split('T')[0], 
+              "current week range:", weekStart.toISOString().split('T')[0], "to", weekEnd.toISOString().split('T')[0], 
+              "matches:", matches
+            );
             return matches;
           } catch (error) {
             console.error("Error processing log:", log.id, error);
