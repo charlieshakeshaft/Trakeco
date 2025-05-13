@@ -200,6 +200,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // User status and password update endpoint
+  app.patch("/api/user/update", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      
+      // Use query param userId if provided (for development), otherwise use authenticated user
+      const userId = req.query.userId ? Number(req.query.userId) : user.id;
+      
+      // Define the user update schema
+      const userUpdateSchema = z.object({
+        password: z.string().optional(),
+        is_new_user: z.boolean().optional(),
+        needs_password_change: z.boolean().optional(),
+      });
+      
+      const updateData = userUpdateSchema.parse(req.body);
+      
+      // Update the user
+      const updatedUser = await storage.updateUser(userId, updateData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Don't return the password
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid data", errors: error.errors });
+      }
+      
+      return res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+  
   // Company routes
   app.post("/api/companies", async (req, res) => {
     try {
