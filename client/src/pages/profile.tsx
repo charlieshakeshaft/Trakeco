@@ -53,15 +53,16 @@ const Profile = () => {
                 <div
                   className="w-24 h-24 rounded-full bg-primary text-white flex items-center justify-center text-3xl font-bold mb-4"
                 >
-                  {(profile?.name || profile?.username || "U").charAt(0).toUpperCase()}
+                  {user?.name ? user.name.charAt(0).toUpperCase() : 
+                   user?.username ? user.username.charAt(0).toUpperCase() : "U"}
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{profile?.name || profile?.username}</h2>
-                <p className="text-gray-500 mb-4">{profile?.email}</p>
+                <h2 className="text-xl font-semibold text-gray-800">{user?.name || user?.username || "User"}</h2>
+                <p className="text-gray-500 mb-4">{user?.email || "No email"}</p>
                 
                 <div className="w-full p-4 rounded-lg bg-blue-50 mt-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Company</span>
-                    <span className="text-sm text-primary font-medium">
+                    <span className="text-sm text-primary font-medium truncate ml-2 max-w-[120px]">
                       {profile?.company?.name || "No company"}
                     </span>
                   </div>
@@ -72,7 +73,7 @@ const Profile = () => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">Member Since</span>
+                    <span className="text-sm font-medium text-gray-700">Since</span>
                     <span className="text-sm text-gray-600">
                       {profile?.created_at 
                         ? new Date(profile.created_at).toLocaleDateString() 

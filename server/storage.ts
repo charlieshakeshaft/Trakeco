@@ -677,9 +677,9 @@ export class DatabaseStorage implements IStorage {
     }
     
     const [updatedUser] = await db
-      .update(users)
+      .update(schema.users)
       .set({ points_total: user.points_total + points })
-      .where(eq(users.id, userId))
+      .where(eq(schema.users.id, userId))
       .returning();
     
     return updatedUser;
@@ -777,7 +777,7 @@ export class DatabaseStorage implements IStorage {
   // Points operations
   async createPointsTransaction(insertTransaction: InsertPointsTransaction): Promise<PointsTransaction> {
     const [transaction] = await db
-      .insert(pointsTransactions)
+      .insert(schema.pointsTransactions)
       .values(insertTransaction)
       .returning();
     
@@ -790,8 +790,8 @@ export class DatabaseStorage implements IStorage {
   async getPointsTransactionsByUserId(userId: number): Promise<PointsTransaction[]> {
     return db
       .select()
-      .from(pointsTransactions)
-      .where(eq(pointsTransactions.user_id, userId));
+      .from(schema.pointsTransactions)
+      .where(eq(schema.pointsTransactions.user_id, userId));
   }
   
   // Challenge operations
