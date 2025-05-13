@@ -22,6 +22,9 @@ export const users = pgTable("users", {
   work_latitude: text("work_latitude"),
   work_longitude: text("work_longitude"),
   commute_distance_km: integer("commute_distance_km"),
+  // New user fields
+  is_new_user: boolean("is_new_user").default(false),
+  needs_password_change: boolean("needs_password_change").default(false),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -38,6 +41,8 @@ export const insertUserSchema = createInsertSchema(users).pick({
   work_latitude: true,
   work_longitude: true,
   commute_distance_km: true,
+  is_new_user: true,
+  needs_password_change: true,
 });
 
 // Companies table

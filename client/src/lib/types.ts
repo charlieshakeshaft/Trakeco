@@ -8,6 +8,17 @@ export interface User {
   streak_count: number;
   role: 'user' | 'admin';
   created_at?: string;
+  // Location information
+  home_address?: string | null;
+  home_latitude?: string | null;
+  home_longitude?: string | null;
+  work_address?: string | null;
+  work_latitude?: string | null;
+  work_longitude?: string | null;
+  commute_distance_km?: number | null;
+  // New user fields
+  is_new_user?: boolean;
+  needs_password_change?: boolean;
 }
 
 export interface Company {

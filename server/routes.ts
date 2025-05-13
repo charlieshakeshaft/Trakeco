@@ -304,7 +304,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: role || 'user',
         company_id: Number(company_id),
         points_total: 0,
-        streak_count: 0
+        streak_count: 0,
+        home_address: null,
+        home_latitude: null,
+        home_longitude: null,
+        work_address: null,
+        work_latitude: null,
+        work_longitude: null,
+        commute_distance_km: null,
+        is_new_user: true,
+        needs_password_change: true
       });
       
       // Don't return the password

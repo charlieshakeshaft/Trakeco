@@ -178,6 +178,56 @@ const Profile = () => {
 
   return (
     <div className="p-4 md:p-8">
+      {user?.is_new_user && (
+        <div className="bg-amber-50 border-amber-200 border rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <span className="material-icons text-amber-500">info</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-lg font-medium text-amber-800">Welcome to EcoCommute!</h3>
+              <div className="mt-2 text-amber-700">
+                <p>To get started, please set up your home and work addresses in the Settings tab below. This will allow you to log your commutes and start earning points!</p>
+                <Button 
+                  className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
+                  onClick={() => {
+                    document.querySelector('[data-value="settings"]')?.dispatchEvent(
+                      new MouseEvent('click', { bubbles: true })
+                    );
+                  }}
+                >
+                  Set up your addresses now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {user?.needs_password_change && (
+        <div className="bg-blue-50 border-blue-200 border rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <span className="material-icons text-blue-500">lock</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-lg font-medium text-blue-800">Change Your Password</h3>
+              <div className="mt-2 text-blue-700">
+                <p>You're using a temporary password. Please change it to a secure password you'll remember.</p>
+                <Button 
+                  className="mt-3 bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => {
+                    document.querySelector('[data-value="settings"]')?.dispatchEvent(
+                      new MouseEvent('click', { bubbles: true })
+                    );
+                  }}
+                >
+                  Change password
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Your Profile</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
