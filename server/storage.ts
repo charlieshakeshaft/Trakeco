@@ -33,6 +33,7 @@ export interface IStorage {
   getCompany(id: number): Promise<Company | undefined>;
   getCompanyByDomain(domain: string): Promise<Company | undefined>;
   createCompany(company: InsertCompany): Promise<Company>;
+  getUsersByCompany(companyId: number): Promise<User[]>;
   
   // Commute operations
   createCommuteLog(commuteLog: InsertCommuteLog): Promise<CommuteLog>;

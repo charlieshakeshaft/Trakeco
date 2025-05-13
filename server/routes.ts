@@ -223,6 +223,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get company members
+  app.get("/api/company/members", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      
+      // Use query param if provided, otherwise use authenticated user's company
+      const companyId = req.query.companyId ? Number(req.query.companyId) : user.company_id;
+      
+      if (!companyId) {
+        return res.status(400).json({ message: "Company ID is required" });
+      }
+      
+      // Check if user has permission (admin or member of the company)
+      const hasPermission = user.role === 'admin' || user.company_id === companyId;
+      
+      if (!hasPermission) {
+        return res.status(403).json({ message: "You don't have permission to view this company's members" });
+      }
+      
+      console.log("Getting members for company ID:", companyId);
+      
+      // Fetch all users that belong to this company
+      const users = await storage.getUsersByCompany(companyId);
+      
+      // Remove passwords before sending the data
+      const safeUsers = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching company members:", error);
+      res.status(500).json({ message: "Failed to fetch company members" });
+    }
+  });
+  
+  // Invite new team member
+  app.post("/api/company/invite", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      
+      // Check if user is an admin
+      if (user.role !== 'admin') {
+        return res.status(403).json({ message: "Only admins can invite team members" });
+      }
+      
+      const { name, email, username, password, role, company_id } = req.body;
+      
+      // Validate required fields
+      if (!name || !email || !username || !password || !company_id) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Check if user has permission to add members to this company
+      const hasPermission = user.company_id === Number(company_id);
+      
+      if (!hasPermission) {
+        return res.status(403).json({ message: "You don't have permission to add members to this company" });
+      }
+      
+      // Check if user with same email or username already exists
+      const existingByEmail = await storage.getUserByEmail(email);
+      if (existingByEmail) {
+        return res.status(400).json({ message: "A user with this email already exists" });
+      }
+      
+      const existingByUsername = await storage.getUserByUsername(username);
+      if (existingByUsername) {
+        return res.status(400).json({ message: "A user with this username already exists" });
+      }
+      
+      // Create the new user
+      const newUser = await storage.createUser({
+        name,
+        email,
+        username,
+        password, // In a real app, you'd hash this password
+        role: role || 'user',
+        company_id: Number(company_id),
+        points_total: 0,
+        streak_count: 0
+      });
+      
+      // Don't return the password
+      const { password: _, ...userWithoutPassword } = newUser;
+      
+      res.status(201).json({
+        message: "Team member invited successfully",
+        user: userWithoutPassword
+      });
+    } catch (error) {
+      console.error("Error inviting team member:", error);
+      res.status(500).json({ message: "Failed to invite team member" });
+    }
+  });
+  
   // Commute routes
   app.post("/api/commutes", authenticate, async (req, res) => {
     try {
