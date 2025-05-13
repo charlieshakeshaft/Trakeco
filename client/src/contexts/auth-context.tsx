@@ -8,6 +8,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   logout: () => Promise<void>;
+  // Deprecated: Use query invalidation instead
+  setCurrentUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Deprecated setCurrentUser function, use query invalidation instead
+  const setCurrentUser = (updatedUser: User) => {
+    console.warn('setCurrentUser is deprecated. Use query invalidation instead.');
+    // Invalidate the user query which will trigger a refetch
+    queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -39,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         isAuthenticated: !!user,
         logout,
+        setCurrentUser,
       }}
     >
       {children}

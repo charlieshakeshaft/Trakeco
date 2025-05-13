@@ -201,13 +201,8 @@ const Profile = () => {
         description: "Your commute location settings have been saved successfully.",
       });
       
-      // Update the user in the auth context
-      if (user) {
-        setCurrentUser({
-          ...user,
-          ...locationSettings
-        });
-      }
+      // Invalidate auth user query to refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
