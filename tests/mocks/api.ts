@@ -209,17 +209,18 @@ export const handlers = [
   }),
   
   // Log commute
-  rest.post('/api/commutes', (req, res, ctx) => {
-    return res(ctx.status(201), ctx.json({
+  http.post('/api/commutes', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({
       id: 2,
-      ...req.body,
+      ...body,
       created_at: new Date().toISOString()
-    }));
+    }, { status: 201 });
   }),
   
   // Company members
-  rest.get('/api/company/members', (req, res, ctx) => {
-    return res(ctx.status(200), ctx.json([mockAdminUser, mockRegularUser]));
+  http.get('/api/company/members', () => {
+    return HttpResponse.json([mockAdminUser, mockRegularUser], { status: 200 });
   })
 ];
 
