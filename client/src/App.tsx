@@ -20,6 +20,7 @@ import SignupPage from "@/pages/signup";
 // Layout components
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
+import MobileMenu from "@/components/layout/mobile-menu";
 import MobileNavigation from "@/components/layout/mobile-navigation";
 
 // Types and utils
@@ -63,10 +64,17 @@ function AuthenticatedApp({ user }: { user: User }) {
       {!isMobile && <Sidebar user={user} />}
       
       {isMobile && (
-        <MobileHeader 
-          isMenuOpen={mobileMenuOpen} 
-          onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} 
-        />
+        <>
+          <MobileHeader 
+            isMenuOpen={mobileMenuOpen} 
+            onMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)} 
+          />
+          <MobileMenu 
+            isOpen={mobileMenuOpen}
+            user={user}
+            onClose={() => setMobileMenuOpen(false)}
+          />
+        </>
       )}
       
       <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
