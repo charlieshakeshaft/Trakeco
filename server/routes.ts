@@ -419,9 +419,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Commute routes
-  app.post("/api/commutes/log", authenticate, async (req, res) => {
+  // Handle both endpoints to support different client implementations
+  app.post(["/api/commutes", "/api/commutes/log"], authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
+      
+      console.log("Receiving commute log submission:", {
+        userId: user.id,
+        body: req.body
+      });
       
       const commuteSchema = insertCommuteLogSchema.extend({
         commute_type: z.string().refine(val => commuteTypes.options.includes(val as any), {

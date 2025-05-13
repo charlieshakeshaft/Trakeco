@@ -125,6 +125,20 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
         ? startOfWeek(now, { weekStartsOn: 1 })
         : startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 });
       
+      console.log("Submitting commute log:", {
+        commute_type: data.commute_type,
+        days_logged: daysLogged,
+        distance_km: commuteDistance,
+        week_start: format(weekStartDate, 'yyyy-MM-dd'),
+        monday: data.monday,
+        tuesday: data.tuesday,
+        wednesday: data.wednesday,
+        thursday: data.thursday,
+        friday: data.friday,
+        saturday: data.saturday,
+        sunday: data.sunday,
+      });
+      
       return await apiRequest(`/api/commutes/log?userId=${userId}`, {
         commute_type: data.commute_type,
         days_logged: daysLogged,
@@ -148,8 +162,10 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       });
       
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/commutes/current?userId=${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/user/stats?userId=${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/commutes`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/commutes/current`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/user/stats`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/challenges`] });
       
       // Reset form
       form.reset();

@@ -18,6 +18,8 @@ const CommuteSummary = ({ userId }: CommuteSummaryProps) => {
     queryKey: [`/api/commutes/current?userId=${userId}`],
     staleTime: 60000, // 1 minute
   });
+  
+  console.log("Dashboard commute logs:", commuteLogs);
 
   if (isLoading) {
     return (
