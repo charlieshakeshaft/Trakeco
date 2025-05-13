@@ -630,6 +630,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
+      console.error("Error logging commute:", error);
       res.status(500).json({ message: "Error logging commute" });
     }
   });
