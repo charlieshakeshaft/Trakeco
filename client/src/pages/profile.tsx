@@ -68,7 +68,7 @@ const Profile = () => {
                   {user?.name ? user.name.charAt(0).toUpperCase() : 
                    user?.username ? user.username.charAt(0).toUpperCase() : "U"}
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{user?.name || user?.username || "User"}</h2>
+                <h2 className="text-xl font-semibold text-gray-800 truncate max-w-[200px] text-center">{user?.name || user?.username || "User"}</h2>
                 <p className="text-gray-500 mb-4">{user?.email || "No email"}</p>
                 
                 <div className="w-full p-4 rounded-lg bg-blue-50 mt-2">
