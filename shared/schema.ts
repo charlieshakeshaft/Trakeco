@@ -14,6 +14,14 @@ export const users = pgTable("users", {
   streak_count: integer("streak_count").default(0).notNull(),
   role: text("role").default("user").notNull(),
   created_at: timestamp("created_at").defaultNow().notNull(),
+  // Location information
+  home_address: text("home_address"),
+  home_latitude: text("home_latitude"),
+  home_longitude: text("home_longitude"),
+  work_address: text("work_address"),
+  work_latitude: text("work_latitude"),
+  work_longitude: text("work_longitude"),
+  commute_distance_km: integer("commute_distance_km"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -23,6 +31,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   company_id: true,
   role: true,
+  home_address: true,
+  home_latitude: true,
+  home_longitude: true,
+  work_address: true,
+  work_latitude: true,
+  work_longitude: true,
+  commute_distance_km: true,
 });
 
 // Companies table
@@ -53,11 +68,13 @@ export const commuteLogs = pgTable("commute_logs", {
   id: serial("id").primaryKey(),
   user_id: integer("user_id").notNull(),
   week_start: date("week_start").notNull(),
+  // Original fields kept for compatibility
   commute_type: text("commute_type").notNull(),
   days_logged: integer("days_logged").notNull(),
   distance_km: integer("distance_km").default(0),
   co2_saved_kg: integer("co2_saved_kg").default(0),
   created_at: timestamp("created_at").defaultNow().notNull(),
+  
   // Day-specific tracking (booleans for each day of the week)
   monday: boolean("monday").default(false),
   tuesday: boolean("tuesday").default(false),
@@ -66,6 +83,22 @@ export const commuteLogs = pgTable("commute_logs", {
   friday: boolean("friday").default(false),
   saturday: boolean("saturday").default(false),
   sunday: boolean("sunday").default(false),
+  
+  // New fields for tracking different commute methods for going to work and returning home
+  monday_to_work: text("monday_to_work"),
+  monday_to_home: text("monday_to_home"),
+  tuesday_to_work: text("tuesday_to_work"),
+  tuesday_to_home: text("tuesday_to_home"),
+  wednesday_to_work: text("wednesday_to_work"),
+  wednesday_to_home: text("wednesday_to_home"),
+  thursday_to_work: text("thursday_to_work"),
+  thursday_to_home: text("thursday_to_home"),
+  friday_to_work: text("friday_to_work"),
+  friday_to_home: text("friday_to_home"),
+  saturday_to_work: text("saturday_to_work"),
+  saturday_to_home: text("saturday_to_home"),
+  sunday_to_work: text("sunday_to_work"),
+  sunday_to_home: text("sunday_to_home"),
 });
 
 export const insertCommuteLogSchema = createInsertSchema(commuteLogs).pick({
@@ -81,6 +114,21 @@ export const insertCommuteLogSchema = createInsertSchema(commuteLogs).pick({
   friday: true,
   saturday: true,
   sunday: true,
+  // New fields for to/from commutes
+  monday_to_work: true,
+  monday_to_home: true,
+  tuesday_to_work: true,
+  tuesday_to_home: true,
+  wednesday_to_work: true,
+  wednesday_to_home: true,
+  thursday_to_work: true,
+  thursday_to_home: true,
+  friday_to_work: true,
+  friday_to_home: true,
+  saturday_to_work: true,
+  saturday_to_home: true,
+  sunday_to_work: true,
+  sunday_to_home: true,
 });
 
 // Points transactions
