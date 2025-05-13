@@ -16,11 +16,39 @@ const ChallengeCard = ({ challenge, participant, userId, isDetailed = false }: C
   const progressPercentage = getChallengeProgress(challenge, progress);
   const daysRemaining = getDaysRemaining(challenge.end_date);
   
-  // Determine image based on challenge type or title
-  let imageSrc = "https://pixabay.com/get/ge15f1fd497978b7e1597e519e647bb2ec685ba064f5be0e0a1f8d7c0e9a2c6e71cd7458f59b39a76d60f7c2efe2efe866cb2a551d7678b5e5c97178e5a20e77c_1280.jpg";
+  // Determine image based on commute type
+  let imageSrc = "https://images.pexels.com/photos/4347936/pexels-photo-4347936.jpeg"; // Default sustainable commute image
   
-  if (challenge.commute_type === 'public_transport' || challenge.title.toLowerCase().includes('transit') || challenge.title.toLowerCase().includes('bus')) {
-    imageSrc = "https://pixabay.com/get/gb65d2ebce1af42dfe65b0ee69d037acb57d762dbe84c26f00344db1302bbaa3bbc8837c0cde1f1c01ee64ee09741798424ff6d99e4be7ea9968a505bda090dab_1280.jpg";
+  // Maps commute type to appropriate images
+  const commuteImages: Record<string, string> = {
+    'cycle': "https://images.pexels.com/photos/5700269/pexels-photo-5700269.jpeg", // Cycling image
+    'walk': "https://images.pexels.com/photos/7194591/pexels-photo-7194591.jpeg", // Walking image
+    'public_transport': "https://images.pexels.com/photos/2031755/pexels-photo-2031755.jpeg", // Public transport image
+    'carpool': "https://images.pexels.com/photos/175696/pexels-photo-175696.jpeg", // Carpool image
+    'electric_vehicle': "https://images.pexels.com/photos/6238050/pexels-photo-6238050.jpeg", // Electric vehicle image
+    'remote_work': "https://images.pexels.com/photos/5711267/pexels-photo-5711267.jpeg" // Remote work image
+  };
+  
+  // Select image based on challenge's commute type
+  if (challenge.commute_type && commuteImages[challenge.commute_type]) {
+    imageSrc = commuteImages[challenge.commute_type];
+  } 
+  // Fallback to keyword-based selection if no commute type specified
+  else if (challenge.title) {
+    const title = challenge.title.toLowerCase();
+    if (title.includes('cycle') || title.includes('bike')) {
+      imageSrc = commuteImages['cycle'];
+    } else if (title.includes('walk')) {
+      imageSrc = commuteImages['walk'];
+    } else if (title.includes('transit') || title.includes('bus') || title.includes('train')) {
+      imageSrc = commuteImages['public_transport'];
+    } else if (title.includes('carpool') || title.includes('shared')) {
+      imageSrc = commuteImages['carpool'];
+    } else if (title.includes('electric') || title.includes('ev')) {
+      imageSrc = commuteImages['electric_vehicle'];
+    } else if (title.includes('remote') || title.includes('home')) {
+      imageSrc = commuteImages['remote_work'];
+    }
   }
 
   return (

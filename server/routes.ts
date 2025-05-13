@@ -219,6 +219,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Update challenge progress for matching challenges
+      await updateChallengeProgressForCommute(userId, commuteData);
+      
       res.status(201).json(commuteLog);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -598,4 +601,62 @@ function calculateCommutePoints(commuteType: string, daysLogged: number): number
   }
   
   return points;
+}
+
+// Helper function to update challenge progress when a commute is logged
+async function updateChallengeProgressForCommute(userId: number, commuteData: any): Promise<void> {
+  try {
+    // Get all user's active challenges
+    const userChallenges = await storage.getUserChallenges(userId);
+    
+    // For each challenge, check if this commute contributes to progress
+    for (const { challenge, participant } of userChallenges) {
+      // Skip completed challenges
+      if (participant.completed) {
+        continue;
+      }
+      
+      let shouldUpdate = false;
+      let newProgress = participant.progress;
+      
+      // Check if challenge is specific to commute type
+      if (challenge.commute_type && challenge.commute_type === commuteData.commute_type) {
+        // Commute type specific challenge
+        if (challenge.goal_type === 'days') {
+          // Add days logged to progress
+          newProgress = Math.min(participant.progress + commuteData.days_logged, challenge.goal_value);
+          shouldUpdate = true;
+        } else if (challenge.goal_type === 'km') {
+          // Add distance to progress
+          newProgress = Math.min(participant.progress + commuteData.distance_km, challenge.goal_value);
+          shouldUpdate = true;
+        }
+      } else if (!challenge.commute_type) {
+        // General challenge for any sustainable commute
+        if (challenge.goal_type === 'days') {
+          // Add days logged to progress
+          newProgress = Math.min(participant.progress + commuteData.days_logged, challenge.goal_value);
+          shouldUpdate = true;
+        }
+      }
+      
+      // Update the challenge progress if needed
+      if (shouldUpdate) {
+        const completed = newProgress >= challenge.goal_value;
+        await storage.updateChallengeProgress(participant.id, newProgress, completed);
+        
+        // If challenge is completed, award points
+        if (completed && !participant.completed) {
+          await storage.createPointsTransaction({
+            user_id: userId,
+            source: `Completed challenge: ${challenge.title}`,
+            points: challenge.points_reward
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error updating challenge progress:', error);
+    // Don't throw, just log error so commute logging still succeeds
+  }
 }

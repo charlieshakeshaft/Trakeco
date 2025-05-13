@@ -67,8 +67,8 @@ const ChallengesSection = ({ userId }: ChallengesSectionProps) => {
           {/* Challenge 1 */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 card-hover transition-all duration-200">
             <img
-              src="https://pixabay.com/get/ge15f1fd497978b7e1597e519e647bb2ec685ba064f5be0e0a1f8d7c0e9a2c6e71cd7458f59b39a76d60f7c2efe2efe866cb2a551d7678b5e5c97178e5a20e77c_1280.jpg"
-              alt="Group of cyclists commuting on a bike lane"
+              src={getChallengeImage(activeUserChallenges[0]?.challenge)}
+              alt={activeUserChallenges[0]?.challenge.title || "Active challenge"}
               className="w-full h-32 object-cover"
             />
             <div className="p-5">
