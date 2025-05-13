@@ -1,12 +1,16 @@
 import { useLocation } from "wouter";
 import { LoginForm } from "@/components/auth/login-form";
+import { useAuth } from "@/contexts/auth-context";
+import { User } from "@/lib/types";
 
 export default function LoginPage() {
   const [, navigate] = useLocation();
+  const { setCurrentUser } = useAuth();
 
-  const handleLoginSuccess = (user: any) => {
-    // In a real app, you'd set the user in a global state or context
-    // For now, we'll just navigate to the dashboard
+  const handleLoginSuccess = (user: User) => {
+    // Update the auth context with the user data
+    setCurrentUser(user);
+    // Navigate to the dashboard
     navigate("/");
   };
 

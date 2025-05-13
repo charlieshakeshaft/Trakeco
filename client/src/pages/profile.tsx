@@ -7,19 +7,18 @@ import RedemptionHistory from "@/components/profile/redemption-history";
 import { DEMO_USER_ID } from "@/lib/constants";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/auth-context";
 
 const Profile = () => {
   const { data: profile, isLoading } = useUserProfile(DEMO_USER_ID);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { logout } = useAuth();
   
   const handleLogout = async () => {
     try {
-      // Call logout API endpoint
-      await fetch('/api/auth/logout', { method: 'POST' });
-      
-      // Clear any stored user data
-      localStorage.removeItem('currentUser');
+      // Use the auth context logout function
+      await logout();
       
       toast({
         title: "Logged out successfully",
@@ -28,11 +27,6 @@ const Profile = () => {
       
       // Use setLocation instead of direct window.location manipulation
       setLocation('/login');
-      
-      // Force a query client reset
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
     } catch (error) {
       console.error('Logout error:', error);
       setLocation('/login');

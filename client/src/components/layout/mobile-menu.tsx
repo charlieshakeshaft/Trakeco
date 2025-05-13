@@ -13,17 +13,12 @@ interface MobileMenuProps {
 const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      // Call logout API endpoint
-      await fetch('/api/auth/logout', { method: 'POST' });
-      
-      // Clear any stored user data
-      localStorage.removeItem('currentUser');
-      
-      // Invalidate queries
-      queryClient.clear();
+      // Use the auth context logout function
+      await logout();
       
       toast({
         title: "Logged out successfully",
@@ -32,11 +27,6 @@ const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
       
       // Navigate to login
       setLocation('/login');
-      
-      // Force a page reload after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
     } catch (error) {
       console.error('Logout error:', error);
       setLocation('/login');
