@@ -4,13 +4,15 @@ import { Challenge } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChallengeCard from "@/components/challenges/challenge-card";
-import { DEMO_USER_ID } from "@/lib/constants";
+import { useAuth } from "@/contexts/auth-context";
 
 const Challenges = () => {
   const [activeTab, setActiveTab] = useState("active");
+  const { user } = useAuth();
+  const userId = user?.id || 0;
   
-  const { data: allChallenges, isLoading: isLoadingAll } = useAllChallenges(DEMO_USER_ID);
-  const { data: userChallenges, isLoading: isLoadingUser } = useUserChallenges(DEMO_USER_ID);
+  const { data: allChallenges, isLoading: isLoadingAll } = useAllChallenges(userId);
+  const { data: userChallenges, isLoading: isLoadingUser } = useUserChallenges(userId);
   
   const isLoading = isLoadingAll || isLoadingUser;
   
@@ -61,7 +63,7 @@ const Challenges = () => {
                   key={userChallenge.challenge.id}
                   challenge={userChallenge.challenge}
                   participant={userChallenge.participant}
-                  userId={DEMO_USER_ID}
+                  userId={userId}
                 />
               ))}
             </div>
@@ -103,7 +105,7 @@ const Challenges = () => {
                 <ChallengeCard 
                   key={challenge.id}
                   challenge={challenge}
-                  userId={DEMO_USER_ID}
+                  userId={userId}
                 />
               ))}
             </div>
@@ -140,7 +142,7 @@ const Challenges = () => {
                   key={userChallenge.challenge.id}
                   challenge={userChallenge.challenge}
                   participant={userChallenge.participant}
-                  userId={DEMO_USER_ID}
+                  userId={userId}
                 />
               ))}
             </div>
