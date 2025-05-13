@@ -2,15 +2,24 @@ import IconBadge from "@/components/ui/icon-badge";
 import StreakDisplay from "@/components/ui/streak-display";
 import { useQuery } from "@tanstack/react-query";
 
+interface UserStats {
+  co2_saved?: number;
+  points?: number;
+  streak?: number;
+  completed_challenges?: number;
+}
+
 interface ImpactStatsProps {
   userId: number;
 }
 
 const ImpactStats = ({ userId }: ImpactStatsProps) => {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<UserStats>({
     queryKey: ['/api/user/stats'],
     staleTime: 60000, // 1 minute
   });
+  
+  const userStats = stats || {} as UserStats;
 
   if (isLoading) {
     return (
@@ -37,7 +46,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <div>
               <p className="text-gray-500 text-sm font-medium">CO₂ Saved</p>
               <h3 className="text-3xl font-semibold text-gray-800 mt-1">
-                {stats?.co2_saved || 0} <span className="text-lg font-normal text-gray-500">kg</span>
+                {userStats.co2_saved || 0} <span className="text-lg font-normal text-gray-500">kg</span>
               </h3>
             </div>
             <IconBadge icon="nature" color="primary" bgColor="green-50" />
@@ -56,7 +65,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <div>
               <p className="text-gray-500 text-sm font-medium">Points Earned</p>
               <h3 className="text-3xl font-semibold text-gray-800 mt-1">
-                {stats?.points || 0} <span className="text-lg font-normal text-gray-500">pts</span>
+                {userStats.points || 0} <span className="text-lg font-normal text-gray-500">pts</span>
               </h3>
             </div>
             <IconBadge icon="stars" color="accent-dark" bgColor="amber-50" />
@@ -64,7 +73,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs">
               <span className="text-gray-500">Next tier at 1000 pts</span>
-              <span className="font-medium">{Math.min(Math.round((stats?.points || 0) / 10), 100)}%</span>
+              <span className="font-medium">{Math.min(Math.round((userStats.points || 0) / 10), 100)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
               <div 

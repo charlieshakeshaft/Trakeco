@@ -73,7 +73,8 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
 
   // Get available rewards (up to 3)
   const availableRewards: Reward[] = Array.isArray(rewards) ? rewards.slice(0, 3) : [];
-  const userPoints = userProfile?.points_total || 0;
+  const userPoints = userProfile && typeof userProfile === 'object' && 'points_total' in userProfile
+    ? userProfile.points_total : 0;
   
   const getRewardIcon = (title: string) => {
     if (title.toLowerCase().includes('coffee')) return 'coffee';
