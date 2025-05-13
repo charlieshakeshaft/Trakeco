@@ -403,6 +403,12 @@ const CompanyPage = () => {
                         company_id: user?.company_id || null
                       }, {
                         onSuccess: () => {
+                          // Show success toast
+                          toast({
+                            title: "Reward Added",
+                            description: `"${newReward.title}" has been added successfully.`,
+                          });
+                          
                           // Reset form and close dialog
                           setNewReward({
                             title: "",
@@ -411,12 +417,24 @@ const CompanyPage = () => {
                             quantity_limit: 0
                           });
                           setIsAddRewardOpen(false);
+                        },
+                        onError: (error) => {
+                          toast({
+                            title: "Error Creating Reward",
+                            description: error.message || "There was a problem adding the reward.",
+                            variant: "destructive"
+                          });
                         }
                       });
                     }} 
                     disabled={createRewardMutation.isPending}
                   >
-                    {createRewardMutation.isPending ? "Adding..." : "Add Reward"}
+                    {createRewardMutation.isPending ? (
+                      <>
+                        <span className="animate-spin mr-2 h-4 w-4 border-b-2 border-current rounded-full inline-block"></span>
+                        Adding...
+                      </>
+                    ) : "Add Reward"}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -425,16 +443,37 @@ const CompanyPage = () => {
           
           <Card>
             <CardContent className="pt-6">
-              <div className="text-center py-8">
-                <div className="text-gray-400 mb-2">
-                  <span className="material-icons text-4xl">redeem</span>
+              {isLoadingRewards ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                 </div>
-                <h3 className="text-lg font-medium mb-2">No rewards yet</h3>
-                <p className="text-gray-500 mb-4">Create your first company reward to motivate your team.</p>
-                <Button onClick={() => setIsAddRewardOpen(true)}>
-                  Add Reward
-                </Button>
-              </div>
+              ) : rewards && rewards.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {rewards.map((reward) => (
+                    <div key={reward.id} className="p-4 border rounded-lg">
+                      <h4 className="font-medium">{reward.title}</h4>
+                      <p className="text-sm text-muted-foreground">{reward.description}</p>
+                      <div className="mt-2 flex items-center text-sm">
+                        <span className="font-semibold">{reward.cost_points} points</span>
+                        <span className="ml-auto text-xs text-muted-foreground">
+                          {reward.quantity_limit ? `${reward.quantity_limit} available` : 'Unlimited'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-2">
+                    <span className="material-icons text-4xl">redeem</span>
+                  </div>
+                  <h3 className="text-lg font-medium mb-2">No rewards yet</h3>
+                  <p className="text-gray-500 mb-4">Create your first company reward to motivate your team.</p>
+                  <Button onClick={() => setIsAddRewardOpen(true)}>
+                    Add Reward
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
