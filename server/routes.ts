@@ -332,19 +332,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               return false;
             }
             
-            // Check if the date is in the current week
-            // The date is in the current week if it falls between weekStart and weekStart + 7 days
-            const weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 7);
-            
-            // Compare if the log date is in the current week range
-            const matches = logWeekStart >= weekStart && logWeekStart < weekEnd;
+            // Always include any existing commute logs
+            // Since we're showing past 30 days, we should always include existing data
+            const matches = true;
             
             console.log(
               "Log", log.id, 
               "log date:", logWeekStart.toISOString().split('T')[0], 
-              "current week range:", weekStart.toISOString().split('T')[0], "to", weekEnd.toISOString().split('T')[0], 
-              "matches:", matches
+              "including all logs from the past 30 days, matches:", matches
             );
             return matches;
           } catch (error) {
