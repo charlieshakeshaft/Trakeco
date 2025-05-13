@@ -56,7 +56,7 @@ const commuteSchema = z.object({
     data.friday, data.saturday, data.sunday
   ].filter(Boolean).length;
   
-  return selectedDays === parseInt(data.days_logged as unknown as string, 10);
+  return selectedDays === data.days_logged;
 }, {
   message: "The number of selected days must match the days logged",
   path: ["days_logged"],
@@ -73,8 +73,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     resolver: zodResolver(commuteSchema),
     defaultValues: {
       commute_type: "",
-      days_logged: "1",
-      distance_km: "0",
+      days_logged: 0,
+      distance_km: 0,
       monday: false,
       tuesday: false,
       wednesday: false,
@@ -100,7 +100,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       form.getValues('sunday')
     ].filter(Boolean).length;
     
-    form.setValue('days_logged', selectedDays.toString());
+    form.setValue('days_logged', selectedDays);
   };
 
   const commuteLogMutation = useMutation({
@@ -137,8 +137,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       // Reset form
       form.reset({
         commute_type: "",
-        days_logged: "1",
-        distance_km: "0",
+        days_logged: 0,
+        distance_km: 0,
         monday: false,
         tuesday: false,
         wednesday: false,
@@ -399,9 +399,9 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                 <FormItem>
                   <FormLabel>How many days this week?</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
+                    onValueChange={(value) => field.onChange(Number(value))}
+                    defaultValue={field.value?.toString() || "0"}
+                    value={field.value?.toString() || "0"}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -432,7 +432,11 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                       type="number"
                       min="0"
                       placeholder="0"
-                      {...field}
+                      value={field.value} 
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                   </FormControl>
                   <FormMessage />

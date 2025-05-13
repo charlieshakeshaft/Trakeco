@@ -180,24 +180,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }),
         // Ensure days_logged matches the number of selected days
         days_logged: z.number().superRefine((val, ctx) => {
-          // Access the containing object to check the selected days
-          const data = ctx.getData();
-          const selectedDays = [
-            !!data.monday,
-            !!data.tuesday,
-            !!data.wednesday,
-            !!data.thursday,
-            !!data.friday,
-            !!data.saturday,
-            !!data.sunday
-          ].filter(Boolean).length;
-          
-          if (val !== selectedDays) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: `Days logged (${val}) must match the number of selected days (${selectedDays})`
-            });
-            return false;
+          if (ctx.parent) {
+            const data = ctx.parent;
+            const selectedDays = [
+              !!data.monday,
+              !!data.tuesday,
+              !!data.wednesday,
+              !!data.thursday,
+              !!data.friday,
+              !!data.saturday,
+              !!data.sunday
+            ].filter(Boolean).length;
+            
+            if (val !== selectedDays) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: `Days logged (${val}) must match the number of selected days (${selectedDays})`
+              });
+              return false;
+            }
           }
           return true;
         })
