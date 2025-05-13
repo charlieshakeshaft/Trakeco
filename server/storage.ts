@@ -47,7 +47,9 @@ export interface IStorage {
   createCommuteLog(commuteLog: InsertCommuteLog): Promise<CommuteLog>;
   getCommuteLogsByUserId(userId: number): Promise<CommuteLog[]>;
   getCommuteLogByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog | undefined>;
+  getCommuteLogsByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog[]>;
   updateCommuteLog(id: number, commuteLog: Partial<InsertCommuteLog>): Promise<CommuteLog>;
+  deleteCommuteLog(id: number): Promise<boolean>;
   
   // Points operations
   createPointsTransaction(transaction: InsertPointsTransaction): Promise<PointsTransaction>;
@@ -359,6 +361,16 @@ export class MemStorage implements IStorage {
     return Array.from(this.commuteLogs.values()).find(
       (log) => log.user_id === userId && new Date(log.week_start).getTime() === weekStart.getTime(),
     );
+  }
+  
+  async getCommuteLogsByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog[]> {
+    return Array.from(this.commuteLogs.values()).filter(
+      (log) => log.user_id === userId && new Date(log.week_start).getTime() === weekStart.getTime(),
+    );
+  }
+  
+  async deleteCommuteLog(id: number): Promise<boolean> {
+    return this.commuteLogs.delete(id);
   }
   
   async updateCommuteLog(id: number, commuteLog: Partial<InsertCommuteLog>): Promise<CommuteLog> {

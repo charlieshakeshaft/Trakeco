@@ -468,72 +468,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user_id: Number(userId) // Ensure it's a number
       });
       
-      // Check if user already has a commute log for this week
+      // Check if user already has commute logs for this week
       const weekStart = new Date(commuteData.week_start);
-      const existingLog = await storage.getCommuteLogByUserIdAndWeek(Number(userId), weekStart);
+      const existingLogs = await storage.getCommuteLogsByUserIdAndWeek(Number(userId), weekStart);
       
-      if (existingLog) {
+      // Find if there's a specific log for this commute type
+      const existingLogForType = existingLogs?.find(log => log.commute_type === commuteData.commute_type);
+      
+      const dayFields = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      let commuteLog;
+      
+      if (existingLogForType) {
         // Check if it's still the same week
         const currentDate = new Date();
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 7);
         
         if (currentDate <= weekEnd) {
-          // When tracking different commute types within the same week,
-          // we need special handling to preserve different commute types for different days
-          const dayFields = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-          
+          // Update the existing log for this commute type
           // Only update fields that have been explicitly set in the request
-          const updateData: any = { 
-            // Always update commute type for the selected days only
-            commute_type: commuteData.commute_type
-          };
+          const updateData: any = {};
           
-          // Store which days were actually selected in this submission
-          const selectedDays: string[] = [];
+          // Clear days from other logs if they're set in this submission
+          // This prevents days being set for multiple commute types
+          const daysToUpdate: string[] = [];
           
-          // Only set days that were explicitly selected to true
+          // Only set days that were explicitly selected to true for this commute type
           dayFields.forEach(day => {
             if (commuteData[day] === true) {
               updateData[day] = true;
-              selectedDays.push(day);
+              daysToUpdate.push(day);
+            } else if (commuteData[day] === false) {
+              updateData[day] = false;
+            } else {
+              // Keep existing values if not specified
+              updateData[day] = existingLogForType[day];
             }
           });
           
-          // If the commute type is different, only update the selected days
-          if (existingLog.commute_type !== commuteData.commute_type) {
-            // Only include days that were explicitly selected 
-            // This preserves different commute types for different days
-            console.log(`Commute type changed from ${existingLog.commute_type} to ${commuteData.commute_type} for days: ${selectedDays.join(', ')}`);
-          } else {
-            // Same commute type, we can safely merge all values
-            dayFields.forEach(day => {
-              if (commuteData[day] === undefined || commuteData[day] === null) {
-                updateData[day] = existingLog[day];
-              } else {
-                updateData[day] = commuteData[day];
+          // If days were explicitly set, clear them from other commute types
+          if (daysToUpdate.length > 0) {
+            for (const otherLog of existingLogs) {
+              if (otherLog.id !== existingLogForType.id) {
+                const otherUpdateData: any = {};
+                let needsUpdate = false;
+                
+                daysToUpdate.forEach(day => {
+                  if (otherLog[day]) {
+                    otherUpdateData[day] = false;
+                    needsUpdate = true;
+                  }
+                });
+                
+                if (needsUpdate) {
+                  // Update days_logged count
+                  const remainingDays = dayFields.filter(day => 
+                    otherLog[day] && !daysToUpdate.includes(day)
+                  ).length;
+                  
+                  otherUpdateData.days_logged = remainingDays;
+                  
+                  // Only update if needed
+                  if (remainingDays > 0) {
+                    await storage.updateCommuteLog(otherLog.id, otherUpdateData);
+                  } else {
+                    // If no days left, delete the log
+                    await storage.deleteCommuteLog(otherLog.id);
+                  }
+                }
               }
-            });
+            }
           }
           
-          // Calculate days_logged based on the resulting data
-          // We need to consider the original log plus our updates
-          const updatedDays = { ...existingLog, ...updateData };
-          updateData.days_logged = dayFields.filter(day => updatedDays[day]).length;
+          // Calculate days_logged for this commute type
+          const daysCount = dayFields.filter(day => 
+            updateData[day] === true
+          ).length;
           
-          console.log("Updating commute log:", {
-            existing: existingLog,
-            newData: commuteData,
-            updateData: updateData
+          // Only update if there are days selected
+          if (daysCount > 0) {
+            updateData.days_logged = daysCount;
+            updateData.distance_km = commuteData.distance_km;
+            
+            console.log("Updating commute log:", {
+              commuteType: commuteData.commute_type,
+              updateData: updateData
+            });
+            
+            // Update existing log
+            commuteLog = await storage.updateCommuteLog(existingLogForType.id, updateData);
+          } else {
+            // No days selected, delete this log
+            await storage.deleteCommuteLog(existingLogForType.id);
+            return res.json({ message: "Commute log deleted" });
+          }
+        }
+      } else {
+        // New commute type for this week - create a new log
+        // But first, clear any days that might be set for other commute types
+        if (existingLogs && existingLogs.length > 0) {
+          const daysToUpdate: string[] = [];
+          
+          dayFields.forEach(day => {
+            if (commuteData[day] === true) {
+              daysToUpdate.push(day);
+            }
           });
           
-          // Update existing log instead of creating a new one
-          const updatedLog = await storage.updateCommuteLog(existingLog.id, updateData);
-          return res.json(updatedLog);
+          // Clear conflicting days from other logs
+          if (daysToUpdate.length > 0) {
+            for (const otherLog of existingLogs) {
+              const otherUpdateData: any = {};
+              let needsUpdate = false;
+              
+              daysToUpdate.forEach(day => {
+                if (otherLog[day]) {
+                  otherUpdateData[day] = false;
+                  needsUpdate = true;
+                }
+              });
+              
+              if (needsUpdate) {
+                // Update days_logged count
+                const remainingDays = dayFields.filter(day => 
+                  otherLog[day] && !daysToUpdate.includes(day)
+                ).length;
+                
+                otherUpdateData.days_logged = remainingDays;
+                
+                // Only update if needed
+                if (remainingDays > 0) {
+                  await storage.updateCommuteLog(otherLog.id, otherUpdateData);
+                } else {
+                  // If no days left, delete the log
+                  await storage.deleteCommuteLog(otherLog.id);
+                }
+              }
+            }
+          }
         }
+        
+        commuteLog = await storage.createCommuteLog(commuteData);
       }
-      
-      const commuteLog = await storage.createCommuteLog(commuteData);
       
       // Award points for the commute
       const pointsEarned = calculateCommutePoints(commuteData.commute_type, commuteData.days_logged);
