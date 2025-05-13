@@ -35,12 +35,6 @@ interface CommuteFormProps {
 
 const commuteSchema = z.object({
   commute_type: z.string().min(1, "Please select a commute type"),
-  days_logged: z.coerce.number().gte(1).lte(7).refine((val) => val >= 1 && val <= 7, {
-    message: "Days must be between 1 and 7",
-  }),
-  distance_km: z.coerce.number().gte(0).refine((val) => val >= 0, {
-    message: "Distance must be a positive number",
-  }),
   // Add day-specific fields
   monday: z.boolean().default(false),
   tuesday: z.boolean().default(false),
@@ -50,16 +44,16 @@ const commuteSchema = z.object({
   saturday: z.boolean().default(false),
   sunday: z.boolean().default(false),
 }).refine((data) => {
-  // Ensure the number of selected days matches days_logged
+  // Ensure at least one day is selected
   const selectedDays = [
     data.monday, data.tuesday, data.wednesday, data.thursday, 
     data.friday, data.saturday, data.sunday
   ].filter(Boolean).length;
   
-  return selectedDays === data.days_logged;
+  return selectedDays > 0;
 }, {
-  message: "The number of selected days must match the days logged",
-  path: ["days_logged"],
+  message: "Please select at least one day",
+  path: ["monday"],
 });
 
 type CommuteFormValues = z.infer<typeof commuteSchema>;
@@ -73,8 +67,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     resolver: zodResolver(commuteSchema),
     defaultValues: {
       commute_type: "",
-      days_logged: 0,
-      distance_km: 0,
       monday: false,
       tuesday: false,
       wednesday: false,
@@ -88,9 +80,9 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   // Get today's day of the week
   const today = getDay(new Date());
   
-  // Update days_logged based on selected days
-  const updateDaysLogged = () => {
-    const selectedDays = [
+  // Calculate number of selected days
+  const calculateSelectedDays = () => {
+    return [
       form.getValues('monday'),
       form.getValues('tuesday'),
       form.getValues('wednesday'),
@@ -99,8 +91,6 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       form.getValues('saturday'),
       form.getValues('sunday')
     ].filter(Boolean).length;
-    
-    form.setValue('days_logged', selectedDays);
   };
 
   const commuteLogMutation = useMutation({
@@ -392,57 +382,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
               )}
             </div>
 
-            <FormField
-              control={form.control}
-              name="days_logged"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>How many days this week?</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(Number(value))}
-                    defaultValue={field.value?.toString() || "0"}
-                    value={field.value?.toString() || "0"}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select days" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                        <SelectItem key={day} value={day.toString()}>
-                          {day} {day === 1 ? "day" : "days"}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="distance_km"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Distance (km)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      value={field.value} 
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                      onBlur={field.onBlur}
-                      name={field.name}
-                      ref={field.ref}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Days logged and distance fields have been removed as requested */}
 
             <Button
               type="submit"
