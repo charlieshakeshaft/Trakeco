@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { isAuthenticated } from "./replitAuth";
+import { isAuthenticated, hashPassword } from "./auth";
 import { 
   insertUserSchema, 
   insertCompanySchema, 
@@ -15,19 +15,12 @@ import {
   commuteTypes
 } from "@shared/schema";
 
-// Legacy authentication middleware for backward compatibility with non-Replit auth parts
+// Development-only auth middleware for testing
 const authenticate = async (req: Request, res: Response, next: Function) => {
   try {
-    // If user is already authenticated via Replit, use that
+    // If user is already authenticated via regular auth, use that
     if (req.isAuthenticated && req.isAuthenticated() && req.user) {
-      const userId = req.user?.claims?.sub;
-      if (userId) {
-        const user = await storage.getUser(Number(userId));
-        if (user) {
-          (req as any).user = user;
-          return next();
-        }
-      }
+      return next();
     }
     
     // Fallbacks for development mode
