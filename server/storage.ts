@@ -8,6 +8,8 @@ import {
   rewards, type Reward, type InsertReward,
   redemptions, type Redemption, type InsertRedemption
 } from "@shared/schema";
+import { db } from "./db";
+import { and, asc, desc, eq, isNull, or } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -638,4 +640,353 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...insertUser,
+        points_total: 0,
+        streak_count: 0
+      })
+      .returning();
+    return user;
+  }
+  
+  async updateUserPoints(userId: number, points: number): Promise<User> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    const [updatedUser] = await db
+      .update(users)
+      .set({ points_total: user.points_total + points })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+  
+  // Company operations
+  async getCompany(id: number): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.id, id));
+    return company || undefined;
+  }
+  
+  async getCompanyByDomain(domain: string): Promise<Company | undefined> {
+    const [company] = await db.select().from(companies).where(eq(companies.domain, domain));
+    return company || undefined;
+  }
+  
+  async createCompany(insertCompany: InsertCompany): Promise<Company> {
+    const [company] = await db
+      .insert(companies)
+      .values(insertCompany)
+      .returning();
+    return company;
+  }
+  
+  // Commute operations
+  async createCommuteLog(insertCommuteLog: InsertCommuteLog): Promise<CommuteLog> {
+    // Calculate CO2 saved based on commute type and distance
+    const co2SavedKg = this.calculateCO2Saved(
+      insertCommuteLog.commute_type,
+      insertCommuteLog.distance_km || 0,
+      insertCommuteLog.days_logged
+    );
+    
+    const [commuteLog] = await db
+      .insert(commuteLogs)
+      .values({
+        ...insertCommuteLog,
+        co2_saved_kg: co2SavedKg
+      })
+      .returning();
+    
+    return commuteLog;
+  }
+  
+  async getCommuteLogsByUserId(userId: number): Promise<CommuteLog[]> {
+    return db.select().from(commuteLogs).where(eq(commuteLogs.user_id, userId));
+  }
+  
+  async getCommuteLogByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog | undefined> {
+    const weekStartStr = weekStart.toISOString().split('T')[0]; // Convert to YYYY-MM-DD
+    const [log] = await db
+      .select()
+      .from(commuteLogs)
+      .where(
+        and(
+          eq(commuteLogs.user_id, userId),
+          eq(commuteLogs.week_start, weekStartStr)
+        )
+      );
+    return log || undefined;
+  }
+  
+  async updateCommuteLog(id: number, commuteLog: Partial<InsertCommuteLog>): Promise<CommuteLog> {
+    const existingLog = await db
+      .select()
+      .from(commuteLogs)
+      .where(eq(commuteLogs.id, id))
+      .then(logs => logs[0]);
+    
+    if (!existingLog) {
+      throw new Error("Commute log not found");
+    }
+    
+    let co2_saved_kg = existingLog.co2_saved_kg;
+    if (commuteLog.commute_type && commuteLog.distance_km && commuteLog.days_logged) {
+      co2_saved_kg = this.calculateCO2Saved(
+        commuteLog.commute_type,
+        commuteLog.distance_km,
+        commuteLog.days_logged
+      );
+    }
+    
+    const [updatedLog] = await db
+      .update(commuteLogs)
+      .set({
+        ...commuteLog,
+        co2_saved_kg
+      })
+      .where(eq(commuteLogs.id, id))
+      .returning();
+    
+    return updatedLog;
+  }
+  
+  // Points operations
+  async createPointsTransaction(insertTransaction: InsertPointsTransaction): Promise<PointsTransaction> {
+    const [transaction] = await db
+      .insert(pointsTransactions)
+      .values(insertTransaction)
+      .returning();
+    
+    // Update user's total points
+    await this.updateUserPoints(insertTransaction.user_id, insertTransaction.points);
+    
+    return transaction;
+  }
+  
+  async getPointsTransactionsByUserId(userId: number): Promise<PointsTransaction[]> {
+    return db
+      .select()
+      .from(pointsTransactions)
+      .where(eq(pointsTransactions.user_id, userId));
+  }
+  
+  // Challenge operations
+  async createChallenge(insertChallenge: InsertChallenge): Promise<Challenge> {
+    const [challenge] = await db
+      .insert(challenges)
+      .values(insertChallenge)
+      .returning();
+    
+    return challenge;
+  }
+  
+  async getChallenges(companyId?: number): Promise<Challenge[]> {
+    if (companyId) {
+      return db
+        .select()
+        .from(challenges)
+        .where(
+          or(
+            eq(challenges.company_id, companyId),
+            isNull(challenges.company_id)
+          )
+        );
+    }
+    return db.select().from(challenges);
+  }
+  
+  async getChallenge(id: number): Promise<Challenge | undefined> {
+    const [challenge] = await db
+      .select()
+      .from(challenges)
+      .where(eq(challenges.id, id));
+    
+    return challenge || undefined;
+  }
+  
+  // Challenge participants
+  async joinChallenge(insertParticipant: InsertChallengeParticipant): Promise<ChallengeParticipant> {
+    const [participant] = await db
+      .insert(challengeParticipants)
+      .values(insertParticipant)
+      .returning();
+    
+    return participant;
+  }
+  
+  async getChallengeParticipants(challengeId: number): Promise<ChallengeParticipant[]> {
+    return db
+      .select()
+      .from(challengeParticipants)
+      .where(eq(challengeParticipants.challenge_id, challengeId));
+  }
+  
+  async getUserChallenges(userId: number): Promise<{challenge: Challenge, participant: ChallengeParticipant}[]> {
+    const userParticipations = await db
+      .select()
+      .from(challengeParticipants)
+      .where(eq(challengeParticipants.user_id, userId));
+    
+    const results: {challenge: Challenge, participant: ChallengeParticipant}[] = [];
+    
+    for (const participant of userParticipations) {
+      const challenge = await this.getChallenge(participant.challenge_id);
+      if (!challenge) {
+        throw new Error(`Challenge ${participant.challenge_id} not found`);
+      }
+      results.push({ challenge, participant });
+    }
+    
+    return results;
+  }
+  
+  async updateChallengeProgress(id: number, progress: number, completed: boolean): Promise<ChallengeParticipant> {
+    const [updatedParticipant] = await db
+      .update(challengeParticipants)
+      .set({ progress, completed })
+      .where(eq(challengeParticipants.id, id))
+      .returning();
+    
+    if (!updatedParticipant) {
+      throw new Error("Challenge participant not found");
+    }
+    
+    return updatedParticipant;
+  }
+  
+  // Rewards
+  async createReward(insertReward: InsertReward): Promise<Reward> {
+    const [reward] = await db
+      .insert(rewards)
+      .values(insertReward)
+      .returning();
+    
+    return reward;
+  }
+  
+  async getRewards(companyId?: number): Promise<Reward[]> {
+    if (companyId) {
+      return db
+        .select()
+        .from(rewards)
+        .where(
+          or(
+            eq(rewards.company_id, companyId),
+            isNull(rewards.company_id)
+          )
+        );
+    }
+    return db.select().from(rewards);
+  }
+  
+  async getReward(id: number): Promise<Reward | undefined> {
+    const [reward] = await db
+      .select()
+      .from(rewards)
+      .where(eq(rewards.id, id));
+    
+    return reward || undefined;
+  }
+  
+  // Redemptions
+  async redeemReward(insertRedemption: InsertRedemption): Promise<Redemption> {
+    const [redemption] = await db
+      .insert(redemptions)
+      .values(insertRedemption)
+      .returning();
+    
+    // Deduct points from user
+    const reward = await this.getReward(insertRedemption.reward_id);
+    if (!reward) {
+      throw new Error("Reward not found");
+    }
+    
+    await this.updateUserPoints(insertRedemption.user_id, -reward.cost_points);
+    
+    return redemption;
+  }
+  
+  async getUserRedemptions(userId: number): Promise<{reward: Reward, redemption: Redemption}[]> {
+    const userRedemptions = await db
+      .select()
+      .from(redemptions)
+      .where(eq(redemptions.user_id, userId));
+    
+    const results: {reward: Reward, redemption: Redemption}[] = [];
+    
+    for (const redemption of userRedemptions) {
+      const reward = await this.getReward(redemption.reward_id);
+      if (!reward) {
+        throw new Error(`Reward ${redemption.reward_id} not found`);
+      }
+      results.push({ reward, redemption });
+    }
+    
+    return results;
+  }
+  
+  // Leaderboard
+  async getLeaderboard(companyId?: number, limit: number = 10): Promise<User[]> {
+    if (companyId) {
+      return db
+        .select()
+        .from(users)
+        .where(eq(users.company_id, companyId))
+        .orderBy(desc(users.points_total))
+        .limit(limit);
+    }
+    
+    return db
+      .select()
+      .from(users)
+      .orderBy(desc(users.points_total))
+      .limit(limit);
+  }
+  
+  // Helper methods
+  private calculateCO2Saved(commuteType: string, distanceKm: number, daysLogged: number): number {
+    // Average CO2 emissions in kg per km for different transport modes
+    const emissionFactors: Record<string, number> = {
+      walk: 0,
+      cycle: 0,
+      public_transport: 0.03,
+      carpool: 0.07,
+      electric_vehicle: 0.05,
+      gas_vehicle: 0.19,
+      remote_work: 0
+    };
+    
+    // CO2 saved compared to average car (0.19 kg/km)
+    const standardEmission = 0.19;
+    const actualEmission = emissionFactors[commuteType] || 0;
+    const saved = (standardEmission - actualEmission) * distanceKm * daysLogged;
+    
+    return Math.max(0, Math.round(saved)); // Ensure non-negative and round to integer
+  }
+}
+
+// Use the database storage instead of in-memory
+export const storage = new DatabaseStorage();
