@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, date, varchar, jsonb, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -252,3 +252,23 @@ export type InsertReward = z.infer<typeof insertRewardSchema>;
 
 export type Redemption = typeof redemptions.$inferSelect;
 export type InsertRedemption = z.infer<typeof insertRedemptionSchema>;
+
+// Session storage table for Replit Auth
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// Type for Replit Auth upsertUser
+export interface UpsertUser {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImageUrl?: string;
+}
