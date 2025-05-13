@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useCreateReward, useAllRewards } from "@/hooks/use-rewards";
+import { useQuery } from "@tanstack/react-query";
 
 // Mock data for company members (to be replaced with real API data)
 const initialMembers = [
@@ -35,6 +37,9 @@ const CompanyPage = () => {
     cost_points: 100,
     quantity_limit: 0
   });
+  
+  const createRewardMutation = useCreateReward(user?.id || 0);
+  const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(user?.id || 0);
   
   // Check if user has admin role
   const isAdmin = user?.role === "admin";
@@ -377,13 +382,42 @@ const CompanyPage = () => {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={() => {
-                    toast({
-                      title: "Reward Added",
-                      description: "The new reward has been added successfully."
-                    });
-                    setIsAddRewardOpen(false);
-                  }}>Add Reward</Button>
+                  <Button 
+                    onClick={() => {
+                      // Validate form
+                      if (!newReward.title) {
+                        toast({
+                          title: "Missing information",
+                          description: "Please enter a title for the reward",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      
+                      // Submit the form
+                      createRewardMutation.mutate({
+                        title: newReward.title,
+                        description: newReward.description,
+                        cost_points: newReward.cost_points,
+                        quantity_limit: newReward.quantity_limit || null,
+                        company_id: user?.company_id || null
+                      }, {
+                        onSuccess: () => {
+                          // Reset form and close dialog
+                          setNewReward({
+                            title: "",
+                            description: "",
+                            cost_points: 100,
+                            quantity_limit: 0
+                          });
+                          setIsAddRewardOpen(false);
+                        }
+                      });
+                    }} 
+                    disabled={createRewardMutation.isPending}
+                  >
+                    {createRewardMutation.isPending ? "Adding..." : "Add Reward"}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
