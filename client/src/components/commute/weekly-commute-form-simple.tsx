@@ -121,8 +121,8 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
   // Determine which week's logs to display based on the selected week
   const activeWeekStart = selectedWeek === "current" ? currentWeekStart : previousWeekStart;
   
-  // Find log for the selected week
-  const weekLog = commuteLogs?.find(log => {
+  // Find all logs for the selected week
+  const weekLogs = commuteLogs?.filter(log => {
     const logDate = new Date(log.week_start);
     const formattedLogDate = format(logDate, 'yyyy-MM-dd');
     const formattedActiveDate = format(activeWeekStart, 'yyyy-MM-dd');
@@ -167,41 +167,28 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
     }
   });
   
-  // Process existing week log data
+  // Process existing week logs data
   useEffect(() => {
-    if (weekLog) {
+    if (weekLogs && weekLogs.length > 0) {
       // Check which days are already logged and with what commute types
       const commuteTypesByDay: Record<string, string[]> = {};
       
-      // We need to extract all commute types for all days
-      if (weekLog.monday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("monday");
-      }
-      if (weekLog.tuesday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("tuesday");
-      }
-      if (weekLog.wednesday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("wednesday");
-      }
-      if (weekLog.thursday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("thursday");
-      }
-      if (weekLog.friday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("friday");
-      }
-      if (weekLog.saturday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("saturday");
-      }
-      if (weekLog.sunday) {
-        if (!commuteTypesByDay[weekLog.commute_type]) commuteTypesByDay[weekLog.commute_type] = [];
-        commuteTypesByDay[weekLog.commute_type].push("sunday");
-      }
+      // Process each log entry for the week
+      weekLogs.forEach(log => {
+        // Create an entry in commuteTypesByDay for this commute type if it doesn't exist
+        if (!commuteTypesByDay[log.commute_type]) {
+          commuteTypesByDay[log.commute_type] = [];
+        }
+        
+        // Add days from this log to the appropriate commute type
+        if (log.monday) commuteTypesByDay[log.commute_type].push("monday");
+        if (log.tuesday) commuteTypesByDay[log.commute_type].push("tuesday");
+        if (log.wednesday) commuteTypesByDay[log.commute_type].push("wednesday");
+        if (log.thursday) commuteTypesByDay[log.commute_type].push("thursday");
+        if (log.friday) commuteTypesByDay[log.commute_type].push("friday");
+        if (log.saturday) commuteTypesByDay[log.commute_type].push("saturday");
+        if (log.sunday) commuteTypesByDay[log.commute_type].push("sunday");
+      });
       
       // Create commute entries from existing data
       const entries: CommuteEntry[] = [];
@@ -228,7 +215,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       // No existing logs for this week
       setCommuteEntries([]);
     }
-  }, [weekLog]);
+  }, [weekLogs]);
   
   // Add a new commute entry form
   const addCommuteEntry = () => {
