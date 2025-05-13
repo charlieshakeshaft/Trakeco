@@ -1,12 +1,13 @@
+import * as schema from "@shared/schema";
 import { 
-  users, type User, type InsertUser,
-  companies, type Company, type InsertCompany,
-  commuteLogs, type CommuteLog, type InsertCommuteLog,
-  pointsTransactions, type PointsTransaction, type InsertPointsTransaction,
-  challenges, type Challenge, type InsertChallenge,
-  challengeParticipants, type ChallengeParticipant, type InsertChallengeParticipant,
-  rewards, type Reward, type InsertReward,
-  redemptions, type Redemption, type InsertRedemption
+  type User, type InsertUser,
+  type Company, type InsertCompany,
+  type CommuteLog, type InsertCommuteLog,
+  type PointsTransaction, type InsertPointsTransaction,
+  type Challenge, type InsertChallenge,
+  type ChallengeParticipant, type InsertChallengeParticipant,
+  type Reward, type InsertReward,
+  type Redemption, type InsertRedemption
 } from "@shared/schema";
 import { db } from "./db";
 import { and, asc, desc, eq, isNull, or } from "drizzle-orm";
@@ -804,18 +805,26 @@ export class DatabaseStorage implements IStorage {
   }
   
   async getChallenges(companyId?: number): Promise<Challenge[]> {
+    console.log("Getting challenges for company ID:", companyId);
+    
     if (companyId) {
-      return db
+      const challengesData = await db
         .select()
-        .from(challenges)
+        .from(schema.challenges)
         .where(
           or(
-            eq(challenges.company_id, companyId),
-            isNull(challenges.company_id)
+            eq(schema.challenges.company_id, companyId),
+            isNull(schema.challenges.company_id)
           )
         );
+      
+      console.log(`Found ${challengesData.length} challenges for company ${companyId}`);
+      return challengesData;
     }
-    return db.select().from(challenges);
+    
+    const challengesData = await db.select().from(schema.challenges);
+    console.log(`Found ${challengesData.length} challenges across all companies`);
+    return challengesData;
   }
   
   async getChallenge(id: number): Promise<Challenge | undefined> {
@@ -953,25 +962,25 @@ export class DatabaseStorage implements IStorage {
     console.log("Getting leaderboard for company ID:", companyId);
     
     if (companyId) {
-      const users = await db
+      const result = await db
         .select()
         .from(schema.users)
         .where(eq(schema.users.company_id, companyId))
         .orderBy(desc(schema.users.points_total))
         .limit(limit);
       
-      console.log(`Found ${users.length} users for company ${companyId}`);
-      return users;
+      console.log(`Found ${result.length} users for company ${companyId}`);
+      return result;
     }
     
-    const users = await db
+    const result = await db
       .select()
       .from(schema.users)
       .orderBy(desc(schema.users.points_total))
       .limit(limit);
     
-    console.log(`Found ${users.length} users across all companies`);
-    return users;
+    console.log(`Found ${result.length} users across all companies`);
+    return result;
   }
   
   // Helper methods
