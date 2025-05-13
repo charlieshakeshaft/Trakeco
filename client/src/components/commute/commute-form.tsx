@@ -319,35 +319,43 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Default commute method</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      // Update the selected commute type to recalculate distance
-                      setSelectedCommuteType(value);
-                      // Apply this commute type to all selected days if they don't have specific types set
-                      form.getValues().monday && !form.getValues().monday_to_work && setDayCommute('monday', 'to_work', value);
-                      form.getValues().monday && !form.getValues().monday_to_home && setDayCommute('monday', 'to_home', value);
-                      // ...apply to other days similarly
-                    }}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        // Update the selected commute type to recalculate distance
+                        setSelectedCommuteType(value);
+                        // Apply this commute type to all selected days if they don't have specific types set
+                        form.getValues().monday && !form.getValues().monday_to_work && setDayCommute('monday', 'to_work', value);
+                        form.getValues().monday && !form.getValues().monday_to_home && setDayCommute('monday', 'to_home', value);
+                        // ...apply to other days similarly
+                      }}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select commute method" />
                       </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {commuteTypeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          <div className="flex items-center">
-                            <span className="material-icons mr-2 text-sm">{option.icon}</span>
-                            {option.label}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                      <SelectContent>
+                        {commuteTypeOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex items-center">
+                              <span className="material-icons mr-2 text-sm">{option.icon}</span>
+                              {option.label}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  
+                  {/* Display adjusted distance for selected commute type */}
+                  {user?.commute_distance_km && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Estimated distance: <span className="font-medium">{getDisplayDistance().toFixed(1)} km</span> 
+                      <span className="italic"> (adjusted for {selectedCommuteType ? commuteTypeOptions.find(o => o.value === selectedCommuteType)?.label.toLowerCase() : field.value ? commuteTypeOptions.find(o => o.value === field.value)?.label.toLowerCase() : 'selected mode'})</span>
+                    </p>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
