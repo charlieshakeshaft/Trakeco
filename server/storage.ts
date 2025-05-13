@@ -857,6 +857,29 @@ export class DatabaseStorage implements IStorage {
     return challenge || undefined;
   }
   
+  async updateChallenge(id: number, updateData: Partial<InsertChallenge>): Promise<Challenge | undefined> {
+    const [updatedChallenge] = await db
+      .update(schema.challenges)
+      .set(updateData)
+      .where(eq(schema.challenges.id, id))
+      .returning();
+    
+    return updatedChallenge;
+  }
+  
+  async deleteChallenge(id: number): Promise<boolean> {
+    try {
+      await db
+        .delete(schema.challenges)
+        .where(eq(schema.challenges.id, id));
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting challenge:", error);
+      return false;
+    }
+  }
+  
   // Challenge participants
   async joinChallenge(insertParticipant: InsertChallengeParticipant): Promise<ChallengeParticipant> {
     const [participant] = await db
