@@ -46,12 +46,12 @@ const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center mb-4">
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
-                alt={`${user.name}'s avatar`}
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username || "User")}&background=0D8ABC&color=fff&size=96`}
+                alt={`${user.name || user.username}'s avatar`}
                 className="w-12 h-12 rounded-full object-cover mr-3"
               />
               <div>
-                <h3 className="font-semibold text-gray-800">{user.name}</h3>
+                <h3 className="font-semibold text-gray-800">{user.name || user.username}</h3>
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
             </div>
@@ -116,6 +116,16 @@ const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
               <span className="material-icons text-gray-600">person</span>
               <span>Profile</span>
             </Link>
+            {user.role === 'admin' && (
+              <Link 
+                href="/company" 
+                className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-100"
+                onClick={onClose}
+              >
+                <span className="material-icons text-gray-600">business</span>
+                <span>Company</span>
+              </Link>
+            )}
           </nav>
 
           <div className="p-4 border-t border-gray-200">

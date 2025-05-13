@@ -63,6 +63,12 @@ const Sidebar = ({ user }: SidebarProps) => {
           <span className="material-icons text-gray-500 mr-3">account_circle</span>
           Profile
         </Link>
+        {user.role === 'admin' && (
+          <Link href="/company" className={linkClasses("/company")}>
+            <span className="material-icons text-gray-500 mr-3">business</span>
+            Company
+          </Link>
+        )}
         <Link href="/settings" className={linkClasses("/settings")}>
           <span className="material-icons text-gray-500 mr-3">settings</span>
           Settings
@@ -72,12 +78,12 @@ const Sidebar = ({ user }: SidebarProps) => {
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center">
           <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&h=100"
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.username || "User")}&background=0D8ABC&color=fff&size=64`}
             className="w-8 h-8 rounded-full"
-            alt={`${user.name}'s avatar`}
+            alt={`${user.name || user.username}'s avatar`}
           />
           <div className="ml-2">
-            <div className="text-sm font-medium text-gray-800">{user.name}</div>
+            <div className="text-sm font-medium text-gray-800">{user.name || user.username}</div>
             <div className="text-xs text-gray-500">{user.email}</div>
           </div>
         </div>

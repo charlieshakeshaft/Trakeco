@@ -77,15 +77,15 @@ const CompanyPage = () => {
           <div className="space-y-2">
             <div className="grid grid-cols-3 gap-4">
               <div className="font-medium">Company Name:</div>
-              <div className="col-span-2">{user?.company_name || "Your Company"}</div>
+              <div className="col-span-2">{user?.company_id ? "Embrace Wellness Ltd" : "Your Company"}</div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="font-medium">Domain:</div>
-              <div className="col-span-2">{user?.company_domain || "yourcompany.com"}</div>
+              <div className="col-span-2">{user?.email ? user.email.split('@')[1] : "yourcompany.com"}</div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div className="font-medium">Admin:</div>
-              <div className="col-span-2">{user?.name}</div>
+              <div className="col-span-2">{user?.name || user?.username}</div>
             </div>
           </div>
         </CardContent>

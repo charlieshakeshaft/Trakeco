@@ -50,11 +50,11 @@ const Profile = () => {
             ) : (
               <div className="flex flex-col items-center">
                 <img
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=150&h=150"
-                  alt={`${profile?.name}'s avatar`}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.name || profile?.username || "User")}&background=0D8ABC&color=fff`}
+                  alt={`${profile?.name || profile?.username}'s avatar`}
                   className="w-24 h-24 rounded-full object-cover mb-4"
                 />
-                <h2 className="text-xl font-semibold text-gray-800">{profile?.name}</h2>
+                <h2 className="text-xl font-semibold text-gray-800">{profile?.name || profile?.username}</h2>
                 <p className="text-gray-500 mb-4">{profile?.email}</p>
                 
                 <div className="w-full p-4 rounded-lg bg-blue-50 mt-2">
@@ -69,7 +69,7 @@ const Profile = () => {
                     <span className="text-sm text-gray-600">
                       {profile?.created_at 
                         ? new Date(profile.created_at).toLocaleDateString() 
-                        : 'N/A'}
+                        : new Date().toLocaleDateString()}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
