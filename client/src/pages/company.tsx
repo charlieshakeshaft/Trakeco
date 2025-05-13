@@ -53,10 +53,12 @@ const CompanyPage = () => {
     company_id: null
   });
   
-  const createRewardMutation = useCreateReward(user?.id || 0);
-  const createChallengeMutation = useCreateChallenge(user?.id || 0);
-  // Pass the user ID from auth context to the hooks
+  // Get user ID from auth context
   const userId = user?.id || 0;
+  
+  // Create mutations and fetch data
+  const createRewardMutation = useCreateReward(userId);
+  const createChallengeMutation = useCreateChallenge(userId);
   const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
   const { data: challenges, isLoading: isLoadingChallenges } = useAllChallenges(userId);
   
