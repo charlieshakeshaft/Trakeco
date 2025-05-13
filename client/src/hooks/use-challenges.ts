@@ -23,7 +23,8 @@ export function useJoinChallenge(userId: number) {
   
   return useMutation({
     mutationFn: async (challengeId: number) => {
-      return await apiRequest("POST", `/api/challenges/${challengeId}/join?userId=${userId}`, {});
+      // Empty object as data with POST method
+      return await apiRequest(`/api/challenges/${challengeId}/join?userId=${userId}`, null, "POST");
     },
     onSuccess: () => {
       toast({
@@ -50,7 +51,7 @@ export function useCreateChallenge(userId: number) {
   
   return useMutation({
     mutationFn: async (data: Omit<Challenge, 'id' | 'created_at'>) => {
-      return await apiRequest("POST", `/api/challenges?userId=${userId}`, data);
+      return await apiRequest(`/api/challenges?userId=${userId}`, data, "POST");
     },
     onSuccess: () => {
       toast({

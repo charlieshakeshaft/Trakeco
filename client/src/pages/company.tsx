@@ -55,8 +55,10 @@ const CompanyPage = () => {
   
   const createRewardMutation = useCreateReward(user?.id || 0);
   const createChallengeMutation = useCreateChallenge(user?.id || 0);
-  const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(user?.id || 0);
-  const { data: challenges, isLoading: isLoadingChallenges } = useAllChallenges(user?.id || 0);
+  // Pass the user ID from auth context to the hooks
+  const userId = user?.id || 0;
+  const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
+  const { data: challenges, isLoading: isLoadingChallenges } = useAllChallenges(userId);
   
   // Check if user has admin role
   const isAdmin = user?.role === "admin";
