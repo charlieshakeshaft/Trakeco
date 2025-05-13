@@ -294,19 +294,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Getting commute logs for user:", userId, "with week start:", weekStart.toISOString());
       const commuteLogs = await storage.getCommuteLogsByUserId(userId);
       
-      // Filter logs for current week
+      console.log("Total commute logs found:", commuteLogs.length);
+      
+      // Filter logs for current week with better debugging
       const currentWeekLogs = commuteLogs.filter(log => {
         // Handle potential parsing issues
         try {
+          console.log("Processing log:", log.id, "week_start:", log.week_start);
+          
+          // If week_start is empty or invalid, skip this log
+          if (!log.week_start) {
+            console.log("Skipping log with invalid week_start:", log.id);
+            return false;
+          }
+          
           const logWeekStart = new Date(log.week_start);
-          // Use date comparison only, ignoring time
-          return logWeekStart.toDateString() === weekStart.toDateString();
+          // Check if valid date
+          if (isNaN(logWeekStart.getTime())) {
+            console.log("Invalid date format for log:", log.id);
+            return false;
+          }
+          
+          // Compare just the date part
+          const logDateStr = logWeekStart.toISOString().split('T')[0];
+          const weekStartStr = weekStart.toISOString().split('T')[0];
+          const matches = logDateStr === weekStartStr;
+          
+          console.log("Log", log.id, "week start:", logDateStr, "current week start:", weekStartStr, "matches:", matches);
+          return matches;
         } catch (error) {
-          console.error("Error parsing week_start", log.week_start, error);
+          console.error("Error processing log:", log.id, error);
           return false;
         }
       });
       
+      console.log("Filtered logs for current week:", currentWeekLogs.length);
       res.json(currentWeekLogs);
     } catch (error) {
       res.status(500).json({ message: "Error fetching current commute logs" });
@@ -601,7 +623,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const commuteLogs = await storage.getCommuteLogsByUserId(user.id);
       
       // Calculate total CO2 saved
-      const totalCO2Saved = commuteLogs.reduce((total, log) => total + log.co2_saved_kg, 0);
+      const totalCO2Saved = commuteLogs.reduce((total, log) => {
+        // Handle null values safely
+        const co2Saved = log.co2_saved_kg || 0; 
+        return total + co2Saved;
+      }, 0);
       
       // Get user challenges
       const userChallenges = await storage.getUserChallenges(user.id);
