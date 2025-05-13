@@ -63,7 +63,7 @@ const Profile = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Company</span>
                     <span className="text-sm text-primary font-medium truncate ml-2 max-w-[120px]">
-                      {profile?.company?.name || "No company"}
+                      {profile && typeof profile === 'object' && 'company' in profile && profile.company?.name || "No company"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between mb-2">
@@ -75,8 +75,8 @@ const Profile = () => {
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Since</span>
                     <span className="text-sm text-gray-600">
-                      {profile?.created_at 
-                        ? new Date(profile.created_at).toLocaleDateString() 
+                      {profile && typeof profile === 'object' && 'created_at' in profile 
+                        ? new Date(String(profile.created_at)).toLocaleDateString() 
                         : new Date().toLocaleDateString()}
                     </span>
                   </div>

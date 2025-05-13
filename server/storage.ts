@@ -874,9 +874,9 @@ export class DatabaseStorage implements IStorage {
   
   async updateChallengeProgress(id: number, progress: number, completed: boolean): Promise<ChallengeParticipant> {
     const [updatedParticipant] = await db
-      .update(challengeParticipants)
+      .update(schema.challengeParticipants)
       .set({ progress, completed })
-      .where(eq(challengeParticipants.id, id))
+      .where(eq(schema.challengeParticipants.id, id))
       .returning();
     
     if (!updatedParticipant) {
@@ -889,7 +889,7 @@ export class DatabaseStorage implements IStorage {
   // Rewards
   async createReward(insertReward: InsertReward): Promise<Reward> {
     const [reward] = await db
-      .insert(rewards)
+      .insert(schema.rewards)
       .values(insertReward)
       .returning();
     
