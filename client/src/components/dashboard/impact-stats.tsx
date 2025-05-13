@@ -96,7 +96,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <IconBadge icon="local_fire_department" color="secondary" bgColor="blue-50" />
           </div>
           <div className="mt-4">
-            <StreakDisplay days={5} />
+            <StreakDisplay userId={userId} />
           </div>
         </div>
       </div>
