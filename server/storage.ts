@@ -1121,6 +1121,27 @@ export class DatabaseStorage implements IStorage {
     return log || undefined;
   }
   
+  async getCommuteLogsByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog[]> {
+    const weekStartStr = weekStart.toISOString().split('T')[0]; // Convert to YYYY-MM-DD
+    return db
+      .select()
+      .from(schema.commuteLogs)
+      .where(
+        and(
+          eq(schema.commuteLogs.user_id, userId),
+          eq(schema.commuteLogs.week_start, weekStartStr)
+        )
+      );
+  }
+  
+  async deleteCommuteLog(id: number): Promise<boolean> {
+    const result = await db
+      .delete(schema.commuteLogs)
+      .where(eq(schema.commuteLogs.id, id));
+    
+    return !!result;
+  }
+  
   async updateCommuteLog(id: number, commuteLog: Partial<InsertCommuteLog>): Promise<CommuteLog> {
     const existingLog = await db
       .select()
