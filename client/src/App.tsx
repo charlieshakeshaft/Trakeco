@@ -95,10 +95,15 @@ function Router() {
   
   // Public routes
   if (!user) {
-    // Force showing login page for testing
     return (
       <div className="min-h-screen">
-        <LoginPage />
+        <Switch>
+          <Route path="/login" component={LoginPage} />
+          <Route path="/signup" component={SignupPage} />
+          <Route>
+            <Redirect to="/login" />
+          </Route>
+        </Switch>
       </div>
     );
   }
