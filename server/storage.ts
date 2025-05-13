@@ -732,11 +732,11 @@ export class DatabaseStorage implements IStorage {
     const weekStartStr = weekStart.toISOString().split('T')[0]; // Convert to YYYY-MM-DD
     const [log] = await db
       .select()
-      .from(commuteLogs)
+      .from(schema.commuteLogs)
       .where(
         and(
-          eq(commuteLogs.user_id, userId),
-          eq(commuteLogs.week_start, weekStartStr)
+          eq(schema.commuteLogs.user_id, userId),
+          eq(schema.commuteLogs.week_start, weekStartStr)
         )
       );
     return log || undefined;
@@ -745,8 +745,8 @@ export class DatabaseStorage implements IStorage {
   async updateCommuteLog(id: number, commuteLog: Partial<InsertCommuteLog>): Promise<CommuteLog> {
     const existingLog = await db
       .select()
-      .from(commuteLogs)
-      .where(eq(commuteLogs.id, id))
+      .from(schema.commuteLogs)
+      .where(eq(schema.commuteLogs.id, id))
       .then(logs => logs[0]);
     
     if (!existingLog) {
@@ -763,12 +763,12 @@ export class DatabaseStorage implements IStorage {
     }
     
     const [updatedLog] = await db
-      .update(commuteLogs)
+      .update(schema.commuteLogs)
       .set({
         ...commuteLog,
         co2_saved_kg
       })
-      .where(eq(commuteLogs.id, id))
+      .where(eq(schema.commuteLogs.id, id))
       .returning();
     
     return updatedLog;
@@ -797,7 +797,7 @@ export class DatabaseStorage implements IStorage {
   // Challenge operations
   async createChallenge(insertChallenge: InsertChallenge): Promise<Challenge> {
     const [challenge] = await db
-      .insert(challenges)
+      .insert(schema.challenges)
       .values(insertChallenge)
       .returning();
     
@@ -830,8 +830,8 @@ export class DatabaseStorage implements IStorage {
   async getChallenge(id: number): Promise<Challenge | undefined> {
     const [challenge] = await db
       .select()
-      .from(challenges)
-      .where(eq(challenges.id, id));
+      .from(schema.challenges)
+      .where(eq(schema.challenges.id, id));
     
     return challenge || undefined;
   }
@@ -839,7 +839,7 @@ export class DatabaseStorage implements IStorage {
   // Challenge participants
   async joinChallenge(insertParticipant: InsertChallengeParticipant): Promise<ChallengeParticipant> {
     const [participant] = await db
-      .insert(challengeParticipants)
+      .insert(schema.challengeParticipants)
       .values(insertParticipant)
       .returning();
     
@@ -849,15 +849,15 @@ export class DatabaseStorage implements IStorage {
   async getChallengeParticipants(challengeId: number): Promise<ChallengeParticipant[]> {
     return db
       .select()
-      .from(challengeParticipants)
-      .where(eq(challengeParticipants.challenge_id, challengeId));
+      .from(schema.challengeParticipants)
+      .where(eq(schema.challengeParticipants.challenge_id, challengeId));
   }
   
   async getUserChallenges(userId: number): Promise<{challenge: Challenge, participant: ChallengeParticipant}[]> {
     const userParticipations = await db
       .select()
-      .from(challengeParticipants)
-      .where(eq(challengeParticipants.user_id, userId));
+      .from(schema.challengeParticipants)
+      .where(eq(schema.challengeParticipants.user_id, userId));
     
     const results: {challenge: Challenge, participant: ChallengeParticipant}[] = [];
     
