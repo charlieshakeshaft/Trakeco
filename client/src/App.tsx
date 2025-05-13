@@ -96,6 +96,7 @@ function AuthenticatedApp({ user }: { user: User }) {
 
 function Router() {
   const { user, isLoading } = useAuth();
+  const [location] = useLocation();
   
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
@@ -108,7 +109,10 @@ function Router() {
         <Switch>
           <Route path="/login" component={LoginPage} />
           <Route path="/signup" component={SignupPage} />
-          <Route path="*">
+          <Route path="/">
+            <Redirect to="/login" />
+          </Route>
+          <Route>
             <Redirect to="/login" />
           </Route>
         </Switch>

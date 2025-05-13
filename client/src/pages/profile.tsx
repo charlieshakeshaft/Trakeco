@@ -26,13 +26,16 @@ const Profile = () => {
         description: "You have been logged out of your account",
       });
       
-      // Force a hard redirect to the login page
-      window.location.href = '/login';
+      // Use setLocation instead of direct window.location manipulation
+      setLocation('/login');
+      
+      // Force a query client reset
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
     } catch (error) {
       console.error('Logout error:', error);
-      
-      // Even if the API call fails, still log out on the client
-      window.location.href = '/login';
+      setLocation('/login');
     }
   };
 

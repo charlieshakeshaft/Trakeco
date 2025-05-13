@@ -1,5 +1,7 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { User } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -8,6 +10,38 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      // Call logout API endpoint
+      await fetch('/api/auth/logout', { method: 'POST' });
+      
+      // Clear any stored user data
+      localStorage.removeItem('currentUser');
+      
+      // Invalidate queries
+      queryClient.clear();
+      
+      toast({
+        title: "Logged out successfully",
+        description: "You have been logged out of your account",
+      });
+      
+      // Navigate to login
+      setLocation('/login');
+      
+      // Force a page reload after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+    } catch (error) {
+      console.error('Logout error:', error);
+      setLocation('/login');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -98,7 +132,7 @@ const MobileMenu = ({ isOpen, user, onClose }: MobileMenuProps) => {
               className="flex items-center w-full px-3 py-2 space-x-3 text-red-600 rounded-md hover:bg-red-50"
               onClick={(e) => {
                 e.preventDefault();
-                window.location.href = '/login';
+                handleLogout();
               }}
             >
               <span className="material-icons">logout</span>
