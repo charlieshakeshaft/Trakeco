@@ -20,6 +20,8 @@ interface UserProfile {
   points_total?: number;
   username?: string;
   email?: string;
+  role?: string;
+  company_id?: number;
 }
 
 const RewardsSection = ({ userId }: RewardsSectionProps) => {
