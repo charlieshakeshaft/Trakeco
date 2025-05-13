@@ -1,35 +1,64 @@
-import { useLocation } from "wouter";
-import { LoginForm } from "@/components/auth/login-form";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/auth-context";
-import { User } from "@/lib/types";
 
 export default function LoginPage() {
-  const [, navigate] = useLocation();
-  const { setCurrentUser } = useAuth();
+  const { isLoading } = useAuth();
 
-  const handleLoginSuccess = (user: User) => {
-    // Update the auth context with the user data
-    setCurrentUser(user);
-    console.log("Login successful, redirecting to dashboard");
-    
-    // Add a delay before navigation to ensure state is updated
-    setTimeout(() => {
-      // Navigate to the dashboard
-      navigate("/");
-    }, 100);
+  const handleLoginWithReplit = () => {
+    // Redirect to the Replit auth endpoint
+    window.location.href = "/api/login";
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8 flex flex-col items-center min-h-screen">
-      <div className="max-w-md w-full">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-          <p className="text-muted-foreground mt-2">
-            Sign in to your account to continue
-          </p>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
-        
-        <LoginForm onLoginSuccess={handleLoginSuccess} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-screen">
+      <div className="max-w-md w-full">
+        <Card className="border shadow-lg">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">Welcome to Green Commute</CardTitle>
+            <CardDescription className="text-center">
+              Track your sustainable commuting and earn rewards
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="grid gap-4">
+            <Button 
+              size="lg" 
+              className="w-full" 
+              onClick={handleLoginWithReplit}
+            >
+              Sign in with Replit
+            </Button>
+            
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Secure Authentication
+                </span>
+              </div>
+            </div>
+          </CardContent>
+          
+          <CardFooter className="flex flex-col items-center">
+            <p className="text-sm text-muted-foreground text-center">
+              By logging in, you agree to our terms of service and privacy policy
+            </p>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );

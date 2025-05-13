@@ -35,7 +35,7 @@ interface LocationSettings {
 }
 
 const Profile = () => {
-  const { user, logout, setCurrentUser } = useAuth();
+  const { user, logout } = useAuth();
   const { data: profile, isLoading } = useUserProfile(user?.id || 0);
   const profileData: ProfileData = profile as ProfileData || {};
   const { toast } = useToast();
@@ -236,13 +236,8 @@ const Profile = () => {
         description: "Your password has been changed successfully.",
       });
       
-      // Update the user in the auth context
-      if (user) {
-        setCurrentUser({
-          ...user,
-          ...data
-        });
-      }
+      // Invalidate auth user query to refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
       // Reset password form
       setPasswordData({
