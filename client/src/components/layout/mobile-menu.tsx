@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { User } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/contexts/auth-context";
 
 interface MobileMenuProps {
   isOpen: boolean;

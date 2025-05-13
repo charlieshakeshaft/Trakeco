@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { Switch, Route, useLocation, Redirect } from "wouter";
-import { queryClient, getQueryFn } from "./lib/queryClient";
-import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { queryClient } from "./lib/queryClient";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMediaQuery } from "@/hooks/use-mobile";
+import { AuthProvider, useAuth } from "@/contexts/auth-context";
 import NotFound from "@/pages/not-found";
+import { User } from "@/lib/types";
 
 // Pages
 import Dashboard from "@/pages/dashboard";
@@ -23,9 +25,6 @@ import MobileHeader from "@/components/layout/mobile-header";
 import MobileMenu from "@/components/layout/mobile-menu";
 import MobileNavigation from "@/components/layout/mobile-navigation";
 
-// Types and utils
-import { User } from "@/lib/types";
-
 // Auth-protected route component
 function PrivateRoute({ component: Component, ...rest }: { component: React.FC<any>, path: string }) {
   const { user, isLoading } = useAuth();
@@ -35,18 +34,6 @@ function PrivateRoute({ component: Component, ...rest }: { component: React.FC<a
   }
   
   return user ? <Component /> : <Redirect to="/login" />;
-}
-
-// Auth hook for checking if user is logged in
-function useAuth() {
-  const { data: user, isLoading } = useQuery({
-    queryKey: ['/api/user/profile'],
-    queryFn: getQueryFn({ on401: 'returnNull' }),
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-  
-  return { user, isLoading, isAuthenticated: !!user };
 }
 
 function AuthenticatedApp({ user }: { user: User }) {
@@ -121,15 +108,17 @@ function Router() {
   }
   
   // Authenticated routes
-  return <AuthenticatedApp user={user as User} />;
+  return <AuthenticatedApp user={user} />;
 }
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Router />
-        <Toaster />
+        <AuthProvider>
+          <Router />
+          <Toaster />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
