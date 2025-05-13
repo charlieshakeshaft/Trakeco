@@ -223,6 +223,70 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
   
+  // Replit Auth integration
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    // Try to find the user by ID first
+    const numericId = parseInt(userData.id);
+    let existingUser = await this.getUser(numericId);
+    
+    // If not found by ID, try by email
+    if (!existingUser && userData.email) {
+      existingUser = Array.from(this.users.values()).find(user => 
+        user.email === userData.email
+      );
+    }
+    
+    // Generate username and name from available data
+    const username = userData.email 
+      ? userData.email.split('@')[0] 
+      : `user_${userData.id}`;
+    
+    const name = userData.firstName && userData.lastName 
+      ? `${userData.firstName} ${userData.lastName}`
+      : userData.firstName 
+        ? userData.firstName
+        : username;
+    
+    if (existingUser) {
+      // Update existing user
+      const updatedUser: User = {
+        ...existingUser,
+        email: userData.email,
+        name: name
+      };
+      
+      this.users.set(existingUser.id, updatedUser);
+      return updatedUser;
+    } else {
+      // Create new user
+      const id = numericId || this.currentUserId++;
+      const newUser: User = {
+        id,
+        username,
+        email: userData.email,
+        name,
+        password: "", // No password for OAuth users
+        company_id: null,
+        points_total: 0,
+        streak_count: 0,
+        role: "user",
+        created_at: new Date(),
+        home_address: null,
+        home_latitude: null,
+        home_longitude: null,
+        work_address: null,
+        work_latitude: null,
+        work_longitude: null,
+        commute_distance_km: null,
+        is_new_user: true,
+        needs_password_change: false
+      };
+      
+      this.users.set(id, newUser);
+      return newUser;
+    }
+  }
+  
   // Company operations
   async getCompany(id: number): Promise<Company | undefined> {
     return this.companies.get(id);
@@ -903,6 +967,83 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedUser;
+  }
+  
+  // Replit Auth integration
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    // First try to find the user by ID (Replit sub as string)
+    let existingUser: User | undefined;
+    
+    try {
+      const numericId = parseInt(userData.id);
+      const [user] = await db
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, numericId));
+      existingUser = user;
+    } catch (error) {
+      console.error("Error finding user by ID:", error);
+    }
+    
+    // If no user found by ID, try by email
+    if (!existingUser && userData.email) {
+      try {
+        const [user] = await db
+          .select()
+          .from(schema.users)
+          .where(eq(schema.users.email, userData.email));
+        existingUser = user;
+      } catch (error) {
+        console.error("Error finding user by email:", error);
+      }
+    }
+    
+    // Generate username and name from available data
+    const username = userData.email 
+      ? userData.email.split('@')[0] 
+      : `user_${userData.id}`;
+    
+    const name = userData.firstName && userData.lastName 
+      ? `${userData.firstName} ${userData.lastName}`
+      : userData.firstName 
+        ? userData.firstName
+        : username;
+    
+    if (existingUser) {
+      // Update existing user
+      const updateData: any = {
+        email: userData.email,
+        name: name
+      };
+      
+      const [updatedUser] = await db
+        .update(schema.users)
+        .set(updateData)
+        .where(eq(schema.users.id, existingUser.id))
+        .returning();
+      
+      return updatedUser;
+    } else {
+      // Create new user with minimal data
+      const insertData = {
+        id: parseInt(userData.id),
+        username: username,
+        email: userData.email,
+        name: name,
+        password: "", // No password for OAuth users
+        points_total: 0,
+        streak_count: 0,
+        role: "user",
+        is_new_user: true
+      };
+      
+      const [newUser] = await db
+        .insert(schema.users)
+        .values(insertData)
+        .returning();
+      
+      return newUser;
+    }
   }
   
   // Company operations
