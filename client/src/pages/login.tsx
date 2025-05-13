@@ -45,7 +45,7 @@ export default function LoginPage() {
       
       toast({
         title: "Login successful!",
-        description: "Welcome back to Green Commute.",
+        description: "Welcome back to Trak.",
       });
     } catch (error) {
       toast({
@@ -75,7 +75,7 @@ export default function LoginPage() {
         {/* Authentication card */}
         <Card className="md:col-span-1 border shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Welcome to Green Commute</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center">Welcome to Trak</CardTitle>
             <CardDescription className="text-center">
               Enter your credentials to access your account
             </CardDescription>
