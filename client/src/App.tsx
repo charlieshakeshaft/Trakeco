@@ -87,6 +87,8 @@ function Router() {
   const { user, isLoading } = useAuth();
   const [location] = useLocation();
   
+  console.log("Router - auth state:", { user, isLoading, path: location });
+  
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
@@ -98,10 +100,7 @@ function Router() {
         <Switch>
           <Route path="/login" component={LoginPage} />
           <Route path="/signup" component={SignupPage} />
-          <Route path="/">
-            <Redirect to="/login" />
-          </Route>
-          <Route>
+          <Route path="/:rest*">
             <Redirect to="/login" />
           </Route>
         </Switch>

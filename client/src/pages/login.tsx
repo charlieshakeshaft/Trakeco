@@ -10,8 +10,13 @@ export default function LoginPage() {
   const handleLoginSuccess = (user: User) => {
     // Update the auth context with the user data
     setCurrentUser(user);
-    // Navigate to the dashboard
-    navigate("/");
+    console.log("Login successful, redirecting to dashboard");
+    
+    // Add a delay before navigation to ensure state is updated
+    setTimeout(() => {
+      // Navigate to the dashboard
+      navigate("/");
+    }, 100);
   };
 
   return (

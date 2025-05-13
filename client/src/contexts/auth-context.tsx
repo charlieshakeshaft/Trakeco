@@ -20,18 +20,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if user is logged in
     const fetchUser = async () => {
       try {
+        // First, check localStorage for cached user data
+        const cachedUser = localStorage.getItem('currentUser');
+        if (cachedUser) {
+          try {
+            const parsedUser = JSON.parse(cachedUser);
+            console.log('User data from localStorage:', parsedUser);
+            setUser(parsedUser);
+          } catch (e) {
+            console.error('Error parsing cached user:', e);
+          }
+        }
+        
+        // Then try to get from the server
         const response = await fetch('/api/user/profile');
         if (response.ok) {
           const userData = await response.json();
-          console.log('User data from profile:', userData);
+          console.log('User data from profile API:', userData);
           setUser(userData);
+          localStorage.setItem('currentUser', JSON.stringify(userData));
         } else {
           console.log('Not authenticated:', await response.text());
-          setUser(null);
+          // Only clear user if we don't have cached data
+          if (!cachedUser) {
+            setUser(null);
+          }
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
-        setUser(null);
+        // Don't clear user if there's an error and we have cached data
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +71,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const setCurrentUser = (userData: User | null) => {
+    console.log("Setting current user:", userData);
     setUser(userData);
+    
+    // Store in local state as a backup mechanism
+    if (userData) {
+      localStorage.setItem('currentUser', JSON.stringify(userData));
+    } else {
+      localStorage.removeItem('currentUser');
+    }
   };
 
   return (
