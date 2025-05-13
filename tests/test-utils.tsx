@@ -3,7 +3,26 @@ import { render, RenderOptions } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { vi } from 'vitest';
 import { mockAuthContextValue } from './mocks/auth-context';
-import { Router } from './mocks/wouter';
+
+// Create a full mock for wouter directly in test-utils
+const Link = ({ href, children }: { href: string; children: React.ReactNode }) => 
+  React.createElement('a', { href, 'data-testid': 'mock-link' }, children);
+
+const Router = ({ children, base = '' }: { children: React.ReactNode; base?: string }) => children;
+const Route = ({ children, path, component: Component }: { children?: React.ReactNode; path?: string; component?: React.ComponentType<any> }) => {
+  if (Component) {
+    return <Component />;
+  }
+  return children || null;
+};
+const Switch = ({ children }: { children: React.ReactNode }) => children;
+const Redirect = ({ to }: { to: string }) => null;
+const useLocation = vi.fn().mockImplementation(() => ['/test-path', vi.fn()]);
+const useRoute = vi.fn().mockImplementation(() => [false, {}]);
+const navigate = vi.fn();
+
+// Export all wouter mocks
+export { Link, Router, Route, Switch, Redirect, useLocation, useRoute, navigate };
 
 // Mock user data for different user types
 export const mockAdminUser = {

@@ -5,26 +5,22 @@ import { mockRegularUser, mockNewUser } from './test-utils';
 import LogCommute from '../client/src/pages/log-commute';
 import React from 'react';
 
+// Import and use our existing mocks
+import { Link, Router, Route, Switch, Redirect, useLocation, useRoute, navigate } from './test-utils';
+
 // Mock wouter directly
-vi.mock('wouter', () => {
-  const actual = { 
-    // Mock all the necessary exports from wouter
-    Link: ({ href, children }) => React.createElement('a', { href }, children),
-    Route: ({ children }) => children,
-    Router: ({ children }) => children,
-    Switch: ({ children }) => children,
-    Redirect: () => null,
-    useLocation: () => ['/mock-path', vi.fn()],
-    useRoute: () => [false, {}],
-    navigate: vi.fn(),
-  };
-  
-  return {
-    __esModule: true,
-    default: actual.Router,
-    ...actual
-  };
-});
+vi.mock('wouter', () => ({
+  __esModule: true,
+  default: Router,
+  Link,
+  Router,
+  Route,
+  Switch,
+  Redirect,
+  useLocation,
+  useRoute,
+  navigate
+}));
 
 // Start mock server before all tests
 beforeAll(() => server.listen());
