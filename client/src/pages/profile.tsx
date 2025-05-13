@@ -319,6 +319,77 @@ const Profile = () => {
             </TabsContent>
             
             <TabsContent value="settings">
+              {user?.needs_password_change && (
+                <Card className="mb-6 border-blue-200">
+                  <CardContent className="pt-6">
+                    <h2 className="text-xl font-semibold mb-4 flex items-center">
+                      <span className="material-icons mr-2 text-blue-500">lock</span>
+                      Change Your Password
+                    </h2>
+                    
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Current Password
+                        </label>
+                        <input 
+                          type="password" 
+                          name="current_password"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter your current password"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          New Password
+                        </label>
+                        <input 
+                          type="password" 
+                          name="new_password"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter your new password"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Confirm New Password
+                        </label>
+                        <input 
+                          type="password" 
+                          name="confirm_password"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Confirm your new password"
+                        />
+                      </div>
+                      
+                      <div className="pt-4 flex justify-end">
+                        <Button 
+                          className="bg-blue-600 hover:bg-blue-700"
+                          onClick={() => {
+                            toast({
+                              title: "Password functionality coming soon",
+                              description: "This feature will be available in a future update.",
+                            });
+                            
+                            // For now, just mark the password as changed
+                            if (user) {
+                              setCurrentUser({
+                                ...user,
+                                needs_password_change: false
+                              });
+                            }
+                          }}
+                        >
+                          Update Password
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            
               <Card className="mb-6">
                 <CardContent className="pt-6">
                   <h2 className="text-xl font-semibold mb-4">Commute Locations</h2>

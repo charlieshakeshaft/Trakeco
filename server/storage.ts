@@ -28,6 +28,11 @@ export interface IStorage {
     work_longitude?: string;
     commute_distance_km?: number;
   }): Promise<User>;
+  updateUser(userId: number, updateData: {
+    is_new_user?: boolean;
+    needs_password_change?: boolean;
+    password?: string;
+  }): Promise<User>;
   
   // Company operations
   getCompany(id: number): Promise<Company | undefined>;
