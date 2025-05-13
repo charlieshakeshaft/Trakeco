@@ -5,17 +5,19 @@ import { formatDistanceToNow } from "date-fns";
 // Function to determine appropriate image based on challenge type
 function getChallengeImage(challenge?: any): string {
   if (!challenge) {
-    return "https://images.pexels.com/photos/4347936/pexels-photo-4347936.jpeg"; // Default image
+    return "https://images.unsplash.com/photo-1594135356483-c396bd517740?q=80&w=2664&auto=format&fit=crop"; // Default image
   }
   
-  // Maps commute type to appropriate images
+  // Maps commute type to appropriate high-quality images
   const commuteImages: Record<string, string> = {
-    'cycle': "https://images.pexels.com/photos/5700269/pexels-photo-5700269.jpeg", // Cycling image
-    'walk': "https://images.pexels.com/photos/7194591/pexels-photo-7194591.jpeg", // Walking image
-    'public_transport': "https://images.pexels.com/photos/2031755/pexels-photo-2031755.jpeg", // Public transport image
-    'carpool': "https://images.pexels.com/photos/175696/pexels-photo-175696.jpeg", // Carpool image
-    'electric_vehicle': "https://images.pexels.com/photos/6238050/pexels-photo-6238050.jpeg", // Electric vehicle image
-    'remote_work': "https://images.pexels.com/photos/5711267/pexels-photo-5711267.jpeg" // Remote work image
+    'cycle': "https://images.unsplash.com/photo-1591741849697-fb1bad058b56?q=80&w=2574&auto=format&fit=crop", // Person cycling to work
+    'walk': "https://images.unsplash.com/photo-1604505264481-84de098b6b4b?q=80&w=2669&auto=format&fit=crop", // Person walking in city
+    'public_transport': "https://images.unsplash.com/photo-1569691105751-e8f95fbdde56?q=80&w=2670&auto=format&fit=crop", // Person on bus
+    'carpool': "https://images.unsplash.com/photo-1578080582217-26b59e5a68b6?q=80&w=2670&auto=format&fit=crop", // Carpool/rideshare
+    'electric_vehicle': "https://images.unsplash.com/photo-1603221680227-7ad5bc9c8b44?q=80&w=2670&auto=format&fit=crop", // EV charging
+    'remote_work': "https://images.unsplash.com/photo-1584717903461-713a534d5acd?q=80&w=2670&auto=format&fit=crop", // Remote work setup
+    'bus': "https://images.unsplash.com/photo-1601629665203-f9f2b8d3a3b5?q=80&w=2670&auto=format&fit=crop", // Person boarding bus
+    'train': "https://images.unsplash.com/photo-1541411438265-4cb4687110f2?q=80&w=2574&auto=format&fit=crop" // Modern train
   };
   
   // Select image based on challenge's commute type
@@ -23,24 +25,31 @@ function getChallengeImage(challenge?: any): string {
     return commuteImages[challenge.commute_type];
   } 
   // Fallback to keyword-based selection if no commute type specified
-  else if (challenge.title) {
-    const title = challenge.title.toLowerCase();
-    if (title.includes('cycle') || title.includes('bike')) {
+  else if (challenge.title || challenge.description) {
+    const title = challenge.title ? challenge.title.toLowerCase() : '';
+    const description = challenge.description ? challenge.description.toLowerCase() : '';
+    const content = title + ' ' + description;
+    
+    if (content.includes('cycle') || content.includes('bike') || content.includes('cycling') || content.includes('biking')) {
       return commuteImages['cycle'];
-    } else if (title.includes('walk')) {
+    } else if (content.includes('walk') || content.includes('walking') || content.includes('step') || content.includes('on foot')) {
       return commuteImages['walk'];
-    } else if (title.includes('transit') || title.includes('bus') || title.includes('train')) {
+    } else if (content.includes('bus') || content.includes('buses')) {
+      return commuteImages['bus'];
+    } else if (content.includes('train') || content.includes('rail') || content.includes('subway') || content.includes('metro')) {
+      return commuteImages['train'];
+    } else if (content.includes('transit') || content.includes('public transport') || content.includes('transport')) {
       return commuteImages['public_transport'];
-    } else if (title.includes('carpool') || title.includes('shared')) {
+    } else if (content.includes('carpool') || content.includes('shared') || content.includes('ride')) {
       return commuteImages['carpool'];
-    } else if (title.includes('electric') || title.includes('ev')) {
+    } else if (content.includes('electric') || content.includes('ev') || content.includes('battery')) {
       return commuteImages['electric_vehicle'];
-    } else if (title.includes('remote') || title.includes('home')) {
+    } else if (content.includes('remote') || content.includes('home') || content.includes('virtual') || content.includes('telecommute')) {
       return commuteImages['remote_work'];
     }
   }
   
-  return "https://images.pexels.com/photos/4347936/pexels-photo-4347936.jpeg"; // Default image
+  return "https://images.unsplash.com/photo-1594135356483-c396bd517740?q=80&w=2664&auto=format&fit=crop"; // Default image
 }
 
 interface ChallengesSectionProps {
