@@ -16,24 +16,30 @@ const ChallengeCard = ({ challenge, participant, userId, isDetailed = false }: C
   const progressPercentage = getChallengeProgress(challenge, progress);
   const daysRemaining = getDaysRemaining(challenge.end_date);
   
-  // Determine image based on commute type
-  let imageSrc = "https://images.unsplash.com/photo-1594135356483-c396bd517740?q=80&w=2664&auto=format&fit=crop"; // Default sustainable commute image
+  // Use Material Icons and colors for challenge images
+  let iconName = "eco"; // Default icon
+  let bgColor = "bg-emerald-100";
+  let iconColor = "text-emerald-600";
   
-  // Maps commute type to appropriate high-quality images
-  const commuteImages: Record<string, string> = {
-    'cycle': "https://images.unsplash.com/photo-1591741849697-fb1bad058b56?q=80&w=2574&auto=format&fit=crop", // Person cycling to work
-    'walk': "https://images.unsplash.com/photo-1604505264481-84de098b6b4b?q=80&w=2669&auto=format&fit=crop", // Person walking in city
-    'public_transport': "https://images.unsplash.com/photo-1569691105751-e8f95fbdde56?q=80&w=2670&auto=format&fit=crop", // Person on bus
-    'carpool': "https://images.unsplash.com/photo-1578080582217-26b59e5a68b6?q=80&w=2670&auto=format&fit=crop", // Carpool/rideshare
-    'electric_vehicle': "https://images.unsplash.com/photo-1603221680227-7ad5bc9c8b44?q=80&w=2670&auto=format&fit=crop", // EV charging
-    'remote_work': "https://images.unsplash.com/photo-1584717903461-713a534d5acd?q=80&w=2670&auto=format&fit=crop", // Remote work setup
-    'bus': "https://images.unsplash.com/photo-1601629665203-f9f2b8d3a3b5?q=80&w=2670&auto=format&fit=crop", // Person boarding bus
-    'train': "https://images.unsplash.com/photo-1541411438265-4cb4687110f2?q=80&w=2574&auto=format&fit=crop" // Modern train
+  // Maps commute type to appropriate icons and colors
+  const commuteIcons: Record<string, {icon: string, bg: string, color: string}> = {
+    'cycle': { icon: "directions_bike", bg: "bg-blue-100", color: "text-blue-600" },
+    'walk': { icon: "directions_walk", bg: "bg-green-100", color: "text-green-600" },
+    'public_transport': { icon: "directions_bus", bg: "bg-amber-100", color: "text-amber-600" },
+    'carpool': { icon: "people", bg: "bg-indigo-100", color: "text-indigo-600" },
+    'electric_vehicle': { icon: "electric_car", bg: "bg-teal-100", color: "text-teal-600" },
+    'remote_work': { icon: "computer", bg: "bg-purple-100", color: "text-purple-600" },
+    'bus': { icon: "directions_bus", bg: "bg-amber-100", color: "text-amber-600" },
+    'train': { icon: "train", bg: "bg-red-100", color: "text-red-600" },
+    'gas_vehicle': { icon: "directions_car", bg: "bg-gray-100", color: "text-gray-600" }
   };
   
-  // Select image based on challenge's commute type
-  if (challenge.commute_type && commuteImages[challenge.commute_type]) {
-    imageSrc = commuteImages[challenge.commute_type];
+  // Select icon based on challenge's commute type
+  if (challenge.commute_type && commuteIcons[challenge.commute_type]) {
+    const iconSet = commuteIcons[challenge.commute_type];
+    iconName = iconSet.icon;
+    bgColor = iconSet.bg;
+    iconColor = iconSet.color;
   } 
   // Fallback to keyword-based selection if no commute type specified
   else if (challenge.title || challenge.description) {
@@ -42,32 +48,54 @@ const ChallengeCard = ({ challenge, participant, userId, isDetailed = false }: C
     const content = title + ' ' + description;
     
     if (content.includes('cycle') || content.includes('bike') || content.includes('cycling') || content.includes('biking')) {
-      imageSrc = commuteImages['cycle'];
+      const iconSet = commuteIcons['cycle'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('walk') || content.includes('walking') || content.includes('step') || content.includes('on foot')) {
-      imageSrc = commuteImages['walk'];
+      const iconSet = commuteIcons['walk'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('bus') || content.includes('buses')) {
-      imageSrc = commuteImages['bus'];
+      const iconSet = commuteIcons['bus'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('train') || content.includes('rail') || content.includes('subway') || content.includes('metro')) {
-      imageSrc = commuteImages['train'];
+      const iconSet = commuteIcons['train'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('transit') || content.includes('public transport') || content.includes('transport')) {
-      imageSrc = commuteImages['public_transport'];
+      const iconSet = commuteIcons['public_transport'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('carpool') || content.includes('shared') || content.includes('ride')) {
-      imageSrc = commuteImages['carpool'];
+      const iconSet = commuteIcons['carpool'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('electric') || content.includes('ev') || content.includes('battery')) {
-      imageSrc = commuteImages['electric_vehicle'];
+      const iconSet = commuteIcons['electric_vehicle'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     } else if (content.includes('remote') || content.includes('home') || content.includes('virtual') || content.includes('telecommute')) {
-      imageSrc = commuteImages['remote_work'];
+      const iconSet = commuteIcons['remote_work'];
+      iconName = iconSet.icon;
+      bgColor = iconSet.bg;
+      iconColor = iconSet.color;
     }
   }
 
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 card-hover transition-all duration-200">
       {!isDetailed ? (
-        <img
-          src={imageSrc}
-          alt={challenge.title}
-          className="w-full h-32 object-cover"
-        />
+        <div className={`w-full h-32 ${bgColor} flex items-center justify-center`}>
+          <span className={`material-icons ${iconColor} text-6xl`}>{iconName}</span>
+        </div>
       ) : null}
       
       <div className="p-5">
