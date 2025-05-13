@@ -16,13 +16,9 @@ import {
 
 // Authentication middleware
 const authenticate = async (req: Request, res: Response, next: Function) => {
-  // For simplicity, we'll use a userId in the query for now
-  // In a real app, this would be replaced with proper authentication
-  const userId = req.query.userId ? Number(req.query.userId) : undefined;
-  
-  if (!userId) {
-    return res.status(401).json({ message: "Authentication required" });
-  }
+  // For simplicity, we'll fake a session-based auth by checking for userId in query params
+  // In a real app, this would be replaced with proper session-based authentication
+  const userId = req.query.userId ? Number(req.query.userId) : 1; // Default to demo user
   
   const user = await storage.getUser(userId);
   if (!user) {

@@ -58,7 +58,7 @@ export function IndividualSignupForm() {
         body: JSON.stringify({
           ...userData,
           role: "user"
-        }),
+        })
       });
       
       toast({

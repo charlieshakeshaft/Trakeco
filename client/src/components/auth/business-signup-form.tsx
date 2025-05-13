@@ -62,8 +62,8 @@ export function BusinessSignupForm() {
         method: "POST",
         body: JSON.stringify({
           name: companyName,
-          domain: companyDomain,
-        }),
+          domain: companyDomain
+        })
       });
       
       // Then create admin user
@@ -74,7 +74,7 @@ export function BusinessSignupForm() {
           name: adminName,
           company_id: companyResponse.id,
           role: "admin"
-        }),
+        })
       });
       
       toast({

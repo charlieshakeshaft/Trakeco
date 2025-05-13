@@ -48,7 +48,7 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
     try {
       const user = await apiRequest("/api/auth/login", {
         method: "POST",
-        body: JSON.stringify(values),
+        body: JSON.stringify(values)
       });
       
       toast({
@@ -117,10 +117,8 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
       <CardFooter className="flex flex-col space-y-2">
         <p className="text-sm text-center text-muted-foreground">
           Don't have an account?{" "}
-          <Link href="/signup">
-            <a className="text-primary underline-offset-4 hover:underline">
-              Sign up
-            </a>
+          <Link href="/signup" className="text-primary underline-offset-4 hover:underline">
+            Sign up
           </Link>
         </p>
       </CardFooter>
