@@ -394,56 +394,6 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
           </Alert>
         )}
         
-        {/* Points Information Section */}
-        <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/10">
-          <div className="flex items-center mb-2">
-            <h3 className="font-medium">Points Earned by Transport Mode</h3>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
-                    <HelpCircle className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-sm">
-                  <p>Points are awarded per day. Get a bonus of 25 points when you use the same sustainable commute method for 3+ days in a week!</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
-            <div className="flex items-center justify-between rounded-md border p-2 bg-white">
-              <span className="font-medium">Walking</span>
-              <Badge variant="default" className="bg-green-600">30 pts</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-2 bg-white">
-              <span className="font-medium">Cycling</span>
-              <Badge variant="default" className="bg-green-600">25 pts</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-2 bg-white">
-              <span className="font-medium">Public Transport</span>
-              <Badge variant="default" className="bg-green-500">20 pts</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-2 bg-white">
-              <span className="font-medium">Remote Work</span>
-              <Badge variant="default" className="bg-green-500">15 pts</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-2 bg-white">
-              <span className="font-medium">Carpooling</span>
-              <Badge variant="default" className="bg-green-500">15 pts</Badge>
-            </div>
-            <div className="flex items-center justify-between rounded-md border p-2 bg-white">
-              <span className="font-medium">Electric Vehicle</span>
-              <Badge variant="default" className="bg-green-400">10 pts</Badge>
-            </div>
-          </div>
-          
-          <div className="mt-3 text-sm text-gray-600">
-            <span className="font-medium">Consistency Bonus:</span> Use the same sustainable commute for 3+ days in a week: <Badge variant="outline" className="border-green-500 text-green-600">+25 pts</Badge>
-          </div>
-        </div>
-        
         {/* Week Selection */}
         <div className="mb-6">
           <h3 className="font-medium mb-2">Select Week</h3>
