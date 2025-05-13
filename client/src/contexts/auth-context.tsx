@@ -19,7 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, refetch } = useQuery({
     queryKey: ['/api/auth/user'],
     retry: false,
-    staleTime: 5 * 60 * 1000, // 5 minutes 
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
   
   // Navigate directly to Replit auth logout endpoint
