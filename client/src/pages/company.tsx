@@ -38,15 +38,17 @@ import { CommuteType, Challenge } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
 
-// Mock data for company members (to be replaced with real API data)
-const initialMembers = [
-  { id: 1, name: "Tristan Clarke", email: "tristan@embracewellness.com", role: "Admin" },
-];
+// Import type for User
+import { User } from "@/lib/types";
 
 const CompanyPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [members, setMembers] = useState(initialMembers);
+  // Fetch company members from API
+  const { data: members = [], isLoading: isLoadingMembers, refetch: refetchMembers } = useQuery<any[]>({
+    queryKey: [`/api/company/members?companyId=${user?.company_id}`],
+    enabled: !!user?.company_id,
+  });
   const [newMember, setNewMember] = useState({ 
     name: "", 
     email: "", 
@@ -168,26 +170,61 @@ const CompanyPage = () => {
   }
   
   // Handle adding a new member
-  const handleAddMember = () => {
-    if (!newMember.name || !newMember.email) {
+  const handleAddMember = async () => {
+    if (!newMember.name || !newMember.email || !newMember.username || !newMember.password) {
       toast({
         title: "Error",
-        description: "Please enter name and email for the new member.",
+        description: "Please enter all required fields for the new member.",
         variant: "destructive",
       });
       return;
     }
     
-    // In a real app, this would be an API call
-    const newId = members.length + 1;
-    setMembers([...members, { id: newId, ...newMember }]);
-    setNewMember({ name: "", email: "", role: "User" });
-    setIsAddMemberOpen(false);
-    
-    toast({
-      title: "Member Added",
-      description: `${newMember.name} has been added to your company.`,
-    });
+    try {
+      // Call the API endpoint
+      const response = await fetch('/api/company/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newMember,
+          company_id: user?.company_id
+        }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add member');
+      }
+      
+      const result = await response.json();
+      
+      // Refresh the members list
+      refetchMembers();
+      
+      // Reset the form
+      setNewMember({ 
+        name: "", 
+        email: "", 
+        username: "",
+        password: "",
+        role: "user" 
+      });
+      setIsAddMemberOpen(false);
+      
+      toast({
+        title: "Member Added",
+        description: `${newMember.name} has been added to your company.`,
+      });
+    } catch (error) {
+      console.error('Error adding member:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to add member",
+        variant: "destructive",
+      });
+    }
   };
   
   return (
@@ -241,7 +278,7 @@ const CompanyPage = () => {
                 <DialogHeader>
                   <DialogTitle>Add New Team Member</DialogTitle>
                   <DialogDescription>
-                    Add a new member to your company. They will receive an email invitation.
+                    Add a new member to your company. Provide a temporary password - they will be required to change it on their first login.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -269,6 +306,29 @@ const CompanyPage = () => {
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="username" className="text-right">
+                      Username
+                    </Label>
+                    <Input
+                      id="username"
+                      value={newMember.username}
+                      onChange={(e) => setNewMember({...newMember, username: e.target.value})}
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="password" className="text-right">
+                      Temporary Password
+                    </Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={newMember.password}
+                      onChange={(e) => setNewMember({...newMember, password: e.target.value})}
+                      className="col-span-3"
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="role" className="text-right">
                       Role
                     </Label>
@@ -278,8 +338,8 @@ const CompanyPage = () => {
                       onChange={(e) => setNewMember({...newMember, role: e.target.value})}
                       className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                     >
-                      <option value="User">User</option>
-                      <option value="Admin">Admin</option>
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
                     </select>
                   </div>
                 </div>
@@ -293,39 +353,49 @@ const CompanyPage = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium">Name</th>
-                      <th className="text-left py-3 px-4 font-medium">Email</th>
-                      <th className="text-left py-3 px-4 font-medium">Role</th>
-                      <th className="text-left py-3 px-4 font-medium">Status</th>
-                      <th className="text-right py-3 px-4 font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {members.map((member) => (
-                      <tr key={member.id} className="border-b">
-                        <td className="py-3 px-4">{member.name}</td>
-                        <td className="py-3 px-4">{member.email}</td>
-                        <td className="py-3 px-4">{member.role}</td>
-                        <td className="py-3 px-4">
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            Active
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <Button variant="ghost" size="sm">
-                            <span className="material-icons text-sm">edit</span>
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <span className="material-icons text-sm text-red-500">delete</span>
-                          </Button>
-                        </td>
+                {isLoadingMembers ? (
+                  <div className="py-10 text-center">
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-800"></div>
+                    <p className="mt-2 text-gray-600">Loading team members...</p>
+                  </div>
+                ) : members.length === 0 ? (
+                  <div className="py-10 text-center">
+                    <p className="text-gray-600">No team members found.</p>
+                    <p className="text-gray-600 mt-1">Add your first team member to get started.</p>
+                  </div>
+                ) : (
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-3 px-4 font-medium">Name</th>
+                        <th className="text-left py-3 px-4 font-medium">Email</th>
+                        <th className="text-left py-3 px-4 font-medium">Username</th>
+                        <th className="text-left py-3 px-4 font-medium">Role</th>
+                        <th className="text-left py-3 px-4 font-medium">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {members.map((member) => (
+                        <tr key={member.id} className="border-b">
+                          <td className="py-3 px-4">{member.name}</td>
+                          <td className="py-3 px-4">{member.email}</td>
+                          <td className="py-3 px-4">{member.username}</td>
+                          <td className="py-3 px-4">{member.role}</td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-1 text-xs rounded-full ${member.is_new_user ? "bg-blue-100 text-blue-800" : "bg-green-100 text-green-800"}`}>
+                              {member.is_new_user ? "New User" : "Active"}
+                            </span>
+                            {member.needs_password_change && (
+                              <span className="ml-2 px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
+                                Password Change Required
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </CardContent>
           </Card>
