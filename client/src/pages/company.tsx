@@ -68,6 +68,29 @@ const CompanyPage = () => {
   const [emailError, setEmailError] = useState("");
   const [usernameError, setUsernameError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  
+  // Functions for validation
+  const validateEmailDomain = (email: string) => {
+    if (!email || !company?.domain) return true;
+    
+    // Extract domain from email (after @)
+    const emailParts = email.split('@');
+    if (emailParts.length !== 2) return false;
+    
+    const emailDomain = emailParts[1];
+    // Check if email domain matches company domain
+    return emailDomain.toLowerCase() === company.domain.toLowerCase();
+  };
+  
+  const checkUsernameUniqueness = (username: string, userId?: number) => {
+    if (!username) return true;
+    
+    // Check if username exists in the members list
+    return !members.some(member => 
+      member.username.toLowerCase() === username.toLowerCase() &&
+      member.id !== userId // Skip current user when editing
+    );
+  };
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isEditMemberOpen, setIsEditMemberOpen] = useState(false);
   const [isDeleteMemberDialogOpen, setIsDeleteMemberDialogOpen] = useState(false);
@@ -414,6 +437,19 @@ const CompanyPage = () => {
                             .replace(/[^a-z0-9.]/g, '');
                         }
                         
+                        // Check if generated username is unique
+                        const isUsernameUnique = checkUsernameUniqueness(suggestedUsername);
+                        
+                        // Only update username error if auto-generating a username
+                        if (suggestedUsername && !isUsernameUnique && 
+                           (newMember.username === '' || 
+                            newMember.username === newMember.name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, ''))) {
+                          setUsernameError("This username is already taken");
+                        } else if (newMember.username === '' || 
+                                  newMember.username === newMember.name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '')) {
+                          setUsernameError("");
+                        }
+                        
                         setNewMember({
                           ...newMember, 
                           name: name,
@@ -430,13 +466,28 @@ const CompanyPage = () => {
                     <Label htmlFor="email" className="text-right">
                       Email
                     </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={newMember.email}
-                      onChange={(e) => setNewMember({...newMember, email: e.target.value})}
-                      className="col-span-3"
-                    />
+                    <div className="col-span-3 space-y-1">
+                      <Input
+                        id="email"
+                        type="email"
+                        value={newMember.email}
+                        onChange={(e) => {
+                          const email = e.target.value;
+                          setNewMember({...newMember, email});
+                          
+                          // Validate email domain
+                          if (email && !validateEmailDomain(email)) {
+                            setEmailError(`Email must use company domain: @${company?.domain}`);
+                          } else {
+                            setEmailError("");
+                          }
+                        }}
+                        className={emailError ? "border-red-500" : ""}
+                      />
+                      {emailError && (
+                        <p className="text-sm text-red-500">{emailError}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="username" className="text-right">
@@ -445,7 +496,17 @@ const CompanyPage = () => {
                     <Input
                       id="username"
                       value={newMember.username}
-                      onChange={(e) => setNewMember({...newMember, username: e.target.value})}
+                      onChange={(e) => {
+                        const username = e.target.value;
+                        setNewMember({...newMember, username});
+                        
+                        // Check username uniqueness
+                        if (username && !checkUsernameUniqueness(username)) {
+                          setUsernameError("This username is already taken");
+                        } else {
+                          setUsernameError("");
+                        }
+                      }}
                       className="col-span-3"
                     />
                   </div>
