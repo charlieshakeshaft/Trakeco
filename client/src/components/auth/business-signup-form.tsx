@@ -59,30 +59,31 @@ export function BusinessSignupForm() {
       
       // First create company
       const companyResponse = await apiRequest("/api/companies", {
-        method: "POST",
-        body: JSON.stringify({
-          name: companyName,
-          domain: companyDomain
-        })
-      });
+        name: companyName,
+        domain: companyDomain
+      }, "POST");
       
       // Then create admin user
       await apiRequest("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          ...userData,
-          name: adminName,
-          company_id: companyResponse.id,
-          role: "admin"
-        })
-      });
+        ...userData,
+        name: adminName,
+        company_id: companyResponse.id,
+        role: "admin"
+      }, "POST");
+      
+      // Automatically log in the user
+      const loginResponse = await apiRequest("/api/auth/login", {
+        username: userData.username,
+        password: userData.password
+      }, "POST");
       
       toast({
         title: "Business account created!",
-        description: "You can now log in with your credentials.",
+        description: "You've been automatically logged in.",
       });
       
-      navigate("/login");
+      // Redirect to dashboard
+      navigate("/");
     } catch (error) {
       console.error("Signup error:", error);
       toast({

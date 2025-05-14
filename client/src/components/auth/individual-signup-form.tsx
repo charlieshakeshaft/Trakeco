@@ -53,20 +53,25 @@ export function IndividualSignupForm() {
     try {
       const { confirmPassword, ...userData } = values;
       
+      // Register the user
       await apiRequest("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify({
-          ...userData,
-          role: "user"
-        })
-      });
+        ...userData,
+        role: "user"
+      }, "POST");
+      
+      // Automatically log in the user
+      const loginResponse = await apiRequest("/api/auth/login", {
+        username: userData.username,
+        password: userData.password
+      }, "POST");
       
       toast({
         title: "Account created!",
-        description: "You can now log in with your credentials.",
+        description: "You've been automatically logged in.",
       });
       
-      navigate("/login");
+      // Redirect to dashboard
+      navigate("/");
     } catch (error) {
       console.error("Signup error:", error);
       toast({
