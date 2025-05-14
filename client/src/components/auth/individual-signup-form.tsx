@@ -54,16 +54,18 @@ export function IndividualSignupForm() {
       const { confirmPassword, ...userData } = values;
       
       // Register the user
-      await apiRequest("/api/auth/register", {
+      const registerData = {
         ...userData,
         role: "user"
-      }, "POST");
+      };
+      await apiRequest("/api/auth/register", registerData, "POST");
       
       // Automatically log in the user
-      const loginResponse = await apiRequest("/api/auth/login", {
+      const loginData = {
         username: userData.username,
         password: userData.password
-      }, "POST");
+      };
+      await apiRequest("/api/auth/login", loginData, "POST");
       
       toast({
         title: "Account created!",
