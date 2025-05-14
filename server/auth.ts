@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
@@ -60,11 +60,22 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   passport.use(
-    new LocalStrategy(async (username, password, done) => {
+    new LocalStrategy(async (usernameOrEmail, password, done) => {
       try {
-        const user = await storage.getUserByUsername(username);
+        // Try to find user by username first
+        let user = await storage.getUserByUsername(usernameOrEmail);
+        
+        // If not found by username, try by email
         if (!user) {
-          return done(null, false, { message: "Invalid credentials" });
+          // Check if input looks like an email (contains @)
+          if (usernameOrEmail.includes('@')) {
+            user = await storage.getUserByEmail(usernameOrEmail);
+          }
+          
+          // If still not found
+          if (!user) {
+            return done(null, false, { message: "Invalid credentials" });
+          }
         }
         
         const isValid = await comparePasswords(password, user.password);
@@ -137,7 +148,7 @@ export function setupAuth(app: Express) {
 }
 
 // Middleware to check if user is authenticated
-export function isAuthenticated(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+export function isAuthenticated(req: any, res: any, next: any) {
   if (req.isAuthenticated()) {
     return next();
   }
