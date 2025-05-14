@@ -141,6 +141,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Main user endpoint for authentication checks
+  app.get("/api/user", async (req, res) => {
+    try {
+      // Check if user is logged in via session
+      const userId = (req as any).session?.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      // Get user from storage
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Return user without password
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      res.status(500).json({ message: "Error fetching user data" });
+    }
+  });
+  
   app.get("/api/user/profile", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;
