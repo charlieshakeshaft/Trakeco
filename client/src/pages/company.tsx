@@ -46,15 +46,22 @@ const CompanyPage = () => {
   const { toast } = useToast();
   
   // Fetch company data
-  const { data: company, isLoading: isLoadingCompany } = useQuery<any>({
+  const { data: company, isLoading: isLoadingCompany, refetch: refetchCompany } = useQuery<any>({
     queryKey: [`/api/companies/${user?.company_id}`],
     enabled: !!user?.company_id,
+    staleTime: 0, // Always fetch fresh data
   });
   
   // Log when company data changes
   useEffect(() => {
     console.log("Company data loaded:", company);
-  }, [company]);
+    
+    // If company data is needed but not loaded yet, try to refetch
+    if (!company && user?.company_id) {
+      console.log("Company data not loaded yet, refetching...");
+      refetchCompany();
+    }
+  }, [company, user?.company_id, refetchCompany]);
   
   // Fetch company members from API
   const { data: members = [], isLoading: isLoadingMembers, refetch: refetchMembers } = useQuery<any[]>({
@@ -79,7 +86,7 @@ const CompanyPage = () => {
     // Debug log
     console.log("Validating email domain:", email, "Company domain:", company?.domain);
     
-    // If no email provided or company data not loaded yet, skip validation
+    // If no email provided, skip validation
     if (!email) {
       console.log("Validation skipped - no email provided");
       return true;
@@ -92,10 +99,23 @@ const CompanyPage = () => {
       return false;
     }
     
-    // If we don't have company domain loaded yet, skip validation 
-    // but consider it valid (will be checked again on submit)
+    // If we don't have company domain loaded yet, try to refetch
     if (!company?.domain) {
-      console.log("Company domain not available yet, skipping validation");
+      console.log("Company domain not available yet, triggering refetch");
+      refetchCompany();
+      
+      // Use fallback domain from user email if available
+      const userDomain = user?.email?.split('@')[1];
+      if (userDomain) {
+        console.log("Using fallback domain from user email:", userDomain);
+        const emailDomain = emailParts[1];
+        const isValid = emailDomain.toLowerCase() === userDomain.toLowerCase();
+        console.log("Fallback domain comparison:", emailDomain, "vs", userDomain, "Result:", isValid);
+        return isValid;
+      }
+      
+      // If no fallback available, consider valid for now but will check again on submit
+      console.log("No fallback domain available, conditionally valid");
       return true;
     }
     
@@ -371,14 +391,42 @@ const CompanyPage = () => {
       return;
     }
     
-    // Check for email domain validation
-    if (!validateEmailDomain(newMember.email)) {
-      toast({
-        title: "Invalid Email",
-        description: `Email must use company domain: @${company?.domain}`,
-        variant: "destructive",
-      });
-      return;
+    // Make sure company data is loaded
+    if (!company?.domain) {
+      // If still no company domain, try to get it from user email
+      const userDomain = user?.email?.split('@')[1];
+      
+      if (!userDomain) {
+        toast({
+          title: "Company Data Missing",
+          description: "Unable to validate email domain. Please try again in a moment.",
+          variant: "destructive",
+        });
+        // Trigger a company data refresh and return
+        refetchCompany();
+        return;
+      }
+      
+      // Use user email domain as fallback
+      const emailDomain = newMember.email.split('@')[1];
+      if (emailDomain.toLowerCase() !== userDomain.toLowerCase()) {
+        toast({
+          title: "Invalid Email",
+          description: `Email must use company domain: @${userDomain}`,
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      // Check for email domain validation with company domain
+      if (!validateEmailDomain(newMember.email)) {
+        toast({
+          title: "Invalid Email",
+          description: `Email must use company domain: @${company.domain}`,
+          variant: "destructive",
+        });
+        return;
+      }
     }
     
     // Check for username uniqueness
