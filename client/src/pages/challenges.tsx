@@ -59,7 +59,7 @@ const Challenges = () => {
     <div className="p-4 md:p-8">
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Challenges</h1>
       
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={switchToTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="active">Active Challenges</TabsTrigger>
           <TabsTrigger value="available">Available Challenges</TabsTrigger>
