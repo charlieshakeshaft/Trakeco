@@ -42,8 +42,21 @@ const Profile = () => {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  // Active tab state
-  const [activeTab, setActiveTab] = useState(window.location.search.includes('tab=settings') ? 'settings' : 'impact');
+  // Active tab state with URL sync
+  const [activeTab, setActiveTab] = useState(() => {
+    // Initialize from URL search params
+    const params = new URLSearchParams(window.location.search);
+    return params.get('tab') || 'impact';
+  });
+  
+  // Handler for tab change
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Update URL without triggering navigation
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', value);
+    window.history.pushState({}, '', url.toString());
+  };
   
   // State for location settings
   const [locationSettings, setLocationSettings] = useState<LocationSettings>({
@@ -311,7 +324,7 @@ const Profile = () => {
                 <Button 
                   className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
                   onClick={() => {
-                    setActiveTab("settings");
+                    handleTabChange("settings");
                     
                     // Update the user to no longer be considered new
                     updateUserMutation.mutate({
@@ -339,7 +352,7 @@ const Profile = () => {
                 <p>You're using a temporary password. Please change it to a secure password you'll remember.</p>
                 <Button 
                   className="mt-3 bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => setActiveTab("settings")}
+                  onClick={() => handleTabChange("settings")}
                 >
                   Change password
                 </Button>
@@ -415,7 +428,7 @@ const Profile = () => {
         </Card>
         
         <div className="md:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <Tabs value={activeTab} onValueChange={handleTabChange} defaultValue="impact">
             <TabsList className="mb-6">
               <TabsTrigger value="impact">Your Impact</TabsTrigger>
               <TabsTrigger value="history">Redemption History</TabsTrigger>

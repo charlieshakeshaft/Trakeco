@@ -89,9 +89,11 @@ function Router() {
   
   console.log("Router - auth state:", { user, isLoading, path: location });
   
+  // Redirect users who need to change password to profile page when visiting other routes
   useEffect(() => {
-    // Redirect users who need to change password to profile page
-    if (user?.needs_password_change && location !== "/profile") {
+    // Only redirect from main navigation routes, not within the profile page itself
+    const mainRoutes = ['/', '/log-commute', '/challenges', '/rewards', '/leaderboard', '/company'];
+    if (user?.needs_password_change && mainRoutes.includes(location)) {
       console.log("User needs password change, redirecting to profile");
       setLocation("/profile");
     }
