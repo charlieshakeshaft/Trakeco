@@ -47,7 +47,13 @@ const CompanyPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [members, setMembers] = useState(initialMembers);
-  const [newMember, setNewMember] = useState({ name: "", email: "", role: "User" });
+  const [newMember, setNewMember] = useState({ 
+    name: "", 
+    email: "", 
+    username: "",
+    password: "",
+    role: "user" 
+  });
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isAddChallengeOpen, setIsAddChallengeOpen] = useState(false);
   const [isEditChallengeOpen, setIsEditChallengeOpen] = useState(false);
