@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAllRewards, useUserRedemptions } from "@/hooks/use-rewards";
 import { useUserProfile } from "@/hooks/use-leaderboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,11 +7,32 @@ import RewardCard from "@/components/rewards/reward-card";
 import { getRewardIcon } from "@/lib/constants";
 import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
+import { Link, useLocation } from "wouter";
 
 const Rewards = () => {
   const [activeTab, setActiveTab] = useState("available");
   const { user } = useAuth();
   const userId = user?.id || 0;
+  const [location] = useLocation();
+  
+  // Handle tab parameter from URL
+  useEffect(() => {
+    // Extract tab parameter from the URL if it exists
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    
+    // Set the active tab if a valid tab parameter is provided
+    if (tabParam && ['available', 'future', 'redeemed'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
+  
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Update URL with tab parameter
+    window.history.replaceState(null, '', `/rewards?tab=${value}`);
+  };
   
   const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
   const { data: redemptions, isLoading: isLoadingRedemptions } = useUserRedemptions(userId);
@@ -54,7 +75,7 @@ const Rewards = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="available" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="mb-6">
           <TabsTrigger value="available">Available Rewards</TabsTrigger>
           <TabsTrigger value="future">Future Rewards</TabsTrigger>
@@ -73,18 +94,30 @@ const Rewards = () => {
               ))}
             </div>
           ) : availableRewards.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {availableRewards.map(reward => (
-                <RewardCard 
-                  key={reward.id}
-                  reward={reward}
-                  userPoints={userPoints}
-                  userId={userId}
-                  redemptions={redemptions || []}
-                  showDetails
-                />
-              ))}
-            </div>
+            <>
+              {user?.role === 'admin' && user?.company_id && (
+                <div className="flex justify-end mb-4">
+                  <Link to="/company?tab=rewards">
+                    <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
+                      <span className="material-icons text-sm mr-1">add_circle</span>
+                      Manage Company Rewards
+                    </button>
+                  </Link>
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {availableRewards.map(reward => (
+                  <RewardCard 
+                    key={reward.id}
+                    reward={reward}
+                    userPoints={userPoints}
+                    userId={userId}
+                    redemptions={redemptions || []}
+                    showDetails
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -97,7 +130,7 @@ const Rewards = () => {
                 </p>
                 <button 
                   className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
-                  onClick={() => setActiveTab("future")}
+                  onClick={() => handleTabChange("future")}
                 >
                   View Future Rewards
                 </button>
@@ -118,18 +151,30 @@ const Rewards = () => {
               ))}
             </div>
           ) : futureRewards.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {futureRewards.map(reward => (
-                <RewardCard 
-                  key={reward.id}
-                  reward={reward}
-                  userPoints={userPoints}
-                  userId={userId}
-                  redemptions={redemptions || []}
-                  showDetails
-                />
-              ))}
-            </div>
+            <>
+              {user?.role === 'admin' && user?.company_id && (
+                <div className="flex justify-end mb-4">
+                  <Link to="/company?tab=rewards">
+                    <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
+                      <span className="material-icons text-sm mr-1">add_circle</span>
+                      Manage Company Rewards
+                    </button>
+                  </Link>
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {futureRewards.map(reward => (
+                  <RewardCard 
+                    key={reward.id}
+                    reward={reward}
+                    userPoints={userPoints}
+                    userId={userId}
+                    redemptions={redemptions || []}
+                    showDetails
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -137,9 +182,17 @@ const Rewards = () => {
                   <span className="material-icons text-gray-400">check_circle</span>
                 </div>
                 <h3 className="text-lg font-medium text-gray-700 mb-2">No Future Rewards</h3>
-                <p className="text-gray-500 mb-2 text-center max-w-lg">
+                <p className="text-gray-500 mb-6 text-center max-w-lg">
                   Great job! You have enough points for all available rewards.
                 </p>
+                {user?.role === 'admin' && user?.company_id && (
+                  <Link to="/company?tab=rewards">
+                    <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
+                      <span className="material-icons text-sm mr-1">add_circle</span>
+                      Manage Company Rewards
+                    </button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           )}
@@ -192,7 +245,7 @@ const Rewards = () => {
                 </p>
                 <button 
                   className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark"
-                  onClick={() => setActiveTab("available")}
+                  onClick={() => handleTabChange("available")}
                 >
                   View Available Rewards
                 </button>
