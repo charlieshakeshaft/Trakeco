@@ -6,6 +6,7 @@ import CommuteSummary from "@/components/dashboard/commute-summary";
 import ChallengesSection from "@/components/dashboard/challenges-section";
 import RewardsSection from "@/components/dashboard/rewards-section";
 import LeaderboardSection from "@/components/dashboard/leaderboard-section";
+import TeamSection from "@/components/dashboard/team-section";
 
 const Dashboard = () => {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -54,6 +55,9 @@ const Dashboard = () => {
       
       {/* Leaderboard */}
       <LeaderboardSection userId={user.id} />
+      
+      {/* Team Members - only shown if user is part of a company */}
+      {user.company_id && <TeamSection userId={user.id} companyId={user.company_id} />}
     </div>
   );
 };

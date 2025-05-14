@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { User } from "@/lib/types";
@@ -23,13 +20,6 @@ interface InviteMemberFormData {
 }
 
 const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
-  
   const queryClient = useQueryClient();
 
   // Only load team members if user is part of a company
@@ -38,74 +28,14 @@ const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
     enabled: !!companyId,
   });
 
-  const inviteMember = useMutation({
-    mutationFn: async (data: InviteMemberFormData) => {
-      return apiRequest("/api/company/invite", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Team member invited",
-        description: `An invitation has been sent to ${email}`,
-      });
-      setIsOpen(false);
-      resetForm();
-      queryClient.invalidateQueries({ queryKey: [`/api/company/members?companyId=${companyId}`] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Failed to invite team member",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const resetForm = () => {
-    setName("");
-    setEmail("");
-    setUsername("");
-    setPassword("");
-    setRole("user");
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!companyId) {
-      toast({
-        title: "Error",
-        description: "You must be part of a company to invite team members",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!name || !email || !username || !password) {
-      toast({
-        title: "Missing fields",
-        description: "Please fill out all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    inviteMember.mutate({
-      name,
-      email,
-      username,
-      password,
-      role,
-      company_id: companyId,
-    });
-  };
-
   // If not part of a company, don't show team section
   if (!companyId) {
     return null;
   }
+
+  const navigateToTeamMembers = () => {
+    window.location.href = "/company?tab=members";
+  };
 
   return (
     <section className="mb-8">
@@ -114,13 +44,11 @@ const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
         <Button 
           variant="outline" 
           className="text-primary border-primary hover:bg-primary/10"
-          onClick={() => window.location.href = "/company?tab=members"}
+          onClick={navigateToTeamMembers}
         >
           <span className="material-icons text-sm mr-1">person_add</span>
           Invite Team Member
         </Button>
-
-        </Dialog>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
@@ -181,7 +109,7 @@ const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
             <h3 className="text-lg font-medium text-gray-700 mb-1">No team members yet</h3>
             <p className="text-sm mb-4">Invite your colleagues to track their sustainable commutes</p>
             <Button 
-              onClick={() => window.location.href = "/company?tab=members"}
+              onClick={navigateToTeamMembers}
               className="inline-flex items-center"
             >
               <span className="material-icons text-sm mr-1">person_add</span>
