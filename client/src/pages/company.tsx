@@ -51,6 +51,11 @@ const CompanyPage = () => {
     enabled: !!user?.company_id,
   });
   
+  // Log when company data changes
+  useEffect(() => {
+    console.log("Company data loaded:", company);
+  }, [company]);
+  
   // Fetch company members from API
   const { data: members = [], isLoading: isLoadingMembers, refetch: refetchMembers } = useQuery<any[]>({
     queryKey: [`/api/company/members?companyId=${user?.company_id}`],
@@ -74,8 +79,9 @@ const CompanyPage = () => {
     // Debug log
     console.log("Validating email domain:", email, "Company domain:", company?.domain);
     
-    if (!email || !company?.domain) {
-      console.log("Validation skipped - missing email or company domain");
+    // If no email provided or company data not loaded yet, skip validation
+    if (!email) {
+      console.log("Validation skipped - no email provided");
       return true;
     }
     
@@ -84,6 +90,13 @@ const CompanyPage = () => {
     if (emailParts.length !== 2) {
       console.log("Invalid email format (no @ symbol or too many)");
       return false;
+    }
+    
+    // If we don't have company domain loaded yet, skip validation 
+    // but consider it valid (will be checked again on submit)
+    if (!company?.domain) {
+      console.log("Company domain not available yet, skipping validation");
+      return true;
     }
     
     const emailDomain = emailParts[1];
