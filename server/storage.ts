@@ -317,6 +317,16 @@ export class MemStorage implements IStorage {
       .filter(user => user.company_id === companyId);
   }
   
+  async deleteUser(id: number): Promise<boolean> {
+    const user = await this.getUser(id);
+    if (!user) {
+      return false;
+    }
+    
+    // Delete the user
+    return this.users.delete(id);
+  }
+  
   // Commute operations
   async createCommuteLog(insertCommuteLog: InsertCommuteLog): Promise<CommuteLog> {
     const id = this.currentCommuteLogId++;
@@ -953,9 +963,13 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateUser(userId: number, updateData: {
+    name?: string;
+    email?: string;
+    username?: string;
+    password?: string;
+    role?: string;
     is_new_user?: boolean;
     needs_password_change?: boolean;
-    password?: string;
   }): Promise<User> {
     const user = await this.getUser(userId);
     if (!user) {
@@ -965,16 +979,32 @@ export class DatabaseStorage implements IStorage {
     // Create update data with only fields that are provided
     const userData: any = {};
     
+    if (updateData.name !== undefined) {
+      userData.name = updateData.name;
+    }
+    
+    if (updateData.email !== undefined) {
+      userData.email = updateData.email;
+    }
+    
+    if (updateData.username !== undefined) {
+      userData.username = updateData.username;
+    }
+    
+    if (updateData.password !== undefined) {
+      userData.password = updateData.password;
+    }
+    
+    if (updateData.role !== undefined) {
+      userData.role = updateData.role;
+    }
+    
     if (updateData.is_new_user !== undefined) {
       userData.is_new_user = updateData.is_new_user;
     }
     
     if (updateData.needs_password_change !== undefined) {
       userData.needs_password_change = updateData.needs_password_change;
-    }
-    
-    if (updateData.password !== undefined) {
-      userData.password = updateData.password;
     }
     
     const [updatedUser] = await db
@@ -984,6 +1014,20 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedUser;
+  }
+  
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const result = await db
+        .delete(schema.users)
+        .where(eq(schema.users.id, id));
+      
+      // Return true if at least one row was affected
+      return true;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
+    }
   }
   
   // Replit Auth integration
