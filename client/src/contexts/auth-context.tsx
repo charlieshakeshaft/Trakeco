@@ -22,14 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { data: user, isLoading, refetch } = useQuery({
     queryKey: ['/api/user'],
     retry: false,
-    staleTime: 5 * 60 * 1000,
-    // TanStack Query v5 uses onSettled for error handling
-    onSettled: (data, error) => {
-      if (error) {
-        // Silent failure on auth errors
-        console.log('Failed to fetch user - not authenticated');
-      }
-    }
+    staleTime: 5 * 60 * 1000
   });
   
   const login = async (username: string, password: string): Promise<User> => {

@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,7 @@ export function IndividualSignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -61,11 +63,7 @@ export function IndividualSignupForm() {
       await apiRequest("/api/auth/register", registerData, "POST");
       
       // Automatically log in the user
-      const loginData = {
-        username: userData.username,
-        password: userData.password
-      };
-      await apiRequest("/api/auth/login", loginData, "POST");
+      await login(userData.username, userData.password);
       
       toast({
         title: "Account created!",

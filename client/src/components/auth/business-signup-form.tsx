@@ -38,6 +38,7 @@ export function BusinessSignupForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -54,7 +55,6 @@ export function BusinessSignupForm() {
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
-    const { login } = useAuth();
     
     try {
       const { confirmPassword, companyName, companyDomain, adminName, ...userData } = values;
