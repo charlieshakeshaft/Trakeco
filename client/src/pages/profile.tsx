@@ -450,18 +450,21 @@ const Profile = () => {
             <TabsList className="mb-6">
               <TabsTrigger 
                 value="impact" 
+                onClick={() => handleTabChange("impact")}
                 className={activeTab === "impact" ? "data-[state=active]:bg-primary/10 data-[state=active]:text-primary" : ""}
               >
                 Your Impact
               </TabsTrigger>
               <TabsTrigger 
                 value="history" 
+                onClick={() => handleTabChange("history")}
                 className={activeTab === "history" ? "data-[state=active]:bg-primary/10 data-[state=active]:text-primary" : ""}
               >
                 Redemption History
               </TabsTrigger>
               <TabsTrigger 
                 value="settings" 
+                onClick={() => handleTabChange("settings")}
                 className={activeTab === "settings" ? "data-[state=active]:bg-primary/10 data-[state=active]:text-primary" : ""}
               >
                 Settings
