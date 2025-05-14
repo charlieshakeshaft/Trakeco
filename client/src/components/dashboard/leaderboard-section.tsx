@@ -64,10 +64,10 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
             You're the only member in your company right now.
           </p>
           {isAdmin && (
-            <button className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+            <a href="/company?tab=members" className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
               <span className="material-icons text-sm mr-1">person_add</span>
               Invite Team Members
-            </button>
+            </a>
           )}
         </div>
       ) : leaderboardUsers.length === 1 ? (
@@ -90,10 +90,10 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
           {isAdmin && (
             <div className="text-center pt-4 border-t border-gray-100">
               <p className="text-gray-500 mb-3">Invite team members to make the competition more fun!</p>
-              <button className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <a href="/company?tab=members" className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
                 <span className="material-icons text-sm mr-1">person_add</span>
                 Invite Team Members
-              </button>
+              </a>
             </div>
           )}
         </div>
