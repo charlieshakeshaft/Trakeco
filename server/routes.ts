@@ -211,6 +211,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Company routes
+  // Get a specific company
+  app.get("/api/companies/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    console.log("Fetching company ID:", id);
+    const company = await storage.getCompany(id);
+    
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+    
+    console.log("Company data:", company);
+    res.json(company);
+  });
+  
+  // Debug endpoint to view company data directly
+  app.get("/api/debug/company/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    const company = await storage.getCompany(id);
+    
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+    
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(company, null, 2));
+  });
+  
   app.post("/api/companies", async (req, res) => {
     try {
       const companyData = insertCompanySchema.parse(req.body);
