@@ -111,97 +111,15 @@ const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-700">Team Members</h2>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="text-primary border-primary hover:bg-primary/10">
-              <span className="material-icons text-sm mr-1">person_add</span>
-              Invite Team Member
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Invite Team Member</DialogTitle>
-              <DialogDescription>
-                Create an account for a new team member. They'll be able to change their password after logging in.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="email" className="text-right">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="username" className="text-right">
-                    Username
-                  </Label>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="password" className="text-right">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="col-span-3"
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="role" className="text-right">
-                    Role
-                  </Label>
-                  <select 
-                    id="role"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                    className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={inviteMember.isPending}>
-                  {inviteMember.isPending ? "Inviting..." : "Invite Member"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
+        <Button 
+          variant="outline" 
+          className="text-primary border-primary hover:bg-primary/10"
+          onClick={() => window.location.href = "/company?tab=members"}
+        >
+          <span className="material-icons text-sm mr-1">person_add</span>
+          Invite Team Member
+        </Button>
+
         </Dialog>
       </div>
 
@@ -263,7 +181,7 @@ const TeamSection = ({ userId, companyId }: TeamSectionProps) => {
             <h3 className="text-lg font-medium text-gray-700 mb-1">No team members yet</h3>
             <p className="text-sm mb-4">Invite your colleagues to track their sustainable commutes</p>
             <Button 
-              onClick={() => setIsOpen(true)}
+              onClick={() => window.location.href = "/company?tab=members"}
               className="inline-flex items-center"
             >
               <span className="material-icons text-sm mr-1">person_add</span>
