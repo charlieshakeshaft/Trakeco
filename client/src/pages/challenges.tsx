@@ -110,18 +110,6 @@ const Challenges = () => {
         </TabsContent>
         
         <TabsContent value="available">
-          {/* Admin Action Bar - Only visible to admins */}
-          {user?.role === 'admin' && user?.company_id && (
-            <div className="flex justify-end mb-4">
-              <Link to="/company?tab=challenges">
-                <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark">
-                  <span className="material-icons text-sm mr-1">add_circle</span>
-                  Manage Company Challenges
-                </button>
-              </Link>
-            </div>
-          )}
-          
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (
@@ -133,15 +121,27 @@ const Challenges = () => {
               ))}
             </div>
           ) : availableChallenges.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {availableChallenges.map(challenge => (
-                <ChallengeCard 
-                  key={challenge.id}
-                  challenge={challenge}
-                  userId={userId}
-                />
-              ))}
-            </div>
+            <>
+              {user?.role === 'admin' && user?.company_id && (
+                <div className="flex justify-end mb-4">
+                  <Link to="/company?tab=challenges">
+                    <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
+                      <span className="material-icons text-sm mr-1">add_circle</span>
+                      Manage Company Challenges
+                    </button>
+                  </Link>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {availableChallenges.map(challenge => (
+                  <ChallengeCard 
+                    key={challenge.id}
+                    challenge={challenge}
+                    userId={userId}
+                  />
+                ))}
+              </div>
+            </>
           ) : (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
@@ -149,9 +149,17 @@ const Challenges = () => {
                   <span className="material-icons text-gray-400">search</span>
                 </div>
                 <h3 className="text-lg font-medium text-gray-700 mb-2">No Available Challenges</h3>
-                <p className="text-gray-500 text-center max-w-lg">
+                <p className="text-gray-500 mb-6 text-center max-w-lg">
                   You've joined all available challenges! Check back later for new challenges from your administrators.
                 </p>
+                {user?.role === 'admin' && user?.company_id && (
+                  <Link to="/company?tab=challenges">
+                    <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
+                      <span className="material-icons text-sm mr-1">add_circle</span>
+                      Manage Company Challenges
+                    </button>
+                  </Link>
+                )}
               </CardContent>
             </Card>
           )}
