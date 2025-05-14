@@ -39,16 +39,19 @@ const Profile = () => {
   const { data: profile, isLoading } = useUserProfile(user?.id || 0);
   const profileData: ProfileData = profile as ProfileData || {};
   const { toast } = useToast();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
   // Active tab state with URL sync - completely refactored for reliability
   const [activeTab, setActiveTab] = useState('impact');
   
-  // Initialize tab from URL on component mount
+  // Initialize tab from URL on component mount and route changes
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tabFromUrl = params.get('tab');
+    
+    console.log("Profile page: location changed to", location, "with params", window.location.search);
+    
     if (tabFromUrl && ['impact', 'history', 'settings'].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
       console.log("Setting active tab from URL:", tabFromUrl);
@@ -57,16 +60,15 @@ const Profile = () => {
       setActiveTab('settings');
       console.log("User needs password change, defaulting to settings tab");
     }
-  }, [user]);
+  }, [location, user]);
   
   // Handler for tab change
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     
-    // Update URL without triggering navigation
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', value);
-    window.history.pushState({}, '', url.toString());
+    // Update URL with new tab parameter through wouter's setLocation
+    // This replaces window.history manipulation to ensure consistency
+    setLocation(`/profile?tab=${value}`);
     
     // Add a short delay for UI updates to propagate
     setTimeout(() => {

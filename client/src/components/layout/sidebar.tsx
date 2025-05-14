@@ -1,4 +1,4 @@
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { User } from "@/lib/types";
 
 interface SidebarProps {
@@ -6,10 +6,10 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ user }: SidebarProps) => {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const isActive = (path: string) => {
-    return location === path;
+    return location === path || (path === '/profile' && location.startsWith('/profile'));
   };
 
   const linkClasses = (path: string) => {
@@ -18,6 +18,35 @@ const Sidebar = ({ user }: SidebarProps) => {
         ? "text-gray-800 bg-gray-100"
         : "text-gray-600 hover:bg-gray-100"
     }`;
+  };
+  
+  // Enhanced navigation handler with tab support
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string, tab?: string) => {
+    e.preventDefault();
+    
+    // If user needs password change, always redirect to profile with appropriate tab
+    if (user?.needs_password_change) {
+      // Map standard routes to profile tabs
+      let tabToUse = tab;
+      
+      if (!tabToUse) {
+        // Set default tabs based on route
+        if (path === '/challenges') tabToUse = 'impact';
+        else if (path === '/rewards') tabToUse = 'history';
+        else tabToUse = 'settings';
+      }
+      
+      console.log(`User needs password change, redirecting to profile with tab: ${tabToUse}`);
+      setLocation(`/profile?tab=${tabToUse}`);
+      return;
+    }
+    
+    // Normal navigation with optional tab parameter
+    if (tab && path === '/profile') {
+      setLocation(`/profile?tab=${tab}`);
+    } else {
+      setLocation(path);
+    }
   };
 
   return (
@@ -35,41 +64,68 @@ const Sidebar = ({ user }: SidebarProps) => {
         <div className="px-4 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
           Main
         </div>
-        <Link href="/" className={linkClasses("/")}>
+        <a 
+          href="/" 
+          onClick={(e) => handleNavigation(e, "/")}
+          className={linkClasses("/")}
+        >
           <span className="material-icons text-primary mr-3">dashboard</span>
           Dashboard
-        </Link>
-        <Link href="/log-commute" className={linkClasses("/log-commute")}>
+        </a>
+        <a 
+          href="/log-commute" 
+          onClick={(e) => handleNavigation(e, "/log-commute")}
+          className={linkClasses("/log-commute")}
+        >
           <span className="material-icons text-gray-500 mr-3">directions_bike</span>
           Log Commute
-        </Link>
-        <Link href="/challenges" className={linkClasses("/challenges")}>
+        </a>
+        <a 
+          href="/challenges" 
+          onClick={(e) => handleNavigation(e, "/challenges", "impact")}
+          className={linkClasses("/challenges")}
+        >
           <span className="material-icons text-gray-500 mr-3">emoji_events</span>
           Challenges
-        </Link>
-        <Link href="/rewards" className={linkClasses("/rewards")}>
+        </a>
+        <a 
+          href="/rewards" 
+          onClick={(e) => handleNavigation(e, "/rewards", "history")}
+          className={linkClasses("/rewards")}
+        >
           <span className="material-icons text-gray-500 mr-3">redeem</span>
           Rewards
-        </Link>
-        <Link href="/leaderboard" className={linkClasses("/leaderboard")}>
+        </a>
+        <a 
+          href="/leaderboard" 
+          onClick={(e) => handleNavigation(e, "/leaderboard")}
+          className={linkClasses("/leaderboard")}
+        >
           <span className="material-icons text-gray-500 mr-3">leaderboard</span>
           Leaderboard
-        </Link>
+        </a>
 
         <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
           Account
         </div>
-        <Link href="/profile" className={linkClasses("/profile")}>
+        <a 
+          href="/profile" 
+          onClick={(e) => handleNavigation(e, "/profile", user?.needs_password_change ? "settings" : "impact")}
+          className={linkClasses("/profile")}
+        >
           <span className="material-icons text-gray-500 mr-3">account_circle</span>
           Profile
-        </Link>
+        </a>
         {user.role === 'admin' && (
-          <Link href="/company" className={linkClasses("/company")}>
+          <a 
+            href="/company" 
+            onClick={(e) => handleNavigation(e, "/company")}
+            className={linkClasses("/company")}
+          >
             <span className="material-icons text-gray-500 mr-3">business</span>
             Company
-          </Link>
+          </a>
         )}
-
       </nav>
 
       <div className="p-4 border-t border-gray-200">
