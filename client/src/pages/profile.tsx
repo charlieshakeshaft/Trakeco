@@ -42,6 +42,9 @@ const Profile = () => {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
+  // Active tab state
+  const [activeTab, setActiveTab] = useState(window.location.search.includes('tab=settings') ? 'settings' : 'impact');
+  
   // State for location settings
   const [locationSettings, setLocationSettings] = useState<LocationSettings>({
     home_address: user?.home_address || "",
@@ -308,9 +311,7 @@ const Profile = () => {
                 <Button 
                   className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
                   onClick={() => {
-                    document.querySelector('[data-value="settings"]')?.dispatchEvent(
-                      new MouseEvent('click', { bubbles: true })
-                    );
+                    setActiveTab("settings");
                     
                     // Update the user to no longer be considered new
                     updateUserMutation.mutate({
@@ -338,11 +339,7 @@ const Profile = () => {
                 <p>You're using a temporary password. Please change it to a secure password you'll remember.</p>
                 <Button 
                   className="mt-3 bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => {
-                    document.querySelector('[data-value="settings"]')?.dispatchEvent(
-                      new MouseEvent('click', { bubbles: true })
-                    );
-                  }}
+                  onClick={() => setActiveTab("settings")}
                 >
                   Change password
                 </Button>
@@ -418,7 +415,7 @@ const Profile = () => {
         </Card>
         
         <div className="md:col-span-2">
-          <Tabs defaultValue={window.location.search.includes('tab=settings') ? 'settings' : 'impact'}>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-6">
               <TabsTrigger value="impact">Your Impact</TabsTrigger>
               <TabsTrigger value="history">Redemption History</TabsTrigger>
