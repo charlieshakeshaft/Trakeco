@@ -87,6 +87,21 @@ const CompanyPage = () => {
   const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
   const { data: challenges, isLoading: isLoadingChallenges } = useAllChallenges(userId);
   
+  // State for active tab with URL parameter support
+  const [activeTab, setActiveTab] = useState("members");
+  
+  // Handle tab parameter from URL
+  useEffect(() => {
+    // Extract tab parameter from the URL if it exists
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    
+    // Set the active tab if a valid tab parameter is provided
+    if (tabParam && ['members', 'challenges', 'rewards'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, []);
+  
   // Check if user has admin role
   const isAdmin = user?.role === "admin";
   
@@ -195,7 +210,11 @@ const CompanyPage = () => {
         </CardContent>
       </Card>
       
-      <Tabs defaultValue="members">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
+        // Update URL when tab changes
+        window.history.replaceState(null, '', `/company?tab=${value}`);
+      }}>
         <TabsList className="mb-6">
           <TabsTrigger value="members">Team Members</TabsTrigger>
           <TabsTrigger value="challenges">Challenges</TabsTrigger>
