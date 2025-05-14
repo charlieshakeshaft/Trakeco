@@ -71,15 +71,26 @@ const CompanyPage = () => {
   
   // Functions for validation
   const validateEmailDomain = (email: string) => {
-    if (!email || !company?.domain) return true;
+    // Debug log
+    console.log("Validating email domain:", email, "Company domain:", company?.domain);
+    
+    if (!email || !company?.domain) {
+      console.log("Validation skipped - missing email or company domain");
+      return true;
+    }
     
     // Extract domain from email (after @)
     const emailParts = email.split('@');
-    if (emailParts.length !== 2) return false;
+    if (emailParts.length !== 2) {
+      console.log("Invalid email format (no @ symbol or too many)");
+      return false;
+    }
     
     const emailDomain = emailParts[1];
     // Check if email domain matches company domain
-    return emailDomain.toLowerCase() === company.domain.toLowerCase();
+    const isValid = emailDomain.toLowerCase() === company.domain.toLowerCase();
+    console.log("Domain comparison:", emailDomain, "vs", company.domain, "Result:", isValid);
+    return isValid;
   };
   
   const checkUsernameUniqueness = (username: string, userId?: number) => {
@@ -531,11 +542,14 @@ const CompanyPage = () => {
                           }
                         }}
                         onBlur={(e) => {
+                          console.log("Email onBlur triggered");
                           const email = e.target.value;
                           // Validate email domain on blur (when user leaves the field)
                           if (email && !validateEmailDomain(email)) {
+                            console.log("Setting email error");
                             setEmailError(`Email must use company domain: @${company?.domain}`);
                           } else {
+                            console.log("Clearing email error");
                             setEmailError("");
                           }
                         }}
@@ -733,11 +747,14 @@ const CompanyPage = () => {
                         }
                       }}
                       onBlur={(e) => {
+                        console.log("Edit Email onBlur triggered");
                         const email = e.target.value;
                         // Check email domain on blur
                         if (email && !validateEmailDomain(email)) {
+                          console.log("Setting email error in edit form");
                           setEmailError(`Email must use company domain: @${company?.domain}`);
                         } else {
+                          console.log("Clearing email error in edit form");
                           setEmailError("");
                         }
                       }}
