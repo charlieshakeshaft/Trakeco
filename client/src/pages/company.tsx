@@ -525,8 +525,14 @@ const CompanyPage = () => {
                         onChange={(e) => {
                           const email = e.target.value;
                           setNewMember({...newMember, email});
-                          
-                          // Validate email domain
+                          // Clear error if user is typing
+                          if (emailError && email === "") {
+                            setEmailError("");
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const email = e.target.value;
+                          // Validate email domain on blur (when user leaves the field)
                           if (email && !validateEmailDomain(email)) {
                             setEmailError(`Email must use company domain: @${company?.domain}`);
                           } else {
@@ -551,8 +557,14 @@ const CompanyPage = () => {
                         onChange={(e) => {
                           const username = e.target.value;
                           setNewMember({...newMember, username});
-                          
-                          // Check username uniqueness
+                          // Clear error if user is typing
+                          if (usernameError && username === "") {
+                            setUsernameError("");
+                          }
+                        }}
+                        onBlur={(e) => {
+                          const username = e.target.value;
+                          // Check username uniqueness on blur
                           if (username && !checkUsernameUniqueness(username)) {
                             setUsernameError("This username is already taken");
                           } else {
@@ -715,8 +727,14 @@ const CompanyPage = () => {
                       onChange={(e) => {
                         const email = e.target.value;
                         setMemberToEdit({...memberToEdit, email});
-                        
-                        // Check email domain
+                        // Clear error if user is typing
+                        if (emailError && email === "") {
+                          setEmailError("");
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const email = e.target.value;
+                        // Check email domain on blur
                         if (email && !validateEmailDomain(email)) {
                           setEmailError(`Email must use company domain: @${company?.domain}`);
                         } else {
@@ -741,8 +759,14 @@ const CompanyPage = () => {
                       onChange={(e) => {
                         const username = e.target.value;
                         setMemberToEdit({...memberToEdit, username});
-                        
-                        // Check username uniqueness
+                        // Clear error if user is typing
+                        if (usernameError && username === "") {
+                          setUsernameError("");
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const username = e.target.value;
+                        // Check username uniqueness on blur
                         if (username && !checkUsernameUniqueness(username, memberToEdit?.id)) {
                           setUsernameError("This username is already taken");
                         } else {
