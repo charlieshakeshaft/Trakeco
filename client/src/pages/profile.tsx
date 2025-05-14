@@ -302,36 +302,11 @@ const Profile = () => {
               <span className="material-icons text-amber-500">info</span>
             </div>
             <div className="ml-3">
-              <h3 className="text-lg font-medium text-amber-800">Welcome to EcoCommute!</h3>
+              <h3 className="text-lg font-medium text-amber-800">Welcome to Trak!</h3>
               <div className="mt-2 text-amber-700">
                 <p>To get started, please set up your home and work addresses in the Settings tab below. This will allow you to log your commutes and start earning points!</p>
                 <Button 
                   className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
-                  onClick={() => {
-                    document.querySelector('[data-value="settings"]')?.dispatchEvent(
-                      new MouseEvent('click', { bubbles: true })
-                    );
-                  }}
-                >
-                  Set up your addresses now
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {user?.is_new_user && (
-        <div className="bg-green-50 border-green-200 border rounded-lg p-4 mb-6">
-          <div className="flex items-start">
-            <div className="flex-shrink-0 pt-0.5">
-              <span className="material-icons text-green-500">waving_hand</span>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-lg font-medium text-green-800">Welcome to EcoCommute!</h3>
-              <div className="mt-2 text-green-700">
-                <p>Thanks for joining! To get started, please set up your home and work locations in your profile settings.</p>
-                <Button 
-                  className="mt-3 bg-green-600 hover:bg-green-700 text-white"
                   onClick={() => {
                     document.querySelector('[data-value="settings"]')?.dispatchEvent(
                       new MouseEvent('click', { bubbles: true })
@@ -343,7 +318,7 @@ const Profile = () => {
                     });
                   }}
                 >
-                  Set up locations
+                  Set up your addresses now
                 </Button>
               </div>
             </div>
