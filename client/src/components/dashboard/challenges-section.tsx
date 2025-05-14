@@ -235,9 +235,9 @@ const ChallengesSection = ({ userId }: ChallengesSectionProps) => {
       ) : (
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 text-center">
           <div className="text-gray-500 mb-4">You haven't joined any challenges yet.</div>
-          <Link to="/challenges">
+          <Link to="/challenges?tab=available">
             <button className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-              Browse Challenges
+              Browse Available Challenges
             </button>
           </Link>
         </div>

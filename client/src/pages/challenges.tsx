@@ -1,15 +1,29 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAllChallenges, useUserChallenges } from "@/hooks/use-challenges";
 import { Challenge } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChallengeCard from "@/components/challenges/challenge-card";
 import { useAuth } from "@/contexts/auth-context";
+import { useLocation } from "wouter";
 
 const Challenges = () => {
   const [activeTab, setActiveTab] = useState("active");
   const { user } = useAuth();
   const userId = user?.id || 0;
+  const [location] = useLocation();
+  
+  // Read the tab parameter from the URL query string
+  useEffect(() => {
+    // Extract tab parameter from the URL if it exists
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    
+    // Set the active tab if a valid tab parameter is provided
+    if (tabParam && ['active', 'available', 'completed'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
   
   const { data: allChallenges, isLoading: isLoadingAll } = useAllChallenges(userId);
   const { data: userChallenges, isLoading: isLoadingUser } = useUserChallenges(userId);
@@ -38,7 +52,7 @@ const Challenges = () => {
     <div className="p-4 md:p-8">
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Challenges</h1>
       
-      <Tabs defaultValue="active" onValueChange={setActiveTab}>
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
           <TabsTrigger value="active">Active Challenges</TabsTrigger>
           <TabsTrigger value="available">Available Challenges</TabsTrigger>
