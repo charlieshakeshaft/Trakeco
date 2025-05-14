@@ -65,7 +65,7 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-700">Available Rewards</h2>
-          <Link to="/rewards" className="text-primary hover:text-primary-dark text-sm font-medium">
+          <Link to="/rewards?tab=available" className="text-primary hover:text-primary-dark text-sm font-medium">
             View All
           </Link>
         </div>
@@ -102,7 +102,7 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
             </p>
           )}
         </div>
-        <Link to="/rewards" className="text-primary hover:text-primary-dark text-sm font-medium">
+        <Link to="/rewards?tab=available" className="text-primary hover:text-primary-dark text-sm font-medium">
           View All
         </Link>
       </div>
@@ -114,14 +114,12 @@ const RewardsSection = ({ userId }: RewardsSectionProps) => {
           <p className="text-gray-500 mb-4">
             There are no rewards available for your company yet.
           </p>
-          {userProfileData.role === 'admin' && (
-            <Link to="/rewards">
-              <button className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
-                <span className="material-icons text-sm mr-1">add</span>
-                Create Reward
-              </button>
-            </Link>
-          )}
+          <Link to="/rewards?tab=available">
+            <button className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+              <span className="material-icons text-sm mr-1">visibility</span>
+              Browse Available Rewards
+            </button>
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

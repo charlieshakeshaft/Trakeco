@@ -83,7 +83,7 @@ const ChallengesSection = ({ userId }: ChallengesSectionProps) => {
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-700">Active Challenges</h2>
-          <Link to="/challenges" className="text-primary hover:text-primary-dark text-sm font-medium">
+          <Link to="/challenges?tab=active" className="text-primary hover:text-primary-dark text-sm font-medium">
             View All
           </Link>
         </div>
@@ -107,7 +107,7 @@ const ChallengesSection = ({ userId }: ChallengesSectionProps) => {
     <section className="mb-8">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-700">Active Challenges</h2>
-        <Link to="/challenges" className="text-primary hover:text-primary-dark text-sm font-medium">
+        <Link to="/challenges?tab=active" className="text-primary hover:text-primary-dark text-sm font-medium">
           View All
         </Link>
       </div>
