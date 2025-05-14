@@ -51,8 +51,13 @@ const Profile = () => {
     const tabFromUrl = params.get('tab');
     if (tabFromUrl && ['impact', 'history', 'settings'].includes(tabFromUrl)) {
       setActiveTab(tabFromUrl);
+      console.log("Setting active tab from URL:", tabFromUrl);
+    } else if (user?.needs_password_change) {
+      // If user needs to change password and no tab is specified, default to settings
+      setActiveTab('settings');
+      console.log("User needs password change, defaulting to settings tab");
     }
-  }, []);
+  }, [user]);
   
   // Handler for tab change
   const handleTabChange = (value: string) => {
