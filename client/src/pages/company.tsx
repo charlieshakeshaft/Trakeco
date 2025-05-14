@@ -707,24 +707,54 @@ const CompanyPage = () => {
                   <Label htmlFor="edit-email" className="text-right">
                     Email
                   </Label>
-                  <Input
-                    id="edit-email"
-                    type="email"
-                    value={memberToEdit?.email || ''}
-                    onChange={(e) => setMemberToEdit({...memberToEdit, email: e.target.value})}
-                    className="col-span-3"
-                  />
+                  <div className="col-span-3 space-y-1">
+                    <Input
+                      id="edit-email"
+                      type="email"
+                      value={memberToEdit?.email || ''}
+                      onChange={(e) => {
+                        const email = e.target.value;
+                        setMemberToEdit({...memberToEdit, email});
+                        
+                        // Check email domain
+                        if (email && !validateEmailDomain(email)) {
+                          setEmailError(`Email must use company domain: @${company?.domain}`);
+                        } else {
+                          setEmailError("");
+                        }
+                      }}
+                      className={emailError ? "border-red-500" : ""}
+                    />
+                    {emailError && (
+                      <p className="text-sm text-red-500">{emailError}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-username" className="text-right">
                     Username
                   </Label>
-                  <Input
-                    id="edit-username"
-                    value={memberToEdit?.username || ''}
-                    onChange={(e) => setMemberToEdit({...memberToEdit, username: e.target.value})}
-                    className="col-span-3"
-                  />
+                  <div className="col-span-3 space-y-1">
+                    <Input
+                      id="edit-username"
+                      value={memberToEdit?.username || ''}
+                      onChange={(e) => {
+                        const username = e.target.value;
+                        setMemberToEdit({...memberToEdit, username});
+                        
+                        // Check username uniqueness
+                        if (username && !checkUsernameUniqueness(username, memberToEdit?.id)) {
+                          setUsernameError("This username is already taken");
+                        } else {
+                          setUsernameError("");
+                        }
+                      }}
+                      className={usernameError ? "border-red-500" : ""}
+                    />
+                    {usernameError && (
+                      <p className="text-sm text-red-500">{usernameError}</p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="edit-password" className="text-right">
