@@ -44,6 +44,13 @@ import { User } from "@/lib/types";
 const CompanyPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Fetch company data
+  const { data: company, isLoading: isLoadingCompany } = useQuery<any>({
+    queryKey: [`/api/companies/${user?.company_id}`],
+    enabled: !!user?.company_id,
+  });
+  
   // Fetch company members from API
   const { data: members = [], isLoading: isLoadingMembers, refetch: refetchMembers } = useQuery<any[]>({
     queryKey: [`/api/company/members?companyId=${user?.company_id}`],
@@ -56,6 +63,10 @@ const CompanyPage = () => {
     password: "",
     role: "user" 
   });
+  
+  // State for validation errors
+  const [emailError, setEmailError] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
   const [isEditMemberOpen, setIsEditMemberOpen] = useState(false);
