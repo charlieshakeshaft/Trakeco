@@ -30,10 +30,15 @@ export interface IStorage {
     commute_distance_km?: number;
   }): Promise<User>;
   updateUser(userId: number, updateData: {
+    name?: string;
+    email?: string;
+    username?: string;
+    password?: string;
+    role?: string;
     is_new_user?: boolean;
     needs_password_change?: boolean;
-    password?: string;
   }): Promise<User>;
+  deleteUser(id: number): Promise<boolean>;
   // For Replit Auth integration
   upsertUser(user: UpsertUser): Promise<User>;
   

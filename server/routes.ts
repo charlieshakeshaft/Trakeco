@@ -270,6 +270,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Update company member
+  app.patch("/api/company/members/:id", authenticate, async (req, res) => {
+    try {
+      const authenticatedUser = (req as any).user;
+      const memberId = Number(req.params.id);
+      
+      // Only admins can update members
+      if (authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Only admins can update team members" });
+      }
+      
+      // Get the member to verify company membership
+      const memberToUpdate = await storage.getUser(memberId);
+      
+      if (!memberToUpdate) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if member belongs to the same company as the admin
+      if (memberToUpdate.company_id !== authenticatedUser.company_id) {
+        return res.status(403).json({ message: "You don't have permission to update members from other companies" });
+      }
+      
+      // Define updateable fields
+      const { 
+        name, 
+        email, 
+        username, 
+        password, 
+        role, 
+        is_new_user, 
+        needs_password_change 
+      } = req.body;
+      
+      // Create update data object
+      const updateData: any = {};
+      
+      // Only add fields that are provided
+      if (name !== undefined) updateData.name = name;
+      if (email !== undefined) updateData.email = email;
+      if (username !== undefined) updateData.username = username;
+      if (password !== undefined) {
+        // Hash the password if it's being updated
+        updateData.password = await hashPassword(password);
+      }
+      if (role !== undefined) updateData.role = role;
+      if (is_new_user !== undefined) updateData.is_new_user = is_new_user;
+      if (needs_password_change !== undefined) updateData.needs_password_change = needs_password_change;
+      
+      // If nothing to update, return early
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: "No data provided to update" });
+      }
+      
+      // Validate the update data
+      // (You may want to add more validation like checking for unique email/username)
+      if (email && email.indexOf('@') === -1) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+      
+      // Update the user
+      const updatedUser = await storage.updateUser(memberId, updateData);
+      
+      if (!updatedUser) {
+        return res.status(404).json({ message: "Failed to update user" });
+      }
+      
+      // Don't return the password
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      
+      return res.json(userWithoutPassword);
+    } catch (error) {
+      console.error("Error updating team member:", error);
+      return res.status(500).json({ message: "Failed to update team member" });
+    }
+  });
+  
+  // Delete company member
+  app.delete("/api/company/members/:id", authenticate, async (req, res) => {
+    try {
+      const authenticatedUser = (req as any).user;
+      const memberId = Number(req.params.id);
+      
+      // Only admins can delete members
+      if (authenticatedUser.role !== 'admin') {
+        return res.status(403).json({ message: "Only admins can delete team members" });
+      }
+      
+      // Don't allow self-deletion
+      if (memberId === authenticatedUser.id) {
+        return res.status(400).json({ message: "You cannot delete your own account" });
+      }
+      
+      // Get the member to verify company membership
+      const memberToDelete = await storage.getUser(memberId);
+      
+      if (!memberToDelete) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if member belongs to the same company as the admin
+      if (memberToDelete.company_id !== authenticatedUser.company_id) {
+        return res.status(403).json({ message: "You don't have permission to delete members from other companies" });
+      }
+      
+      // Delete the user
+      const deleted = await storage.deleteUser(memberId);
+      
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete user" });
+      }
+      
+      return res.status(200).json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      return res.status(500).json({ message: "Failed to delete team member" });
+    }
+  });
+  
   // Update user info (password, status)
   app.patch("/api/user/update", authenticate, async (req, res) => {
     try {

@@ -553,6 +553,156 @@ const CompanyPage = () => {
               </div>
             </CardContent>
           </Card>
+          
+          {/* Edit Member Dialog */}
+          <Dialog open={isEditMemberOpen} onOpenChange={setIsEditMemberOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Team Member</DialogTitle>
+                <DialogDescription>
+                  Update the member's information. Leave the password field empty to keep the current password.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-name" className="text-right">
+                    Name
+                  </Label>
+                  <Input
+                    id="edit-name"
+                    value={memberToEdit?.name || ''}
+                    onChange={(e) => setMemberToEdit({...memberToEdit, name: e.target.value})}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-email" className="text-right">
+                    Email
+                  </Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={memberToEdit?.email || ''}
+                    onChange={(e) => setMemberToEdit({...memberToEdit, email: e.target.value})}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-username" className="text-right">
+                    Username
+                  </Label>
+                  <Input
+                    id="edit-username"
+                    value={memberToEdit?.username || ''}
+                    onChange={(e) => setMemberToEdit({...memberToEdit, username: e.target.value})}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-password" className="text-right">
+                    New Password
+                  </Label>
+                  <div className="col-span-3 relative">
+                    <Input
+                      id="edit-password"
+                      type={showPassword ? "text" : "password"}
+                      value={memberToEdit?.password || ''}
+                      onChange={(e) => setMemberToEdit({...memberToEdit, password: e.target.value})}
+                      className="pr-10"
+                      placeholder="Leave empty to keep current password"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      <span className="material-icons text-gray-500" style={{ fontSize: '18px' }}>
+                        {showPassword ? 'visibility_off' : 'visibility'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-role" className="text-right">
+                    Role
+                  </Label>
+                  <select
+                    id="edit-role"
+                    value={memberToEdit?.role || 'user'}
+                    onChange={(e) => setMemberToEdit({...memberToEdit, role: e.target.value})}
+                    className="col-span-3 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">User Status</Label>
+                  <div className="col-span-3 space-y-2">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="is-new-user"
+                        checked={memberToEdit?.is_new_user || false}
+                        onChange={(e) => setMemberToEdit({...memberToEdit, is_new_user: e.target.checked})}
+                        className="mr-2"
+                      />
+                      <Label htmlFor="is-new-user" className="text-sm font-normal">
+                        New User (Shows welcome screen)
+                      </Label>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="needs-password-change"
+                        checked={memberToEdit?.needs_password_change || false}
+                        onChange={(e) => setMemberToEdit({...memberToEdit, needs_password_change: e.target.checked})}
+                        className="mr-2"
+                      />
+                      <Label htmlFor="needs-password-change" className="text-sm font-normal">
+                        Requires Password Change
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => {
+                  setIsEditMemberOpen(false);
+                  setMemberToEdit(null);
+                  setShowPassword(false);
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveMember}>Save Changes</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          
+          {/* Delete Member Dialog */}
+          <AlertDialog open={isDeleteMemberDialogOpen} onOpenChange={setIsDeleteMemberDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action will permanently remove {memberToDelete?.name} from your company. 
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => {
+                  setIsDeleteMemberDialogOpen(false);
+                  setMemberToDelete(null);
+                }}>
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDeleteMember} className="bg-red-600 hover:bg-red-700">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </TabsContent>
         
         <TabsContent value="challenges">
