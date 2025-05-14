@@ -103,69 +103,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
-      }
-      
-      const user = await storage.getUserByUsername(username);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      
-      // Set user ID in session
-      (req as any).session.userId = user.id;
-      
-      // Don't return the password
-      const { password: _, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(500).json({ message: "Error logging in" });
-    }
-  });
+  // Authentication endpoints are in auth.ts
   
-  app.post("/api/auth/logout", (req, res) => {
-    // Clear session data
-    if ((req as any).session) {
-      (req as any).session.userId = null;
-      (req as any).session.destroy(() => {
-        res.status(200).json({ message: "Logged out successfully" });
-      });
-    } else {
-      res.status(200).json({ message: "Logged out successfully" });
-    }
-  });
-  
-  // Main user endpoint for authentication checks
-  app.get("/api/user", async (req, res) => {
-    try {
-      // Check if user is logged in via session
-      const userId = (req as any).session?.userId;
-      
-      if (!userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      
-      // Get user from storage
-      const user = await storage.getUser(userId);
-      
-      if (!user) {
-        return res.status(401).json({ message: "User not found" });
-      }
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
-    } catch (error) {
-      console.error("Error fetching current user:", error);
-      res.status(500).json({ message: "Error fetching user data" });
-    }
-  });
+  // Main user endpoint for authentication checks is already defined in auth.ts
   
   app.get("/api/user/profile", authenticate, async (req, res) => {
     try {

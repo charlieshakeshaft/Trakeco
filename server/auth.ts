@@ -93,7 +93,7 @@ export function setupAuth(app: Express) {
   });
 
   // Login endpoint
-  app.post("/api/login", (req, res, next) => {
+  app.post("/api/auth/login", (req, res, next) => {
     passport.authenticate("local", (err: Error | null, user: User | false, info: { message: string } | undefined) => {
       if (err) {
         return next(err);
@@ -108,13 +108,15 @@ export function setupAuth(app: Express) {
           return next(err);
         }
         
-        return res.json(user);
+        // Don't return the password
+        const { password: _, ...userWithoutPassword } = user;
+        return res.json(userWithoutPassword);
       });
     })(req, res, next);
   });
 
   // Logout endpoint
-  app.post("/api/logout", (req, res) => {
+  app.post("/api/auth/logout", (req, res) => {
     req.logout((err) => {
       if (err) {
         return res.status(500).json({ message: "Failed to logout" });
