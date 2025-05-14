@@ -56,7 +56,12 @@ const CompanyPage = () => {
     password: "",
     role: "user" 
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
+  const [isEditMemberOpen, setIsEditMemberOpen] = useState(false);
+  const [isDeleteMemberDialogOpen, setIsDeleteMemberDialogOpen] = useState(false);
+  const [memberToEdit, setMemberToEdit] = useState<any | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
   const [isAddChallengeOpen, setIsAddChallengeOpen] = useState(false);
   const [isEditChallengeOpen, setIsEditChallengeOpen] = useState(false);
   const [isAddRewardOpen, setIsAddRewardOpen] = useState(false);
@@ -158,6 +163,103 @@ const CompanyPage = () => {
     deleteChallengeMutation.mutate(challengeToDelete.id);
     setIsDeleteDialogOpen(false);
     setChallengeToDelete(null);
+  };
+  
+  // Handle editing a member
+  const handleEditMember = (member: any) => {
+    // Create a copy without password (we don't want to show or update the current password)
+    const { password, ...memberWithoutPassword } = member;
+    setMemberToEdit({
+      ...memberWithoutPassword,
+      password: '', // Empty password means it won't be updated
+    });
+    setIsEditMemberOpen(true);
+  };
+  
+  // Handle saving edited member
+  const handleSaveMember = async () => {
+    if (!memberToEdit) return;
+    
+    try {
+      const dataToSend = { ...memberToEdit };
+      
+      // Only include password if it was provided
+      if (!dataToSend.password) {
+        delete dataToSend.password;
+      }
+      
+      const response = await fetch(`/api/company/members/${memberToEdit.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSend),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update member');
+      }
+      
+      // Refresh the members list
+      refetchMembers();
+      
+      setIsEditMemberOpen(false);
+      setMemberToEdit(null);
+      setShowPassword(false);
+      
+      toast({
+        title: "Member Updated",
+        description: `${memberToEdit.name}'s details have been updated.`,
+      });
+    } catch (error) {
+      console.error('Error updating member:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update member",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Handle deleting a member
+  const handleDeleteMember = (member: any) => {
+    setMemberToDelete(member);
+    setIsDeleteMemberDialogOpen(true);
+  };
+  
+  // Handle confirming member deletion
+  const handleConfirmDeleteMember = async () => {
+    if (!memberToDelete) return;
+    
+    try {
+      const response = await fetch(`/api/company/members/${memberToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete member');
+      }
+      
+      // Refresh the members list
+      refetchMembers();
+      
+      setIsDeleteMemberDialogOpen(false);
+      setMemberToDelete(null);
+      
+      toast({
+        title: "Member Deleted",
+        description: `${memberToDelete.name} has been removed from your company.`,
+      });
+    } catch (error) {
+      console.error('Error deleting member:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete member",
+        variant: "destructive",
+      });
+    }
   };
   
   if (!isAdmin) {
@@ -289,7 +391,27 @@ const CompanyPage = () => {
                     <Input
                       id="name"
                       value={newMember.name}
-                      onChange={(e) => setNewMember({...newMember, name: e.target.value})}
+                      onChange={(e) => {
+                        const name = e.target.value;
+                        let suggestedUsername = '';
+                        
+                        // Generate username based on name (if name is provided)
+                        if (name) {
+                          // Convert to lowercase, replace spaces with dots, remove special characters
+                          suggestedUsername = name.toLowerCase()
+                            .replace(/\s+/g, '.')
+                            .replace(/[^a-z0-9.]/g, '');
+                        }
+                        
+                        setNewMember({
+                          ...newMember, 
+                          name: name,
+                          // Only auto-update username if it's empty or was auto-generated before
+                          username: newMember.username === '' || 
+                                   newMember.username === newMember.name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '') 
+                                   ? suggestedUsername : newMember.username
+                        });
+                      }}
                       className="col-span-3"
                     />
                   </div>
@@ -320,13 +442,24 @@ const CompanyPage = () => {
                     <Label htmlFor="password" className="text-right">
                       Temporary Password
                     </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={newMember.password}
-                      onChange={(e) => setNewMember({...newMember, password: e.target.value})}
-                      className="col-span-3"
-                    />
+                    <div className="col-span-3 relative">
+                      <Input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        value={newMember.password}
+                        onChange={(e) => setNewMember({...newMember, password: e.target.value})}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        <span className="material-icons text-gray-500" style={{ fontSize: '18px' }}>
+                          {showPassword ? 'visibility_off' : 'visibility'}
+                        </span>
+                      </button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="role" className="text-right">
@@ -372,6 +505,7 @@ const CompanyPage = () => {
                         <th className="text-left py-3 px-4 font-medium">Username</th>
                         <th className="text-left py-3 px-4 font-medium">Role</th>
                         <th className="text-left py-3 px-4 font-medium">Status</th>
+                        <th className="text-right py-3 px-4 font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -390,6 +524,26 @@ const CompanyPage = () => {
                                 Password Change Required
                               </span>
                             )}
+                          </td>
+                          <td className="py-3 px-4 text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditMember(member)}
+                              disabled={user?.id === member.id} // Can't edit yourself
+                              title={user?.id === member.id ? "You cannot edit your own account" : "Edit member"}
+                            >
+                              <span className="material-icons text-sm">edit</span>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleDeleteMember(member)}
+                              disabled={user?.id === member.id} // Can't delete yourself
+                              title={user?.id === member.id ? "You cannot delete your own account" : "Delete member"}
+                            >
+                              <span className="material-icons text-sm text-red-500">delete</span>
+                            </Button>
                           </td>
                         </tr>
                       ))}
