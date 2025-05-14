@@ -92,6 +92,33 @@ const CompanyPage = () => {
       return true;
     }
     
+    // If company domain is not available, try to use the admin user's domain as fallback
+    if (!company?.domain) {
+      console.log("Company domain not available, using fallback validation");
+      
+      // Get admin's email domain
+      const userDomain = user?.email?.split('@')[1];
+      if (!userDomain) {
+        console.log("No fallback domain available");
+        // Trigger a refetch to try to get the company data
+        refetchCompany();
+        return false;
+      }
+      
+      // Extract domain from email (after @)
+      const emailParts = email.split('@');
+      if (emailParts.length !== 2) {
+        console.log("Invalid email format");
+        return false;
+      }
+      
+      const emailDomain = emailParts[1].toLowerCase();
+      const matchesDomain = emailDomain === userDomain.toLowerCase();
+      console.log(`Fallback validation: ${emailDomain} against ${userDomain} - Result: ${matchesDomain}`);
+      return matchesDomain;
+    }
+    
+    // Regular validation when company domain is available
     // Extract domain from email (after @)
     const emailParts = email.split('@');
     if (emailParts.length !== 2) {
@@ -268,11 +295,35 @@ const CompanyPage = () => {
       return;
     }
     
-    // Validate email domain
-    if (!validateEmailDomain(memberToEdit.email)) {
+    // Validate email domain - first check if domain data is available
+    if (!company?.domain) {
+      // Use fallback validation with user's email domain
+      const userDomain = user?.email?.split('@')[1];
+      if (userDomain) {
+        const emailParts = memberToEdit.email.split('@');
+        if (emailParts.length !== 2 || emailParts[1].toLowerCase() !== userDomain.toLowerCase()) {
+          toast({
+            title: "Invalid Email",
+            description: `Email must use company domain: @${userDomain}`,
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        // No company domain or fallback available, trigger refetch
+        refetchCompany();
+        toast({
+          title: "Company Data Missing",
+          description: "Unable to validate email domain. Please try again in a moment.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else if (!validateEmailDomain(memberToEdit.email)) {
+      // Normal validation when company domain is available
       toast({
         title: "Invalid Email",
-        description: `Email must use company domain: @${company?.domain}`,
+        description: `Email must use company domain: @${company.domain}`,
         variant: "destructive",
       });
       return;
