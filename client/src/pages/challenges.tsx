@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ChallengeCard from "@/components/challenges/challenge-card";
 import { useAuth } from "@/contexts/auth-context";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 
 const Challenges = () => {
   const [activeTab, setActiveTab] = useState("active");
@@ -110,6 +110,18 @@ const Challenges = () => {
         </TabsContent>
         
         <TabsContent value="available">
+          {/* Admin Action Bar - Only visible to admins */}
+          {user?.role === 'admin' && user?.company_id && (
+            <div className="flex justify-end mb-4">
+              <Link to="/company?tab=challenges">
+                <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary-dark">
+                  <span className="material-icons text-sm mr-1">add_circle</span>
+                  Manage Company Challenges
+                </button>
+              </Link>
+            </div>
+          )}
+          
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3].map(i => (

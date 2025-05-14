@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,6 +33,7 @@ import {
   useUpdateChallenge,
   useDeleteChallenge 
 } from "@/hooks/use-challenges";
+import { useLocation } from "wouter";
 import { CommuteType, Challenge } from "@/lib/types";
 
 import { useQuery } from "@tanstack/react-query";
