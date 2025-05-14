@@ -214,6 +214,36 @@ const CompanyPage = () => {
   const handleSaveMember = async () => {
     if (!memberToEdit) return;
     
+    // Validate required fields
+    if (!memberToEdit.name || !memberToEdit.email || !memberToEdit.username) {
+      toast({
+        title: "Error",
+        description: "Name, email, and username are required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate email domain
+    if (!validateEmailDomain(memberToEdit.email)) {
+      toast({
+        title: "Invalid Email",
+        description: `Email must use company domain: @${company?.domain}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check username uniqueness (pass the current member's ID to exclude it from the check)
+    if (!checkUsernameUniqueness(memberToEdit.username, memberToEdit.id)) {
+      toast({
+        title: "Username Taken",
+        description: "This username is already in use by another team member.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       const dataToSend = { ...memberToEdit };
       
@@ -307,10 +337,31 @@ const CompanyPage = () => {
   
   // Handle adding a new member
   const handleAddMember = async () => {
+    // Check for required fields
     if (!newMember.name || !newMember.email || !newMember.username || !newMember.password) {
       toast({
         title: "Error",
         description: "Please enter all required fields for the new member.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check for email domain validation
+    if (!validateEmailDomain(newMember.email)) {
+      toast({
+        title: "Invalid Email",
+        description: `Email must use company domain: @${company?.domain}`,
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Check for username uniqueness
+    if (!checkUsernameUniqueness(newMember.username)) {
+      toast({
+        title: "Username Taken",
+        description: "This username is already in use. Please choose a different username.",
         variant: "destructive",
       });
       return;
@@ -493,22 +544,27 @@ const CompanyPage = () => {
                     <Label htmlFor="username" className="text-right">
                       Username
                     </Label>
-                    <Input
-                      id="username"
-                      value={newMember.username}
-                      onChange={(e) => {
-                        const username = e.target.value;
-                        setNewMember({...newMember, username});
-                        
-                        // Check username uniqueness
-                        if (username && !checkUsernameUniqueness(username)) {
-                          setUsernameError("This username is already taken");
-                        } else {
-                          setUsernameError("");
-                        }
-                      }}
-                      className="col-span-3"
-                    />
+                    <div className="col-span-3 space-y-1">
+                      <Input
+                        id="username"
+                        value={newMember.username}
+                        onChange={(e) => {
+                          const username = e.target.value;
+                          setNewMember({...newMember, username});
+                          
+                          // Check username uniqueness
+                          if (username && !checkUsernameUniqueness(username)) {
+                            setUsernameError("This username is already taken");
+                          } else {
+                            setUsernameError("");
+                          }
+                        }}
+                        className={usernameError ? "border-red-500" : ""}
+                      />
+                      {usernameError && (
+                        <p className="text-sm text-red-500">{usernameError}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="password" className="text-right">
