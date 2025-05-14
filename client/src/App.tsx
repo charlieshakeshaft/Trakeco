@@ -85,9 +85,17 @@ function AuthenticatedApp({ user }: { user: User }) {
 
 function Router() {
   const { user, isLoading } = useAuth();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   
   console.log("Router - auth state:", { user, isLoading, path: location });
+  
+  useEffect(() => {
+    // Redirect users who need to change password to profile page
+    if (user?.needs_password_change && location !== "/profile") {
+      console.log("User needs password change, redirecting to profile");
+      setLocation("/profile");
+    }
+  }, [user, location, setLocation]);
   
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
