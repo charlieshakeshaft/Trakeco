@@ -656,12 +656,46 @@ const CompanyPage = () => {
                         onBlur={(e) => {
                           console.log("Email onBlur triggered");
                           const email = e.target.value;
-                          // Validate email domain on blur (when user leaves the field)
-                          if (email && !validateEmailDomain(email)) {
-                            console.log("Setting email error");
-                            setEmailError(`Email must use company domain: @${company?.domain}`);
+                          
+                          // Skip validation if email is empty
+                          if (!email) {
+                            console.log("Clearing email error - empty email");
+                            setEmailError("");
+                            return;
+                          }
+                          
+                          // Check for valid email format first
+                          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                          if (!emailRegex.test(email)) {
+                            console.log("Invalid email format");
+                            setEmailError("Please enter a valid email address");
+                            return;
+                          }
+                          
+                          // If company data not available, use fallback or trigger refetch
+                          if (!company?.domain) {
+                            // Try using admin user's domain
+                            const userDomain = user?.email?.split('@')[1];
+                            if (userDomain) {
+                              const emailParts = email.split('@');
+                              if (emailParts.length !== 2 || emailParts[1].toLowerCase() !== userDomain.toLowerCase()) {
+                                console.log(`Setting email error using fallback domain: ${userDomain}`);
+                                setEmailError(`Email must use company domain: @${userDomain}`);
+                              } else {
+                                console.log("Email validation passed with fallback domain");
+                                setEmailError("");
+                              }
+                            } else {
+                              console.log("Refetching company data for validation");
+                              refetchCompany();
+                              setEmailError("Validating email domain...");
+                            }
+                          } else if (!validateEmailDomain(email)) {
+                            // Normal domain validation when company data is available
+                            console.log(`Setting email error with domain: ${company.domain}`);
+                            setEmailError(`Email must use company domain: @${company.domain}`);
                           } else {
-                            console.log("Clearing email error");
+                            console.log("Email validation passed");
                             setEmailError("");
                           }
                         }}
@@ -861,12 +895,46 @@ const CompanyPage = () => {
                       onBlur={(e) => {
                         console.log("Edit Email onBlur triggered");
                         const email = e.target.value;
-                        // Check email domain on blur
-                        if (email && !validateEmailDomain(email)) {
-                          console.log("Setting email error in edit form");
-                          setEmailError(`Email must use company domain: @${company?.domain}`);
+                        
+                        // Skip validation if email is empty
+                        if (!email) {
+                          console.log("Clearing email error - empty email");
+                          setEmailError("");
+                          return;
+                        }
+                        
+                        // Check for valid email format first
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (!emailRegex.test(email)) {
+                          console.log("Invalid email format");
+                          setEmailError("Please enter a valid email address");
+                          return;
+                        }
+                        
+                        // If company data not available, use fallback or trigger refetch
+                        if (!company?.domain) {
+                          // Try using admin user's domain
+                          const userDomain = user?.email?.split('@')[1];
+                          if (userDomain) {
+                            const emailParts = email.split('@');
+                            if (emailParts.length !== 2 || emailParts[1].toLowerCase() !== userDomain.toLowerCase()) {
+                              console.log(`Setting email error using fallback domain: ${userDomain}`);
+                              setEmailError(`Email must use company domain: @${userDomain}`);
+                            } else {
+                              console.log("Email validation passed with fallback domain");
+                              setEmailError("");
+                            }
+                          } else {
+                            console.log("Refetching company data for validation");
+                            refetchCompany();
+                            setEmailError("Validating email domain...");
+                          }
+                        } else if (!validateEmailDomain(email)) {
+                          // Normal domain validation when company data is available
+                          console.log(`Setting email error with domain: ${company.domain}`);
+                          setEmailError(`Email must use company domain: @${company.domain}`);
                         } else {
-                          console.log("Clearing email error in edit form");
+                          console.log("Email validation passed");
                           setEmailError("");
                         }
                       }}
