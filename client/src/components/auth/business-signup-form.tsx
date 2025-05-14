@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +54,7 @@ export function BusinessSignupForm() {
 
   async function onSubmit(values: FormValues) {
     setIsSubmitting(true);
+    const { login } = useAuth();
     
     try {
       const { confirmPassword, companyName, companyDomain, adminName, ...userData } = values;
@@ -74,11 +76,7 @@ export function BusinessSignupForm() {
       await apiRequest("/api/auth/register", adminData, "POST");
       
       // Automatically log in the user
-      const loginData = {
-        username: userData.username,
-        password: userData.password
-      };
-      await apiRequest("/api/auth/login", loginData, "POST");
+      await login(userData.username, userData.password);
       
       toast({
         title: "Business account created!",

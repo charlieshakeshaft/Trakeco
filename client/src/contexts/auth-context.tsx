@@ -23,15 +23,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryKey: ['/api/user'],
     retry: false,
     staleTime: 5 * 60 * 1000,
-    onError: () => {
-      // Silent failure on auth errors
-      console.log('Failed to fetch user - not authenticated');
+    // TanStack Query v5 uses onSettled for error handling
+    onSettled: (data, error) => {
+      if (error) {
+        // Silent failure on auth errors
+        console.log('Failed to fetch user - not authenticated');
+      }
     }
   });
   
   const login = async (username: string, password: string): Promise<User> => {
     try {
-      const response = await apiRequest("/api/login", { username, password }, "POST");
+      const response = await apiRequest("/api/auth/login", { username, password }, "POST");
       queryClient.invalidateQueries({ queryKey: ['/api/user'] });
       return response;
     } catch (error) {
@@ -42,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const logout = async () => {
     try {
-      await apiRequest("/api/logout", null, "POST");
+      await apiRequest("/api/auth/logout", null, "POST");
       queryClient.clear();
       window.location.href = '/login';
     } catch (error) {
