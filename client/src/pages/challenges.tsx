@@ -47,6 +47,13 @@ const Challenges = () => {
   
   // Get completed user challenges
   const completedChallenges = userChallenges?.filter(uc => uc.participant.completed) || [];
+  
+  // Helper function to switch tabs and update URL
+  const switchToTab = (tab: string) => {
+    setActiveTab(tab);
+    // Update the URL to include the tab parameter
+    window.history.replaceState(null, '', `/challenges?tab=${tab}`);
+  };
 
   return (
     <div className="p-4 md:p-8">
