@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserProfile } from "@/hooks/use-leaderboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,20 +42,31 @@ const Profile = () => {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  // Active tab state with URL sync
-  const [activeTab, setActiveTab] = useState(() => {
-    // Initialize from URL search params
+  // Active tab state with URL sync - completely refactored for reliability
+  const [activeTab, setActiveTab] = useState('impact');
+  
+  // Initialize tab from URL on component mount
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('tab') || 'impact';
-  });
+    const tabFromUrl = params.get('tab');
+    if (tabFromUrl && ['impact', 'history', 'settings'].includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, []);
   
   // Handler for tab change
   const handleTabChange = (value: string) => {
     setActiveTab(value);
+    
     // Update URL without triggering navigation
     const url = new URL(window.location.href);
     url.searchParams.set('tab', value);
     window.history.pushState({}, '', url.toString());
+    
+    // Add a short delay for UI updates to propagate
+    setTimeout(() => {
+      console.log("Tab changed to:", value);
+    }, 50);
   };
   
   // State for location settings
@@ -102,8 +113,8 @@ const Profile = () => {
       
       // Create a deterministic but reasonable distance based on the postcodes
       // This ensures the same postcodes always yield the same distance
-      const homeHash = [...homePostcode.replace(/\s+/g, '')].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      const workHash = [...workPostcode.replace(/\s+/g, '')].reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const homeHash = homePostcode.replace(/\s+/g, '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const workHash = workPostcode.replace(/\s+/g, '').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
       
       // Use the difference between hashes to create a reasonable distance (3-25 km)
       const hashDiff = Math.abs(homeHash - workHash);
@@ -428,11 +439,26 @@ const Profile = () => {
         </Card>
         
         <div className="md:col-span-2">
-          <Tabs value={activeTab} onValueChange={handleTabChange} defaultValue="impact">
+          <Tabs key={`tabs-${activeTab}`} value={activeTab} onValueChange={handleTabChange} defaultValue="impact">
             <TabsList className="mb-6">
-              <TabsTrigger value="impact">Your Impact</TabsTrigger>
-              <TabsTrigger value="history">Redemption History</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger 
+                value="impact" 
+                className={activeTab === "impact" ? "data-[state=active]:bg-primary/10 data-[state=active]:text-primary" : ""}
+              >
+                Your Impact
+              </TabsTrigger>
+              <TabsTrigger 
+                value="history" 
+                className={activeTab === "history" ? "data-[state=active]:bg-primary/10 data-[state=active]:text-primary" : ""}
+              >
+                Redemption History
+              </TabsTrigger>
+              <TabsTrigger 
+                value="settings" 
+                className={activeTab === "settings" ? "data-[state=active]:bg-primary/10 data-[state=active]:text-primary" : ""}
+              >
+                Settings
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="impact">
