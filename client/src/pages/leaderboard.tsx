@@ -11,6 +11,14 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 // Generate initials from a name
 const getInitials = (name: string): string => {
@@ -39,6 +47,60 @@ const getAvatarColor = (userId: number): string => {
   
   // Get a consistent color based on the user ID
   return colors[userId % colors.length];
+};
+
+// Get user rank tier based on points
+interface RankTier {
+  name: string;
+  color: string;
+  minPoints: number;
+  maxPoints: number;
+  icon: string;
+}
+
+const getRankTiers = (): RankTier[] => {
+  return [
+    { 
+      name: 'Bronze',
+      color: 'bg-amber-600 text-white',
+      minPoints: 0,
+      maxPoints: 499,
+      icon: 'workspace_premium'
+    },
+    { 
+      name: 'Silver',
+      color: 'bg-gray-400 text-white',
+      minPoints: 500,
+      maxPoints: 999,
+      icon: 'workspace_premium'
+    },
+    { 
+      name: 'Gold',
+      color: 'bg-yellow-500 text-white',
+      minPoints: 1000,
+      maxPoints: 1999,
+      icon: 'emoji_events'
+    },
+    { 
+      name: 'Platinum',
+      color: 'bg-blue-600 text-white',
+      minPoints: 2000,
+      maxPoints: 2999,
+      icon: 'military_tech'
+    },
+    { 
+      name: 'Elite',
+      color: 'bg-gradient-to-r from-purple-600 to-pink-600 text-white',
+      minPoints: 3000,
+      maxPoints: Infinity,
+      icon: 'star'
+    }
+  ];
+};
+
+const getUserRankTier = (points: number): RankTier => {
+  const tiers = getRankTiers();
+  return tiers.find(tier => points >= tier.minPoints && points <= tier.maxPoints) || tiers[0];
 };
 
 const Leaderboard = () => {
@@ -371,21 +433,154 @@ const Leaderboard = () => {
                 </div>
               )}
               
-              {/* Points calculation information */}
-              <div className="mt-6 p-4 bg-green-50 rounded-lg text-green-800">
-                <div className="flex items-center mb-2">
-                  <span className="material-icons text-primary mr-2">insights</span>
-                  <h3 className="font-medium">How Points Are Calculated</h3>
+              {/* Your rank card */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* User current rank */}
+                <div className="p-4 rounded-lg border border-gray-200 bg-white">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-gray-800 mb-1 flex items-center">
+                        <span className="material-icons text-primary mr-2">military_tech</span>
+                        Your Current Rank
+                      </h3>
+                      
+                      {stats && (
+                        <>
+                          <div className="flex items-center gap-2 mt-3">
+                            <div className={cn(
+                              "w-12 h-12 rounded-full flex items-center justify-center shadow-sm",
+                              getUserRankTier(stats.points).color
+                            )}>
+                              <span className="material-icons">{getUserRankTier(stats.points).icon}</span>
+                            </div>
+                            
+                            <div>
+                              <div className="text-lg font-semibold">{getUserRankTier(stats.points).name}</div>
+                              <div className="text-xs text-gray-500">
+                                {stats.points} / {getUserRankTier(stats.points).maxPoints < Infinity 
+                                  ? getUserRankTier(stats.points).maxPoints
+                                  : "∞"} points
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Progress bar */}
+                          {getUserRankTier(stats.points).maxPoints < Infinity && (
+                            <div className="mt-3">
+                              <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
+                                <div 
+                                  className="bg-primary h-2 rounded-full" 
+                                  style={{ 
+                                    width: `${Math.min(100, (stats.points - getUserRankTier(stats.points).minPoints) / 
+                                      (getUserRankTier(stats.points).maxPoints - getUserRankTier(stats.points).minPoints) * 100)}%` 
+                                  }}
+                                ></div>
+                              </div>
+                              <div className="text-xs text-gray-500 flex justify-between">
+                                <span>{getUserRankTier(stats.points).minPoints}</span>
+                                <span>
+                                  {stats.points < getUserRankTier(stats.points).maxPoints ? (
+                                    <span>
+                                      {getUserRankTier(stats.points).maxPoints - stats.points} more points to {
+                                        getRankTiers().find(tier => tier.minPoints > getUserRankTier(stats.points).maxPoints)?.name || "MAX"
+                                      }
+                                    </span>
+                                  ) : (
+                                    <span>MAX RANK!</span>
+                                  )}
+                                </span>
+                                <span>{getUserRankTier(stats.points).maxPoints}</span>
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    
+                    {/* View all ranks button */}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" className="text-xs">
+                          <span className="material-icons text-sm mr-1">visibility</span>
+                          All Ranks
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Rank Tiers</DialogTitle>
+                          <DialogDescription>
+                            Earn points from your sustainable commutes to level up your rank
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        <div className="space-y-3 mt-2">
+                          {getRankTiers().map((tier, index) => (
+                            <div 
+                              key={tier.name} 
+                              className={cn(
+                                "flex items-center p-3 rounded-lg border",
+                                stats && getUserRankTier(stats.points).name === tier.name
+                                  ? "border-primary bg-primary/5"
+                                  : "border-gray-200"
+                              )}
+                            >
+                              <div className={cn(
+                                "w-10 h-10 rounded-full flex items-center justify-center mr-3",
+                                tier.color
+                              )}>
+                                <span className="material-icons">{tier.icon}</span>
+                              </div>
+                              
+                              <div className="flex-1">
+                                <div className="font-medium">{tier.name}</div>
+                                <div className="text-xs text-gray-500">
+                                  {tier.minPoints} - {tier.maxPoints < Infinity 
+                                    ? tier.maxPoints 
+                                    : "∞"} points
+                                </div>
+                              </div>
+                              
+                              {stats && getUserRankTier(stats.points).name === tier.name && (
+                                <div className="bg-primary/20 text-primary text-xs font-medium px-2 py-1 rounded">
+                                  Current
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </div>
-                <ul className="text-sm space-y-1 ml-6 list-disc">
-                  <li>Walking: 30 points per day</li>
-                  <li>Cycling: 25 points per day</li>
-                  <li>Public Transit: 20 points per day</li>
-                  <li>Carpooling: 15 points per day</li>
-                  <li>Remote Work: 15 points per day</li>
-                  <li>Electric Vehicle: 10 points per day</li>
-                  <li>Bonus: +25 points for 3+ days of sustainable commuting</li>
-                </ul>
+                
+                {/* Points information */}
+                <div className="p-4 bg-green-50 rounded-lg text-green-800">
+                  <div className="flex items-center mb-2">
+                    <span className="material-icons text-primary mr-2">insights</span>
+                    <h3 className="font-medium">How Points Are Calculated</h3>
+                  </div>
+                  <ul className="text-xs space-y-1 ml-6 list-disc">
+                    <li>Walking: 30 points per day</li>
+                    <li>Cycling: 25 points per day</li>
+                    <li>Public Transit: 20 points per day</li>
+                    <li>Carpooling: 15 points per day</li>
+                    <li>Remote Work: 15 points per day</li>
+                    <li>Electric Vehicle: 10 points per day</li>
+                    <li>Bonus: +25 points for 3+ days per week</li>
+                    <li>Weekly Challenge: +50-100 bonus points</li>
+                  </ul>
+                  
+                  <div className="flex justify-between mt-3 text-xs">
+                    <div>
+                      <div className="font-medium text-green-800">Potential Weekly:</div>
+                      <div className="mt-1">150-250 points</div>
+                    </div>
+                    <div>
+                      <div className="font-medium text-green-800">Potential Monthly:</div>
+                      <div className="mt-1">600-1000 points</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </>
           )}
