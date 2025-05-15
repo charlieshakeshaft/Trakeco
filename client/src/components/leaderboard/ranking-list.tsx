@@ -136,7 +136,7 @@ const RankingList = ({ users, currentUserId, startRank = 1 }: RankingListProps) 
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="font-bold">{getInitials(user.name)}</span>
+                  <span className="font-bold text-base">{getInitials(user.name)}</span>
                 )}
               </div>
               

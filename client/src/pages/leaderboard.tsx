@@ -111,11 +111,40 @@ const Leaderboard = () => {
                   </div>
                 )}
                 
-                {/* Points-based encouragement */}
-                {leaderboard && leaderboard.length > 0 && currentUserRank > 1 && (
-                  <p className="text-sm text-blue-600">
-                    <span className="font-medium">Only {leaderboard[currentUserRank - 2]?.points_total - (stats?.points || 0)} more points</span> to move up in rank!
-                  </p>
+                {/* Current rank and next rank status */}
+                {leaderboard && leaderboard.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                    <div className="bg-white px-3 py-1 rounded-full border border-blue-200 flex items-center">
+                      <span className="text-blue-700 font-medium text-sm mr-1">Current Rank:</span>
+                      <span className={cn(
+                        "text-xs font-bold px-2 py-0.5 rounded-full",
+                        currentUserRank <= 3 ? "bg-yellow-100 text-yellow-800" : 
+                        currentUserRank <= 10 ? "bg-purple-100 text-purple-800" : 
+                        "bg-gray-100 text-gray-800"
+                      )}>
+                        {currentUserRank === 1 ? "🥇 Gold" : 
+                         currentUserRank === 2 ? "🥈 Silver" : 
+                         currentUserRank === 3 ? "🥉 Bronze" : 
+                         currentUserRank <= 5 ? "Elite" :
+                         currentUserRank <= 10 ? "Challenger" : "Explorer"}
+                      </span>
+                    </div>
+                    
+                    {currentUserRank > 1 && (
+                      <div className="text-sm text-blue-600 flex items-center">
+                        <span className="material-icons text-blue-500 text-sm mr-1">arrow_upward</span>
+                        <span>
+                          {leaderboard[currentUserRank - 2]?.points_total - (stats?.points || 0) > 0 ? (
+                            <>
+                              <span className="font-medium">{leaderboard[currentUserRank - 2]?.points_total - (stats?.points || 0)} more points</span> to rank up!
+                            </>
+                          ) : (
+                            <>Tied for higher rank - keep adding points!</>  
+                          )}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               
@@ -212,11 +241,12 @@ const Leaderboard = () => {
               <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
                 <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
                   <span className="material-icons text-blue-500 text-sm mr-1">today</span>
-                  Most Active Days
+                  Commute Activity Pattern
                 </h4>
                 <div className="flex justify-between items-end h-20">
                   {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day, i) => {
-                    // Use fixed heights that create a nice graph pattern
+                    // Heights for a typical active week pattern
+                    // Could be replaced with actual data from the backend in the future
                     const heights = [
                       "h-8", // Monday
                       "h-12", // Tuesday
@@ -235,8 +265,8 @@ const Leaderboard = () => {
                     );
                   })}
                 </div>
-                <p className="text-xs text-gray-500 mt-3 italic">
-                  Wednesday is the most active day company-wide!
+                <p className="text-xs text-gray-500 mt-3">
+                  <span className="font-medium">Typical pattern:</span> Mid-week has highest participation
                 </p>
               </div>
               
@@ -252,18 +282,27 @@ const Leaderboard = () => {
                       <li className="flex items-center text-green-700">
                         <span className="material-icons text-green-500 text-sm mr-1">trending_up</span>
                         <strong className="mr-1">{leaderboard[0].name.split(' ')[0]}</strong> 
-                        <span>is this week's biggest climber (+45pts)</span>
+                        <span>is at the top of the leaderboard</span>
                       </li>
-                      <li className="flex items-center text-amber-700">
-                        <span className="material-icons text-amber-500 text-sm mr-1">local_fire_department</span>
-                        <strong className="mr-1">
-                          {leaderboard.find(u => Math.max(...leaderboard.map(user => user.streak_count || 0)) === (u.streak_count || 0))?.name.split(' ')[0] || 'Someone'}
-                        </strong>
-                        <span>has the longest streak ({Math.max(...leaderboard.map(user => user.streak_count || 0))} days)</span>
-                      </li>
+                      
+                      {Math.max(...leaderboard.map(user => user.streak_count || 0)) > 0 ? (
+                        <li className="flex items-center text-amber-700">
+                          <span className="material-icons text-amber-500 text-sm mr-1">local_fire_department</span>
+                          <strong className="mr-1">
+                            {leaderboard.find(u => Math.max(...leaderboard.map(user => user.streak_count || 0)) === (u.streak_count || 0))?.name.split(' ')[0] || 'Someone'}
+                          </strong>
+                          <span>has the longest streak ({Math.max(...leaderboard.map(user => user.streak_count || 0))} days)</span>
+                        </li>
+                      ) : (
+                        <li className="flex items-center text-amber-700">
+                          <span className="material-icons text-amber-500 text-sm mr-1">local_fire_department</span>
+                          <span>No active streaks - be the first to start one!</span>
+                        </li>
+                      )}
+                      
                       <li className="flex items-center text-blue-700">
-                        <span className="material-icons text-blue-500 text-sm mr-1">directions_bike</span>
-                        <span>Top commute: <strong>Cycling</strong> (42% of all commutes)</span>
+                        <span className="material-icons text-blue-500 text-sm mr-1">thumb_up</span>
+                        <span>Next milestone: <strong>5 sustainable commutes</strong></span>
                       </li>
                     </>
                   ) : (
@@ -272,24 +311,45 @@ const Leaderboard = () => {
                 </ul>
               </div>
               
-              {/* Weekly challenge */}
+              {/* Weekly challenge - dynamically select from available challenges */}
               <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100 relative overflow-hidden">
+                {/* Background icon - changes based on the challenge type */}
                 <div className="absolute -right-8 -bottom-8 opacity-10">
-                  <span className="material-icons text-8xl text-blue-500">pedal_bike</span>
+                  <span className="material-icons text-8xl text-blue-500">
+                    {stats?.streak === 0 ? "pedal_bike" : "local_fire_department"}
+                  </span>
                 </div>
                 <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
                   <span className="material-icons text-blue-500 text-sm mr-1">stars</span>
                   Weekly Challenge
                 </h4>
-                <p className="text-sm font-medium text-blue-900 mb-2">
-                  Log 3+ bike commutes this week!
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                  <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${hasCommuteThisWeek ? 33 : 0}%` }}></div>
-                </div>
-                <p className="text-xs text-gray-600">
-                  {hasCommuteThisWeek ? "1/3 completed" : "0/3 completed"} • 50 bonus points
-                </p>
+                
+                {/* Dynamic challenge based on user stats */}
+                {stats?.streak === 0 ? (
+                  <>
+                    <p className="text-sm font-medium text-blue-900 mb-2">
+                      Start a 3-day commute streak!
+                    </p>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${hasCommuteThisWeek ? 33 : 0}%` }}></div>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      {hasCommuteThisWeek ? "1/3 completed" : "0/3 completed"} • 50 bonus points
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-blue-900 mb-2">
+                      Try a new sustainable commute type!
+                    </p>
+                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: "0%" }}></div>
+                    </div>
+                    <p className="text-xs text-gray-600">
+                      0/1 completed • 75 bonus points
+                    </p>
+                  </>
+                )}
                 
                 <Link to="/log-commute" className="inline-block text-xs text-blue-600 hover:text-blue-800 mt-2 font-medium">
                   Log commute →
