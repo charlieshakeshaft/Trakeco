@@ -83,7 +83,7 @@ const UserRankCard = ({ userId }: UserRankCardProps) => {
   });
 
   return (
-    <section className="mb-8">
+    <section>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-700 flex items-center">
           <span className="material-icons text-accent mr-2">military_tech</span>

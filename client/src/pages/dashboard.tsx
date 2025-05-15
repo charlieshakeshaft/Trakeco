@@ -41,27 +41,30 @@ const Dashboard = () => {
         {user.company_id ? 'Company Dashboard' : 'Personal Dashboard'}
       </h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          {/* User Impact Stats */}
-          <ImpactStats userId={user.id} />
-          
-          {/* Weekly Commute Summary */}
-          <CommuteSummary userId={user.id} />
-          
-          {/* Active Challenges */}
-          <ChallengesSection userId={user.id} />
-          
-          {/* Available Rewards */}
-          <RewardsSection userId={user.id} />
-        </div>
+      <div className="space-y-6">
+        {/* User Impact Stats */}
+        <ImpactStats userId={user.id} />
         
-        <div className="space-y-6">
+        {/* Weekly Commute Summary */}
+        <CommuteSummary userId={user.id} />
+        
+        {/* Active Challenges */}
+        <ChallengesSection userId={user.id} />
+        
+        {/* Available Rewards */}
+        <RewardsSection userId={user.id} />
+        
+        {/* Rank and Leaderboard - Side by Side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* User Rank Card */}
-          <UserRankCard userId={user.id} />
+          <div>
+            <UserRankCard userId={user.id} />
+          </div>
           
           {/* Leaderboard */}
-          <LeaderboardSection userId={user.id} />
+          <div>
+            <LeaderboardSection userId={user.id} />
+          </div>
         </div>
       </div>
     </div>

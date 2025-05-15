@@ -148,7 +148,7 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
   // This section has been moved to a separate component
 
   return (
-    <section className="mb-8">
+    <section>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold text-gray-700">Leaderboard</h2>
         <Link to="/leaderboard">
