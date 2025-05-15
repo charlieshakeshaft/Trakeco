@@ -13,17 +13,7 @@ const Challenges = () => {
   const userId = user?.id || 0;
   const [location] = useLocation();
   
-  // Read the tab parameter from the URL query string
-  useEffect(() => {
-    // Extract tab parameter from the URL if it exists
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    
-    // Set the active tab if a valid tab parameter is provided
-    if (tabParam && ['active', 'available', 'completed'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [location]);
+  // No URL parameters for tabs anymore
   
   const { data: allChallenges, isLoading: isLoadingAll } = useAllChallenges(userId);
   const { data: userChallenges, isLoading: isLoadingUser } = useUserChallenges(userId);
@@ -48,11 +38,9 @@ const Challenges = () => {
   // Get completed user challenges
   const completedChallenges = userChallenges?.filter(uc => uc.participant.completed) || [];
   
-  // Helper function to switch tabs and update URL
+  // Simple tab switching function - no URL manipulation
   const switchToTab = (tab: string) => {
     setActiveTab(tab);
-    // Update the URL to include the tab parameter
-    window.history.replaceState(null, '', `/challenges?tab=${tab}`);
   };
 
   return (

@@ -15,23 +15,9 @@ const Rewards = () => {
   const userId = user?.id || 0;
   const [location] = useLocation();
   
-  // Handle tab parameter from URL
-  useEffect(() => {
-    // Extract tab parameter from the URL if it exists
-    const params = new URLSearchParams(window.location.search);
-    const tabParam = params.get('tab');
-    
-    // Set the active tab if a valid tab parameter is provided
-    if (tabParam && ['available', 'future', 'redeemed'].includes(tabParam)) {
-      setActiveTab(tabParam);
-    }
-  }, [location]);
-  
-  // Handle tab changes
+  // Simple tab change handler - no URL manipulation
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    // Update URL with tab parameter
-    window.history.replaceState(null, '', `/rewards?tab=${value}`);
   };
   
   const { data: rewards, isLoading: isLoadingRewards } = useAllRewards(userId);
