@@ -69,17 +69,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const logout = async () => {
     try {
+      console.log("Logout attempt at:", new Date().toISOString());
+      
+      // First clear local storage items that might be keeping the user logged in
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('login_success');
+      localStorage.removeItem('login_timestamp');
+      
+      // Then make the server request
       await apiRequest("/api/auth/logout", null, "POST");
+      console.log("Logout API response successful");
+      
+      // Clear all cache data
       queryClient.clear();
-      // Use client-side navigation instead of page reload
-      setLocation('/login');
+      queryClient.setQueryData(['/api/user'], null);
+      
+      // Force a complete page reload to clear any in-memory state
+      console.log("Forcing hard logout with page reload");
+      setTimeout(() => {
+        // Use replace for a cleaner history
+        window.location.replace('/login?loggedout=true');
+      }, 300);
     } catch (error) {
       console.error('Logout error:', error);
+      
+      // Even if server logout fails, try to clear local state
+      queryClient.clear();
+      queryClient.setQueryData(['/api/user'], null);
+      
       toast({
         variant: "destructive",
         title: "Logout failed",
         description: "There was a problem logging out. Please try again."
       });
+      
+      // As a last resort, force navigation
+      setTimeout(() => {
+        window.location.replace('/login?loggedout=true&error=true');
+      }, 1000);
     }
   };
 
