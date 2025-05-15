@@ -12,6 +12,35 @@ import { format } from "date-fns";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
+// Generate initials from a name
+const getInitials = (name: string): string => {
+  if (!name) return '?';
+  
+  const nameParts = name.split(' ');
+  if (nameParts.length === 1) {
+    return nameParts[0].substring(0, 2).toUpperCase();
+  }
+  
+  return (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase();
+};
+
+// Generate a consistent color based on user ID
+const getAvatarColor = (userId: number): string => {
+  const colors = [
+    'bg-primary text-white',
+    'bg-secondary text-white',
+    'bg-accent-dark text-white',
+    'bg-green-500 text-white',
+    'bg-blue-500 text-white',
+    'bg-purple-500 text-white',
+    'bg-orange-500 text-white',
+    'bg-pink-500 text-white',
+  ];
+  
+  // Get a consistent color based on the user ID
+  return colors[userId % colors.length];
+};
+
 const Leaderboard = () => {
   const [timeFrame, setTimeFrame] = useState("month");
   const { user } = useAuth();
@@ -173,50 +202,164 @@ const Leaderboard = () => {
         <CardHeader className="pb-3">
           <CardTitle className="text-lg font-semibold text-gray-700 flex items-center">
             <span className="material-icons text-accent mr-2">emoji_events</span>
-            Top Performers
+            Leaderboard
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="animate-pulse space-y-6">
-              <div className="flex justify-center space-x-6">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="flex flex-col items-center">
-                    <div className="w-16 h-16 bg-gray-200 rounded-full mb-2"></div>
-                    <div className="h-4 w-20 bg-gray-200 rounded mb-1"></div>
-                    <div className="h-3 w-12 bg-gray-200 rounded"></div>
-                  </div>
-                ))}
-              </div>
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div key={i} className="h-12 bg-gray-200 rounded"></div>
-                ))}
-              </div>
+            <div className="animate-pulse space-y-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-12 bg-gray-200 rounded"></div>
+              ))}
             </div>
           ) : (
             <>
-              {topThree.length > 0 && (
-                <TopUsers topUsers={topThree} currentUserId={userId} />
-              )}
-              
-              {otherUsers.length > 0 && (
-                <RankingList users={otherUsers} currentUserId={userId} startRank={4} />
-              )}
-              
-              {/* Display current user if they're not in the displayed list */}
-              {isUserOutsideDisplayed && currentUserRank > 0 && leaderboard && (
-                <div className="mt-6 pt-6 border-t border-dashed border-gray-200">
-                  <div className="text-sm text-gray-500 mb-2 text-center">Your Position</div>
-                  <RankingList 
-                    users={[leaderboard.find(user => user.id === userId)!]} 
-                    currentUserId={userId} 
-                    startRank={currentUserRank} 
-                  />
+              {/* Top user */}
+              {leaderboard && leaderboard.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex justify-center mb-4">
+                    <div className="relative">
+                      <div className={cn(
+                        "w-20 h-20 rounded-full border-4 border-yellow-400 flex items-center justify-center shadow-lg",
+                        getAvatarColor(leaderboard[0].id)
+                      )}>
+                        {leaderboard[0].profileImageUrl ? (
+                          <img
+                            src={leaderboard[0].profileImageUrl}
+                            alt={`${leaderboard[0].name}'s avatar`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl font-bold">
+                            {getInitials(leaderboard[0].name)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute -top-2 -right-2 bg-yellow-400 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md">
+                        <span className="material-icons text-sm">emoji_events</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <h3 className="font-medium text-lg">
+                      {leaderboard[0].id === userId ? "You" : leaderboard[0].name}
+                    </h3>
+                    <div className="flex justify-center items-center gap-2 text-gray-600">
+                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {leaderboard[0].points_total} points
+                      </span>
+                      
+                      {leaderboard[0].streak_count > 0 && (
+                        <span className="bg-amber-100 text-amber-800 flex items-center px-3 py-1 rounded-full text-sm">
+                          <span className="material-icons text-amber-500 text-xs mr-1">local_fire_department</span>
+                          {leaderboard[0].streak_count} day streak
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
               
-              {leaderboard && leaderboard.length === 0 && (
+              {/* All users in a ranked list */}
+              {leaderboard && leaderboard.length > 0 ? (
+                <div className="space-y-3">
+                  {leaderboard.map((user, index) => {
+                    const rank = index + 1;
+                    const isCurrentUser = user.id === userId;
+                    
+                    // Skip the first user since they're already displayed as top user
+                    if (rank === 1) return null;
+                    
+                    return (
+                      <div 
+                        key={user.id} 
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-lg transition-all",
+                          isCurrentUser 
+                            ? "bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 shadow-md" 
+                            : "border border-gray-100 hover:shadow-sm hover:bg-gray-50"
+                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          {/* Rank number */}
+                          <div className={cn(
+                            "w-8 h-8 flex items-center justify-center rounded-full shadow-sm",
+                            rank === 2 
+                              ? "bg-gradient-to-r from-gray-300 to-gray-400 text-white"
+                              : rank === 3
+                                ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white"
+                                : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700"
+                          )}>
+                            {rank}
+                          </div>
+                          
+                          {/* User avatar */}
+                          <div className={cn(
+                            "w-10 h-10 rounded-full overflow-hidden border-2",
+                            rank === 2 
+                              ? "border-gray-300" 
+                              : rank === 3 
+                                ? "border-amber-500"
+                                : "border-gray-200",
+                            "flex items-center justify-center",
+                            getAvatarColor(user.id)
+                          )}>
+                            {user.profileImageUrl ? (
+                              <img
+                                src={user.profileImageUrl}
+                                alt={`${user.name}'s avatar`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-base font-bold">{getInitials(user.name)}</span>
+                            )}
+                          </div>
+                          
+                          {/* User info */}
+                          <div>
+                            <div className="flex items-center gap-1">
+                              <span className={cn(
+                                "font-medium",
+                                isCurrentUser ? "text-blue-800" : "text-gray-800"
+                              )}>
+                                {isCurrentUser ? "You" : user.name}
+                              </span>
+                              {isCurrentUser && (
+                                <span className="material-icons text-blue-500 text-sm">verified</span>
+                              )}
+                            </div>
+                            
+                            {/* Streak visualization */}
+                            {user.streak_count > 0 && (
+                              <div className="flex items-center text-amber-500">
+                                <span className="material-icons text-xs">local_fire_department</span>
+                                <span className="text-xs text-gray-500 ml-1">
+                                  {user.streak_count} day streak
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Points */}
+                        <div className={cn(
+                          "text-sm font-semibold px-3 py-1 rounded-full",
+                          isCurrentUser 
+                            ? "bg-gradient-to-r from-blue-100 to-green-100 text-blue-800"
+                            : rank === 2
+                              ? "bg-gray-100 text-gray-700"
+                              : rank === 3
+                                ? "bg-amber-100 text-amber-800"
+                                : "bg-gray-100 text-gray-700"
+                        )}>
+                          {user.points_total} pts
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
                     <span className="material-icons text-gray-400">people</span>
@@ -227,198 +370,25 @@ const Leaderboard = () => {
                   </p>
                 </div>
               )}
-            </>
-          )}
-          
-          {/* Weekly competition card */}
-          <div className="mt-8 mb-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-5 border border-blue-100 shadow-sm">
-            <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center">
-              <span className="material-icons text-blue-600 mr-2">event</span>
-              Weekly Activity Competition
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Most active days */}
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
-                <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
-                  <span className="material-icons text-blue-500 text-sm mr-1">today</span>
-                  Commute Activity Pattern
-                </h4>
-                <div className="flex justify-between items-end h-20">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri"].map((day, i) => {
-                    // Heights for a typical active week pattern
-                    // Could be replaced with actual data from the backend in the future
-                    const heights = [
-                      "h-8", // Monday
-                      "h-12", // Tuesday
-                      "h-16", // Wednesday (highest)
-                      "h-10", // Thursday
-                      "h-6"  // Friday
-                    ];
-                    
-                    return (
-                      <div key={day} className="flex flex-col items-center">
-                        <div className={`w-8 ${heights[i]} rounded-t-sm ${
-                          i === 2 ? "bg-blue-500" : i === 1 || i === 3 ? "bg-blue-400" : "bg-blue-300"
-                        }`}></div>
-                        <span className="text-xs text-gray-600 mt-1">{day}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <p className="text-xs text-gray-500 mt-3">
-                  <span className="font-medium">Typical pattern:</span> Mid-week has highest participation
-                </p>
-              </div>
               
-              {/* Weekly leaderboard highlights */}
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100">
-                <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
-                  <span className="material-icons text-blue-500 text-sm mr-1">emoji_events</span>
-                  Weekly Highlights
-                </h4>
-                <ul className="text-xs space-y-2">
-                  {leaderboard && leaderboard.length > 0 ? (
-                    <>
-                      <li className="flex items-center text-green-700">
-                        <span className="material-icons text-green-500 text-sm mr-1">trending_up</span>
-                        <strong className="mr-1">{leaderboard[0].name.split(' ')[0]}</strong> 
-                        <span>is at the top of the leaderboard</span>
-                      </li>
-                      
-                      {Math.max(...leaderboard.map(user => user.streak_count || 0)) > 0 ? (
-                        <li className="flex items-center text-amber-700">
-                          <span className="material-icons text-amber-500 text-sm mr-1">local_fire_department</span>
-                          <strong className="mr-1">
-                            {leaderboard.find(u => Math.max(...leaderboard.map(user => user.streak_count || 0)) === (u.streak_count || 0))?.name.split(' ')[0] || 'Someone'}
-                          </strong>
-                          <span>has the longest streak ({Math.max(...leaderboard.map(user => user.streak_count || 0))} days)</span>
-                        </li>
-                      ) : (
-                        <li className="flex items-center text-amber-700">
-                          <span className="material-icons text-amber-500 text-sm mr-1">local_fire_department</span>
-                          <span>No active streaks - be the first to start one!</span>
-                        </li>
-                      )}
-                      
-                      <li className="flex items-center text-blue-700">
-                        <span className="material-icons text-blue-500 text-sm mr-1">thumb_up</span>
-                        <span>Next milestone: <strong>5 sustainable commutes</strong></span>
-                      </li>
-                    </>
-                  ) : (
-                    <li className="text-gray-500">Start logging commutes to see weekly highlights!</li>
-                  )}
+              {/* Points calculation information */}
+              <div className="mt-6 p-4 bg-green-50 rounded-lg text-green-800">
+                <div className="flex items-center mb-2">
+                  <span className="material-icons text-primary mr-2">insights</span>
+                  <h3 className="font-medium">How Points Are Calculated</h3>
+                </div>
+                <ul className="text-sm space-y-1 ml-6 list-disc">
+                  <li>Walking: 30 points per day</li>
+                  <li>Cycling: 25 points per day</li>
+                  <li>Public Transit: 20 points per day</li>
+                  <li>Carpooling: 15 points per day</li>
+                  <li>Remote Work: 15 points per day</li>
+                  <li>Electric Vehicle: 10 points per day</li>
+                  <li>Bonus: +25 points for 3+ days of sustainable commuting</li>
                 </ul>
               </div>
-              
-              {/* Weekly challenge - dynamically select from available challenges */}
-              <div className="bg-white rounded-lg p-4 shadow-sm border border-blue-100 relative overflow-hidden">
-                {/* Background icon - changes based on the challenge type */}
-                <div className="absolute -right-8 -bottom-8 opacity-10">
-                  <span className="material-icons text-8xl text-blue-500">
-                    {stats?.streak === 0 ? "pedal_bike" : "local_fire_department"}
-                  </span>
-                </div>
-                <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
-                  <span className="material-icons text-blue-500 text-sm mr-1">stars</span>
-                  Weekly Challenge
-                </h4>
-                
-                {/* Dynamic challenge based on user stats */}
-                {stats?.streak === 0 ? (
-                  <>
-                    <p className="text-sm font-medium text-blue-900 mb-2">
-                      Start a 3-day commute streak!
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${hasCommuteThisWeek ? 33 : 0}%` }}></div>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {hasCommuteThisWeek ? "1/3 completed" : "0/3 completed"} • 50 bonus points
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-blue-900 mb-2">
-                      Try a new sustainable commute type!
-                    </p>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                      <div className="bg-blue-500 h-2 rounded-full" style={{ width: "0%" }}></div>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      0/1 completed • 75 bonus points
-                    </p>
-                  </>
-                )}
-                
-                <Link to="/log-commute" className="inline-block text-xs text-blue-600 hover:text-blue-800 mt-2 font-medium">
-                  Log commute →
-                </Link>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-green-50 rounded-lg text-green-800">
-              <div className="flex items-center mb-2">
-                <span className="material-icons text-primary mr-2">insights</span>
-                <h3 className="font-medium">How Points Are Calculated</h3>
-              </div>
-              <ul className="text-sm space-y-1 ml-6 list-disc">
-                <li>Walking: 30 points per day</li>
-                <li>Cycling: 25 points per day</li>
-                <li>Public Transit: 20 points per day</li>
-                <li>Carpooling: 15 points per day</li>
-                <li>Remote Work: 15 points per day</li>
-                <li>Electric Vehicle: 10 points per day</li>
-                <li>Bonus: +25 points for 3+ days of sustainable commuting</li>
-              </ul>
-            </div>
-            
-            <div className="p-4 bg-purple-50 rounded-lg text-purple-800">
-              <div className="flex items-center mb-2">
-                <span className="material-icons text-purple-600 mr-2">stars</span>
-                <h3 className="font-medium">Competitive Insights</h3>
-              </div>
-              
-              {stats && leaderboard && leaderboard.length > 0 ? (
-                <div className="space-y-2 text-sm">
-                  {/* Most consistent commuter */}
-                  <div className="flex items-center">
-                    <span className="material-icons text-purple-500 text-sm mr-1">local_fire_department</span>
-                    <p>
-                      <strong>Longest Streak: </strong> 
-                      {Math.max(...leaderboard.map(user => user.streak_count || 0))} days
-                      {stats.streak > 0 && ` (yours: ${stats.streak} days)`}
-                    </p>
-                  </div>
-                  
-                  {/* Average points this week */}
-                  <div className="flex items-center">
-                    <span className="material-icons text-purple-500 text-sm mr-1">speed</span>
-                    <p>
-                      <strong>Average Weekly Points: </strong>
-                      {Math.round(leaderboard.reduce((acc, user) => acc + (user.points_total || 0), 0) / leaderboard.length)} points
-                    </p>
-                  </div>
-                  
-                  {/* Personal best potential */}
-                  <div className="flex items-center">
-                    <span className="material-icons text-purple-500 text-sm mr-1">trending_up</span>
-                    <p>
-                      <strong>Potential Weekly Gain: </strong>
-                      Up to 240 points if you log sustainable commutes every day
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-purple-700">
-                  Start logging your commutes to see competitive insights and track your progress against others!
-                </p>
-              )}
-            </div>
-          </div>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>
