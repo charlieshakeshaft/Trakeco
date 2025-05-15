@@ -103,6 +103,20 @@ const getUserRankTier = (points: number): RankTier => {
   return tiers.find(tier => points >= tier.minPoints && points <= tier.maxPoints) || tiers[0];
 };
 
+const getNextRankTier = (points: number): RankTier => {
+  const allTiers = getRankTiers();
+  const currentTier = getUserRankTier(points);
+  const currentTierIndex = allTiers.findIndex(tier => tier.name === currentTier.name);
+  
+  // If we're at the highest tier, just return the current one
+  if (currentTierIndex === allTiers.length - 1) {
+    return currentTier;
+  }
+  
+  // Otherwise return the next tier
+  return allTiers[currentTierIndex + 1];
+};
+
 const Leaderboard = () => {
   const [timeFrame, setTimeFrame] = useState("month");
   const { user } = useAuth();
@@ -120,25 +134,22 @@ const Leaderboard = () => {
     completed_challenges: number;
   }
   
-  // Fetch user stats for streak and points information
+  // Retrieve user stats
   const { data: stats } = useQuery<UserStats>({
     queryKey: [`/api/user/stats?userId=${userId}`],
     staleTime: 60000, // 1 minute
   });
   
-  // Get today's date for display
+  // Get the current day of week for the message
   const today = format(new Date(), 'EEEE');
   
-  // Check if user has logged any commutes this week
+  // Check if user has any commutes logged for the current week
   const hasCommuteThisWeek = currentCommutes && currentCommutes.length > 0;
   
-  // Get top 3 users for the podium display
-  const topThree = leaderboard ? leaderboard.slice(0, 3) : [];
+  // For displaying ranks beyond the top 3
+  const otherUsers = leaderboard ? leaderboard.slice(3, 7) : [];
   
-  // Get remaining users for the list (excluding top 3)
-  const otherUsers = leaderboard ? leaderboard.slice(3) : [];
-  
-  // Find the current user's rank
+  // Find the current user's position in the leaderboard
   const currentUserRank = leaderboard ? findUserRank(leaderboard, userId) : -1;
   
   // Check if current user is not in the top displayed users
@@ -156,7 +167,7 @@ const Leaderboard = () => {
             onValueChange={setTimeFrame}
           >
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="Select time" />
+              <SelectValue placeholder="This Month" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="week">This Week</SelectItem>
@@ -167,9 +178,9 @@ const Leaderboard = () => {
           </Select>
         </div>
       </div>
-      
-      {/* Motivational action card - personalized to the user's current situation */}
-      {user && (
+
+      <div className="space-y-6">
+        {/* Motivational Card */}
         <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 mb-6">
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
@@ -188,239 +199,164 @@ const Leaderboard = () => {
                     <h3 className="text-xl font-semibold text-blue-800 mb-2">
                       🔥 Start a new streak today!
                     </h3>
-                    <p className="text-blue-700 mb-3">
-                      You've logged commutes this week - keep going to start a streak and earn bonus points!
+                    <p className="text-blue-700">
+                      Great job logging your commute! Continue throughout the week to start a streak.
                     </p>
                   </div>
                 ) : (
                   <div>
                     <h3 className="text-xl font-semibold text-blue-800 mb-2">
-                      🔥 {stats?.streak}-day streak! Keep it going!
+                      🔥 Your streak: {stats?.streak} days!
                     </h3>
-                    <p className="text-blue-700 mb-3">
-                      Amazing work! You're on a {stats?.streak}-day streak. Log today's commute to keep climbing the ranks!
+                    <p className="text-blue-700">
+                      Amazing work! Keep logging your sustainable commutes to maintain your streak and climb the ranks.
                     </p>
-                  </div>
-                )}
-                
-                {/* Current rank and next rank status */}
-                {leaderboard && leaderboard.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 mt-1">
-                    <div className="bg-white px-3 py-1 rounded-full border border-blue-200 flex items-center">
-                      <span className="text-blue-700 font-medium text-sm mr-1">Current Rank:</span>
-                      <span className={cn(
-                        "text-xs font-bold px-2 py-0.5 rounded-full",
-                        currentUserRank <= 3 ? "bg-yellow-100 text-yellow-800" : 
-                        currentUserRank <= 10 ? "bg-purple-100 text-purple-800" : 
-                        "bg-gray-100 text-gray-800"
-                      )}>
-                        {currentUserRank === 1 ? "🥇 Gold" : 
-                         currentUserRank === 2 ? "🥈 Silver" : 
-                         currentUserRank === 3 ? "🥉 Bronze" : 
-                         currentUserRank <= 5 ? "Elite" :
-                         currentUserRank <= 10 ? "Challenger" : "Explorer"}
-                      </span>
-                    </div>
-                    
-                    {currentUserRank > 1 && (
-                      <div className="text-sm text-blue-600 flex items-center">
-                        <span className="material-icons text-blue-500 text-sm mr-1">arrow_upward</span>
-                        <span>
-                          {leaderboard[currentUserRank - 2]?.points_total - (stats?.points || 0) > 0 ? (
-                            <>
-                              <span className="font-medium">{leaderboard[currentUserRank - 2]?.points_total - (stats?.points || 0)} more points</span> to rank up!
-                            </>
-                          ) : (
-                            <>Tied for higher rank - keep adding points!</>  
-                          )}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
               
-              <div className="flex space-x-3">
+              <div>
                 <Link to="/log-commute">
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    <span className="material-icons mr-1 text-sm">directions_bike</span>
+                  <Button className="w-full md:w-auto">
+                    <span className="material-icons mr-2 text-sm">directions_bike</span>
                     Log Today's Commute
-                  </Button>
-                </Link>
-                
-                <Link to="/challenges">
-                  <Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-100">
-                    <span className="material-icons mr-1 text-sm">emoji_events</span>
-                    View Challenges
                   </Button>
                 </Link>
               </div>
             </div>
           </CardContent>
         </Card>
-      )}
-      
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg font-semibold text-gray-700 flex items-center">
-            <span className="material-icons text-accent mr-2">emoji_events</span>
-            Leaderboard
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="animate-pulse space-y-4">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="h-12 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          ) : (
-            <>
-              {/* Top user */}
-              {leaderboard && leaderboard.length > 0 && (
-                <div className="mb-6">
-                  <div className="flex justify-center mb-4">
-                    <div className="relative">
-                      <div className={cn(
-                        "w-20 h-20 rounded-full border-4 border-yellow-400 flex items-center justify-center shadow-lg",
-                        getAvatarColor(leaderboard[0].id)
-                      )}>
-                        {leaderboard[0].profileImageUrl ? (
-                          <img
-                            src={leaderboard[0].profileImageUrl}
-                            alt={`${leaderboard[0].name}'s avatar`}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-2xl font-bold">
-                            {getInitials(leaderboard[0].name)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="absolute -top-2 -right-2 bg-yellow-400 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md">
-                        <span className="material-icons text-sm">emoji_events</span>
-                      </div>
-                    </div>
+        
+        {/* User Rank Section - Moved OUTSIDE the leaderboard section */}
+        {stats && (
+          <div className="mb-6">
+            <h2 className="text-xl font-medium text-gray-800 mb-3 flex items-center">
+              <span className="material-icons text-primary mr-2">military_tech</span>
+              Your Rank Progress
+            </h2>
+            
+            <div className="p-5 rounded-lg border border-gray-200 bg-white shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "w-16 h-16 rounded-full flex items-center justify-center shadow-sm",
+                  getUserRankTier(stats.points).color
+                )}>
+                  <span className="material-icons text-xl">{getUserRankTier(stats.points).icon}</span>
+                </div>
+                
+                <div className="flex-1">
+                  <div className="text-xl font-semibold">{getUserRankTier(stats.points).name} Rank</div>
+                  <div className="text-sm text-gray-600">
+                    You have {stats.points} points total
                   </div>
                   
-                  <div className="text-center">
-                    <h3 className="font-medium text-lg">
-                      {leaderboard[0].id === userId ? "You" : leaderboard[0].name}
-                    </h3>
-                    <div className="flex justify-center items-center gap-2 text-gray-600">
-                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
-                        {leaderboard[0].points_total} points
-                      </span>
-                      
-                      {leaderboard[0].streak_count > 0 && (
-                        <span className="bg-amber-100 text-amber-800 flex items-center px-3 py-1 rounded-full text-sm">
-                          <span className="material-icons text-amber-500 text-xs mr-1">local_fire_department</span>
-                          {leaderboard[0].streak_count} day streak
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-              {/* All users in a ranked list */}
-              {leaderboard && leaderboard.length > 0 ? (
-                <div className="space-y-3">
-                  {leaderboard.map((user, index) => {
-                    const rank = index + 1;
-                    const isCurrentUser = user.id === userId;
-                    
-                    // Skip the first user since they're already displayed as top user
-                    if (rank === 1) return null;
-                    
-                    return (
-                      <div 
-                        key={user.id} 
-                        className={cn(
-                          "flex items-center justify-between p-3 rounded-lg transition-all",
-                          isCurrentUser 
-                            ? "bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 shadow-md" 
-                            : "border border-gray-100 hover:shadow-sm hover:bg-gray-50"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          {/* Rank number */}
-                          <div className={cn(
-                            "w-8 h-8 flex items-center justify-center rounded-full shadow-sm",
-                            rank === 2 
-                              ? "bg-gradient-to-r from-gray-300 to-gray-400 text-white"
-                              : rank === 3
-                                ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white"
-                                : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700"
-                          )}>
-                            {rank}
-                          </div>
-                          
-                          {/* User avatar */}
-                          <div className={cn(
-                            "w-10 h-10 rounded-full overflow-hidden border-2",
-                            rank === 2 
-                              ? "border-gray-300" 
-                              : rank === 3 
-                                ? "border-amber-500"
-                                : "border-gray-200",
-                            "flex items-center justify-center",
-                            getAvatarColor(user.id)
-                          )}>
-                            {user.profileImageUrl ? (
-                              <img
-                                src={user.profileImageUrl}
-                                alt={`${user.name}'s avatar`}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-base font-bold">{getInitials(user.name)}</span>
-                            )}
-                          </div>
-                          
-                          {/* User info */}
-                          <div>
-                            <div className="flex items-center gap-1">
-                              <span className={cn(
-                                "font-medium",
-                                isCurrentUser ? "text-blue-800" : "text-gray-800"
-                              )}>
-                                {isCurrentUser ? "You" : user.name}
-                              </span>
-                              {isCurrentUser && (
-                                <span className="material-icons text-blue-500 text-sm">verified</span>
-                              )}
-                            </div>
-                            
-                            {/* Streak visualization */}
-                            {user.streak_count > 0 && (
-                              <div className="flex items-center text-amber-500">
-                                <span className="material-icons text-xs">local_fire_department</span>
-                                <span className="text-xs text-gray-500 ml-1">
-                                  {user.streak_count} day streak
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Points */}
-                        <div className={cn(
-                          "text-sm font-semibold px-3 py-1 rounded-full",
-                          isCurrentUser 
-                            ? "bg-gradient-to-r from-blue-100 to-green-100 text-blue-800"
-                            : rank === 2
-                              ? "bg-gray-100 text-gray-700"
-                              : rank === 3
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-gray-100 text-gray-700"
-                        )}>
-                          {user.points_total} pts
-                        </div>
+                  {/* Progress bar */}
+                  {getUserRankTier(stats.points).maxPoints < Infinity && (
+                    <div className="mt-3">
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+                        <div 
+                          className="bg-primary h-2.5 rounded-full" 
+                          style={{ 
+                            width: `${Math.min(100, (stats.points - getUserRankTier(stats.points).minPoints) / 
+                              (getUserRankTier(stats.points).maxPoints - getUserRankTier(stats.points).minPoints) * 100)}%` 
+                          }}
+                        ></div>
                       </div>
-                    );
-                  })}
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>{getUserRankTier(stats.points).minPoints} pts</span>
+                        {stats.points < getUserRankTier(stats.points).maxPoints && (
+                          <span className="text-center text-primary font-medium">
+                            {getUserRankTier(stats.points).maxPoints - stats.points} more to {
+                              getNextRankTier(stats.points).name
+                            }
+                          </span>
+                        )}
+                        <span>{getUserRankTier(stats.points).maxPoints} pts</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
+                
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <span className="material-icons text-sm mr-1">visibility</span>
+                      All Ranks
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Rank Tiers</DialogTitle>
+                      <DialogDescription>
+                        Earn points by tracking your commutes to progress through ranks
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-3 mt-2">
+                      {getRankTiers().map((tier, index) => (
+                        <div 
+                          key={tier.name} 
+                          className={cn(
+                            "flex items-center p-3 rounded-lg border",
+                            stats && getUserRankTier(stats.points).name === tier.name
+                              ? "border-primary bg-primary/5"
+                              : "border-gray-200"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center mr-3",
+                            tier.color
+                          )}>
+                            <span className="material-icons">{tier.icon}</span>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="font-medium">{tier.name}</div>
+                            <div className="text-xs text-gray-500">
+                              {tier.minPoints} - {tier.maxPoints < Infinity 
+                                ? tier.maxPoints 
+                                : "∞"} points
+                            </div>
+                          </div>
+                          
+                          {stats && getUserRankTier(stats.points).name === tier.name && (
+                            <div className="bg-primary/20 text-primary text-xs font-medium px-2 py-1 rounded">
+                              Current
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Leaderboard Section */}
+        <div>
+          <h2 className="text-xl font-medium text-gray-800 mb-3">
+            Top Performers
+          </h2>
+          
+          <Card>
+            <CardContent className="pt-6">
+              {isLoading ? (
+                <div className="animate-pulse space-y-4">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <div key={i} className="h-16 bg-gray-200 rounded"></div>
+                  ))}
+                </div>
+              ) : leaderboard && leaderboard.length > 0 ? (
+                <>
+                  <TopUsers users={leaderboard.slice(0, 3)} />
+                  <RankingList 
+                    users={leaderboard} 
+                    userId={user?.id || 0}
+                    className="mt-6"
+                  />
+                </>
               ) : (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -432,160 +368,10 @@ const Leaderboard = () => {
                   </p>
                 </div>
               )}
-              
-              {/* Your rank card */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* User current rank */}
-                <div className="p-4 rounded-lg border border-gray-200 bg-white">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium text-gray-800 mb-1 flex items-center">
-                        <span className="material-icons text-primary mr-2">military_tech</span>
-                        Your Current Rank
-                      </h3>
-                      
-                      {stats && (
-                        <>
-                          <div className="flex items-center gap-2 mt-3">
-                            <div className={cn(
-                              "w-12 h-12 rounded-full flex items-center justify-center shadow-sm",
-                              getUserRankTier(stats.points).color
-                            )}>
-                              <span className="material-icons">{getUserRankTier(stats.points).icon}</span>
-                            </div>
-                            
-                            <div>
-                              <div className="text-lg font-semibold">{getUserRankTier(stats.points).name}</div>
-                              <div className="text-xs text-gray-500">
-                                {stats.points} / {getUserRankTier(stats.points).maxPoints < Infinity 
-                                  ? getUserRankTier(stats.points).maxPoints
-                                  : "∞"} points
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Progress bar */}
-                          {getUserRankTier(stats.points).maxPoints < Infinity && (
-                            <div className="mt-3">
-                              <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
-                                <div 
-                                  className="bg-primary h-2 rounded-full" 
-                                  style={{ 
-                                    width: `${Math.min(100, (stats.points - getUserRankTier(stats.points).minPoints) / 
-                                      (getUserRankTier(stats.points).maxPoints - getUserRankTier(stats.points).minPoints) * 100)}%` 
-                                  }}
-                                ></div>
-                              </div>
-                              <div className="text-xs text-gray-500 flex justify-between">
-                                <span>{getUserRankTier(stats.points).minPoints}</span>
-                                <span>
-                                  {stats.points < getUserRankTier(stats.points).maxPoints ? (
-                                    <span>
-                                      {getUserRankTier(stats.points).maxPoints - stats.points} more points to {
-                                        getRankTiers().find(tier => tier.minPoints > getUserRankTier(stats.points).maxPoints)?.name || "MAX"
-                                      }
-                                    </span>
-                                  ) : (
-                                    <span>MAX RANK!</span>
-                                  )}
-                                </span>
-                                <span>{getUserRankTier(stats.points).maxPoints}</span>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    
-                    {/* View all ranks button */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-xs">
-                          <span className="material-icons text-sm mr-1">visibility</span>
-                          All Ranks
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Rank Tiers</DialogTitle>
-                          <DialogDescription>
-                            Earn points from your sustainable commutes to level up your rank
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        <div className="space-y-3 mt-2">
-                          {getRankTiers().map((tier, index) => (
-                            <div 
-                              key={tier.name} 
-                              className={cn(
-                                "flex items-center p-3 rounded-lg border",
-                                stats && getUserRankTier(stats.points).name === tier.name
-                                  ? "border-primary bg-primary/5"
-                                  : "border-gray-200"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center mr-3",
-                                tier.color
-                              )}>
-                                <span className="material-icons">{tier.icon}</span>
-                              </div>
-                              
-                              <div className="flex-1">
-                                <div className="font-medium">{tier.name}</div>
-                                <div className="text-xs text-gray-500">
-                                  {tier.minPoints} - {tier.maxPoints < Infinity 
-                                    ? tier.maxPoints 
-                                    : "∞"} points
-                                </div>
-                              </div>
-                              
-                              {stats && getUserRankTier(stats.points).name === tier.name && (
-                                <div className="bg-primary/20 text-primary text-xs font-medium px-2 py-1 rounded">
-                                  Current
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
-                
-                {/* Points information */}
-                <div className="p-4 bg-green-50 rounded-lg text-green-800">
-                  <div className="flex items-center mb-2">
-                    <span className="material-icons text-primary mr-2">insights</span>
-                    <h3 className="font-medium">How Points Are Calculated</h3>
-                  </div>
-                  <ul className="text-xs space-y-1 ml-6 list-disc">
-                    <li>Walking: 30 points per day</li>
-                    <li>Cycling: 25 points per day</li>
-                    <li>Public Transit: 20 points per day</li>
-                    <li>Carpooling: 15 points per day</li>
-                    <li>Remote Work: 15 points per day</li>
-                    <li>Electric Vehicle: 10 points per day</li>
-                    <li>Bonus: +25 points for 3+ days per week</li>
-                    <li>Weekly Challenge: +50-100 bonus points</li>
-                  </ul>
-                  
-                  <div className="flex justify-between mt-3 text-xs">
-                    <div>
-                      <div className="font-medium text-green-800">Potential Weekly:</div>
-                      <div className="mt-1">150-250 points</div>
-                    </div>
-                    <div>
-                      <div className="font-medium text-green-800">Potential Monthly:</div>
-                      <div className="mt-1">600-1000 points</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
