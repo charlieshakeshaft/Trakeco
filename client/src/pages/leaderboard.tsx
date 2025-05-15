@@ -182,19 +182,6 @@ const Leaderboard = () => {
                     <p className="text-blue-700 mb-3">
                       Happy {today}! Log your sustainable commute for today and start climbing the leaderboard!
                     </p>
-                    {stats && (
-                      <div className="flex items-center mt-2 mb-3">
-                        <div className={cn(
-                          "w-8 h-8 rounded-full flex items-center justify-center mr-2",
-                          getUserRankTier(stats.points).color
-                        )}>
-                          <span className="material-icons text-sm">{getUserRankTier(stats.points).icon}</span>
-                        </div>
-                        <span className="font-medium text-blue-700">
-                          Your rank: {getUserRankTier(stats.points).name} ({stats.points} points)
-                        </span>
-                      </div>
-                    )}
                   </div>
                 ) : stats?.streak === 0 ? (
                   <div>

@@ -54,17 +54,13 @@ const Dashboard = () => {
         {/* Available Rewards */}
         <RewardsSection userId={user.id} />
         
-        {/* Rank and Leaderboard - Side by Side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* User Rank Card */}
-          <div>
-            <UserRankCard userId={user.id} />
-          </div>
-          
+        {/* Leaderboard followed by Rank */}
+        <div className="space-y-6">
           {/* Leaderboard */}
-          <div>
-            <LeaderboardSection userId={user.id} />
-          </div>
+          <LeaderboardSection userId={user.id} />
+          
+          {/* User Rank Card */}
+          <UserRankCard userId={user.id} />
         </div>
       </div>
     </div>

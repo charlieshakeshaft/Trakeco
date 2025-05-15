@@ -68,6 +68,20 @@ const getUserRankTier = (points: number): RankTier => {
   return tiers.find(tier => points >= tier.minPoints && points <= tier.maxPoints) || tiers[0];
 };
 
+const getNextRankTier = (points: number): RankTier => {
+  const tiers = getRankTiers();
+  const currentTier = getUserRankTier(points);
+  const currentTierIndex = tiers.findIndex(tier => tier.name === currentTier.name);
+  
+  // If we're at the highest tier, just return the current one
+  if (currentTierIndex === tiers.length - 1) {
+    return currentTier;
+  }
+  
+  // Otherwise return the next tier
+  return tiers[currentTierIndex + 1];
+};
+
 const UserRankCard = ({ userId }: UserRankCardProps) => {
   // Retrieve user stats
   interface UserStats {
@@ -197,39 +211,48 @@ const UserRankCard = ({ userId }: UserRankCardProps) => {
                 </div>
               )}
               
-              {/* Rank benefits */}
+              {/* Next level challenges */}
               <div className="mt-4 border-t border-gray-100 pt-4">
-                <h3 className="font-medium text-gray-700 mb-2">Rank Benefits</h3>
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <li className="flex items-start">
-                    <span className="material-icons text-green-500 text-sm mr-1">check_circle</span>
-                    <span>Access to basic challenges</span>
-                  </li>
-                  {(stats.points >= 500) && (
-                    <li className="flex items-start">
-                      <span className="material-icons text-green-500 text-sm mr-1">check_circle</span>
-                      <span>Special rewards access</span>
-                    </li>
-                  )}
-                  {(stats.points >= 1000) && (
-                    <li className="flex items-start">
-                      <span className="material-icons text-green-500 text-sm mr-1">check_circle</span>
-                      <span>Premium challenges</span>
-                    </li>
-                  )}
-                  {(stats.points >= 2000) && (
-                    <li className="flex items-start">
-                      <span className="material-icons text-green-500 text-sm mr-1">check_circle</span>
-                      <span>Exclusive badges</span>
-                    </li>
-                  )}
-                  {(stats.points >= 3000) && (
-                    <li className="flex items-start">
-                      <span className="material-icons text-green-500 text-sm mr-1">check_circle</span>
-                      <span>Elite leaderboard status</span>
-                    </li>
-                  )}
-                </ul>
+                {getUserRankTier(stats.points).maxPoints < Infinity ? (
+                  <>
+                    <h3 className="font-medium text-gray-700 mb-2">
+                      Unlock at {getNextRankTier(stats.points).name} Rank
+                    </h3>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                      {stats.points < 500 && (
+                        <li className="flex items-start">
+                          <span className="material-icons text-gray-400 text-sm mr-1">lock</span>
+                          <span className="text-gray-500">Special rewards access</span>
+                        </li>
+                      )}
+                      {stats.points < 1000 && (
+                        <li className="flex items-start">
+                          <span className="material-icons text-gray-400 text-sm mr-1">lock</span>
+                          <span className="text-gray-500">Premium challenges</span>
+                        </li>
+                      )}
+                      {stats.points < 2000 && (
+                        <li className="flex items-start">
+                          <span className="material-icons text-gray-400 text-sm mr-1">lock</span>
+                          <span className="text-gray-500">Exclusive badges</span>
+                        </li>
+                      )}
+                      {stats.points < 3000 && (
+                        <li className="flex items-start">
+                          <span className="material-icons text-gray-400 text-sm mr-1">lock</span>
+                          <span className="text-gray-500">Elite leaderboard status</span>
+                        </li>
+                      )}
+                    </ul>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-medium text-gray-700 mb-2">
+                      All Challenges Unlocked
+                    </h3>
+                    <p className="text-sm text-gray-500">You've reached the highest rank and unlocked all challenges!</p>
+                  </>
+                )}
               </div>
             </div>
           ) : (
