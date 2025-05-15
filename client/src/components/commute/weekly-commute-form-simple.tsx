@@ -174,9 +174,12 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
     }
   });
   
-  // Process existing week logs data
+  // Process existing week logs data - Only run this on initial load
   useEffect(() => {
-    if (weekLogs && weekLogs.length > 0) {
+    // Only initialize from logs if we don't have any entries yet
+    if (weekLogs && weekLogs.length > 0 && commuteEntries.length === 0) {
+      console.log("Initializing commute entries from existing logs:", weekLogs);
+      
       // Check which days are already logged and with what commute types
       const commuteTypesByDay: Record<string, string[]> = {};
       
@@ -217,12 +220,16 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       });
       
       // Update the state
+      console.log("Setting initial commute entries:", entries);
       setCommuteEntries(entries);
-    } else {
-      // No existing logs for this week
+    } else if (weekLogs && weekLogs.length === 0 && selectedWeek === "current") {
+      // Reset entries when changing to a week with no logs
+      console.log("No existing logs for this week, resetting commute entries");
       setCommuteEntries([]);
     }
-  }, [weekLogs]);
+    // We don't want this effect to run when commuteEntries changes, only when weekLogs changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [weekLogs, selectedWeek]);
   
   // Add a new commute entry form
   const addCommuteEntry = () => {
