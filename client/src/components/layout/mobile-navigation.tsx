@@ -10,12 +10,10 @@ const MobileNavigation = () => {
   const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string, tab?: string) => {
     e.preventDefault();
     
-    // If user needs password change, always redirect to profile with appropriate tab
+    // If user needs password change, always redirect to profile settings tab
     if (user?.needs_password_change) {
-      // Map standard routes to profile tabs
-      const tabToUse = tab || 'settings';
-      console.log(`User needs password change, redirecting to profile with tab: ${tabToUse}`);
-      setLocation(`/profile?tab=${tabToUse}`);
+      console.log(`User needs password change, redirecting to profile settings tab`);
+      setLocation('/profile?tab=settings');
       return;
     }
     

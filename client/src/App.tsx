@@ -94,24 +94,11 @@ function Router() {
     // Only redirect from main navigation routes, not within the profile page itself
     const mainRoutes = ['/', '/log-commute', '/challenges', '/rewards', '/leaderboard', '/company'];
     
-    // Map routes to specific profile tabs
-    const routeToTabMap: Record<string, string> = {
-      '/challenges': 'impact',
-      '/rewards': 'history',
-      // Add more mappings as needed
-    };
-    
     if (user?.needs_password_change && mainRoutes.includes(location)) {
-      console.log("User needs password change, redirecting to profile");
+      console.log("User needs password change, redirecting to profile settings tab");
       
-      // Check if we should pass a specific tab parameter
-      const tabParam = routeToTabMap[location];
-      if (tabParam) {
-        setLocation(`/profile?tab=${tabParam}`);
-      } else {
-        // Default to settings tab for password change
-        setLocation(`/profile?tab=settings`);
-      }
+      // Always redirect to settings tab when password change is needed
+      setLocation('/profile?tab=settings');
     }
   }, [user, location, setLocation]);
   

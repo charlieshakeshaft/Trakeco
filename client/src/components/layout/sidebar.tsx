@@ -24,24 +24,16 @@ const Sidebar = ({ user }: SidebarProps) => {
   const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string, tab?: string) => {
     e.preventDefault();
     
-    // If user needs password change, always redirect to profile with appropriate tab
+    // Always use normal navigation for regular paths, 
+    // unless the user needs to change password
     if (user?.needs_password_change) {
-      // Map standard routes to profile tabs
-      let tabToUse = tab;
-      
-      if (!tabToUse) {
-        // Set default tabs based on route
-        if (path === '/challenges') tabToUse = 'impact';
-        else if (path === '/rewards') tabToUse = 'history';
-        else tabToUse = 'settings';
-      }
-      
-      console.log(`User needs password change, redirecting to profile with tab: ${tabToUse}`);
-      setLocation(`/profile?tab=${tabToUse}`);
+      // Always redirect to profile settings tab if password change is needed
+      console.log(`User needs password change, redirecting to profile with settings tab`);
+      setLocation('/profile?tab=settings');
       return;
     }
     
-    // Normal navigation with optional tab parameter
+    // Normal navigation with optional tab parameter for profile page
     if (tab && path === '/profile') {
       setLocation(`/profile?tab=${tab}`);
     } else {
