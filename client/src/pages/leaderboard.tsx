@@ -230,10 +230,131 @@ const Leaderboard = () => {
         {/* User Rank Section - Moved OUTSIDE the leaderboard section */}
         {stats && (
           <div className="mb-6">
-            <h2 className="text-xl font-medium text-gray-800 mb-3 flex items-center">
-              <span className="material-icons text-primary mr-2">workspace_premium</span>
-              Your Achievement Badges
-            </h2>
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-3">
+              <h2 className="text-xl font-medium text-gray-800 flex items-center">
+                <span className="material-icons text-primary mr-2">workspace_premium</span>
+                Your Achievement Badges
+              </h2>
+              
+              <div className="flex items-center mt-2 md:mt-0">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex items-center gap-1 text-primary">
+                      <span className="material-icons text-sm">badge</span>
+                      Badge Guide
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Achievement Badges</DialogTitle>
+                      <DialogDescription>
+                        Track your commutes to earn points and unlock higher tier badges
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="space-y-3 mt-4">
+                      {getRankTiers().map((tier, index) => (
+                        <div 
+                          key={tier.name} 
+                          className={cn(
+                            "flex items-center p-4 rounded-lg",
+                            stats && getUserRankTier(stats.points).name === tier.name
+                              ? tier.name === 'Bronze' 
+                                ? "bg-amber-50 border border-amber-200"
+                                : tier.name === 'Silver'
+                                  ? "bg-gray-50 border border-gray-200"
+                                  : tier.name === 'Gold'
+                                    ? "bg-yellow-50 border border-yellow-200"
+                                    : tier.name === 'Platinum'
+                                      ? "bg-blue-50 border border-blue-200"
+                                      : "bg-purple-50 border border-purple-200"
+                              : "border border-gray-200"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-14 h-14 rounded-lg flex items-center justify-center mr-4 shadow-md border-2",
+                            tier.name === 'Bronze' 
+                              ? "border-amber-600 bg-gradient-to-br from-amber-100 to-amber-300"
+                              : tier.name === 'Silver'
+                                ? "border-gray-400 bg-gradient-to-br from-gray-100 to-gray-300"
+                                : tier.name === 'Gold'
+                                  ? "border-yellow-500 bg-gradient-to-br from-yellow-100 to-yellow-300"
+                                  : tier.name === 'Platinum'
+                                    ? "border-blue-600 bg-gradient-to-br from-blue-100 to-blue-300"
+                                    : "border-purple-600 bg-gradient-to-br from-purple-200 to-pink-300"
+                          )}>
+                            <span className={cn(
+                              "material-icons text-2xl",
+                              tier.name === 'Bronze' 
+                                ? "text-amber-800"
+                                : tier.name === 'Silver'
+                                  ? "text-gray-700"
+                                  : tier.name === 'Gold'
+                                    ? "text-yellow-700"
+                                    : tier.name === 'Platinum'
+                                      ? "text-blue-700"
+                                      : "text-purple-800"
+                            )}>{tier.icon}</span>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <div className="font-medium text-lg">{tier.name} Badge</div>
+                              {stats && getUserRankTier(stats.points).name === tier.name && (
+                                <div className={cn(
+                                  "text-xs font-medium px-2 py-0.5 rounded",
+                                  tier.name === 'Bronze' 
+                                    ? "bg-amber-100 text-amber-800"
+                                    : tier.name === 'Silver'
+                                      ? "bg-gray-200 text-gray-800"
+                                      : tier.name === 'Gold'
+                                        ? "bg-yellow-100 text-yellow-800"
+                                        : tier.name === 'Platinum'
+                                          ? "bg-blue-100 text-blue-800"
+                                          : "bg-purple-100 text-purple-800"
+                                )}>
+                                  Current
+                                </div>
+                              )}
+                            </div>
+                            
+                            <div className="text-sm text-gray-600 mt-1">
+                              <span className="font-medium">{tier.minPoints} - {tier.maxPoints < Infinity 
+                                ? tier.maxPoints 
+                                : "∞"}</span> points
+                            </div>
+                            
+                            {stats && getUserRankTier(stats.points).minPoints <= stats.points && 
+                             tier.maxPoints > stats.points && tier.maxPoints < Infinity && (
+                              <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
+                                <div 
+                                  className={cn(
+                                    "h-1.5 rounded-full",
+                                    tier.name === 'Bronze' 
+                                      ? "bg-amber-500"
+                                      : tier.name === 'Silver'
+                                        ? "bg-gray-500"
+                                        : tier.name === 'Gold'
+                                          ? "bg-yellow-500"
+                                          : tier.name === 'Platinum'
+                                            ? "bg-blue-500"
+                                            : "bg-purple-500"
+                                  )}
+                                  style={{ 
+                                    width: `${Math.min(100, (stats.points - tier.minPoints) / 
+                                      (tier.maxPoints - tier.minPoints) * 100)}%` 
+                                  }}
+                                ></div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
             
             <div className="p-6 rounded-lg border border-gray-200 bg-white shadow-sm">
               <div className="flex flex-col md:flex-row md:items-start gap-6">
@@ -338,125 +459,6 @@ const Leaderboard = () => {
                       </div>
                     </>
                   )}
-                  
-                  <div className="flex justify-end mt-3">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="gap-1.5">
-                          <span className="material-icons text-sm">badge</span>
-                          View All Badges
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent>
-                        <DialogHeader>
-                          <DialogTitle>Achievement Badges</DialogTitle>
-                          <DialogDescription>
-                            Track your commutes to earn points and unlock higher tier badges
-                          </DialogDescription>
-                        </DialogHeader>
-                        
-                        <div className="space-y-3 mt-4">
-                          {getRankTiers().map((tier, index) => (
-                            <div 
-                              key={tier.name} 
-                              className={cn(
-                                "flex items-center p-4 rounded-lg",
-                                stats && getUserRankTier(stats.points).name === tier.name
-                                  ? tier.name === 'Bronze' 
-                                    ? "bg-amber-50 border border-amber-200"
-                                    : tier.name === 'Silver'
-                                      ? "bg-gray-50 border border-gray-200"
-                                      : tier.name === 'Gold'
-                                        ? "bg-yellow-50 border border-yellow-200"
-                                        : tier.name === 'Platinum'
-                                          ? "bg-blue-50 border border-blue-200"
-                                          : "bg-purple-50 border border-purple-200"
-                                  : "border border-gray-200"
-                              )}
-                            >
-                              <div className={cn(
-                                "w-14 h-14 rounded-lg flex items-center justify-center mr-4 shadow-md border-2",
-                                tier.name === 'Bronze' 
-                                  ? "border-amber-600 bg-gradient-to-br from-amber-100 to-amber-300"
-                                  : tier.name === 'Silver'
-                                    ? "border-gray-400 bg-gradient-to-br from-gray-100 to-gray-300"
-                                    : tier.name === 'Gold'
-                                      ? "border-yellow-500 bg-gradient-to-br from-yellow-100 to-yellow-300"
-                                      : tier.name === 'Platinum'
-                                        ? "border-blue-600 bg-gradient-to-br from-blue-100 to-blue-300"
-                                        : "border-purple-600 bg-gradient-to-br from-purple-200 to-pink-300"
-                              )}>
-                                <span className={cn(
-                                  "material-icons text-2xl",
-                                  tier.name === 'Bronze' 
-                                    ? "text-amber-800"
-                                    : tier.name === 'Silver'
-                                      ? "text-gray-700"
-                                      : tier.name === 'Gold'
-                                        ? "text-yellow-700"
-                                        : tier.name === 'Platinum'
-                                          ? "text-blue-700"
-                                          : "text-purple-800"
-                                )}>{tier.icon}</span>
-                              </div>
-                              
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <div className="font-medium text-lg">{tier.name} Badge</div>
-                                  {stats && getUserRankTier(stats.points).name === tier.name && (
-                                    <div className={cn(
-                                      "text-xs font-medium px-2 py-0.5 rounded",
-                                      tier.name === 'Bronze' 
-                                        ? "bg-amber-100 text-amber-800"
-                                        : tier.name === 'Silver'
-                                          ? "bg-gray-200 text-gray-800"
-                                          : tier.name === 'Gold'
-                                            ? "bg-yellow-100 text-yellow-800"
-                                            : tier.name === 'Platinum'
-                                              ? "bg-blue-100 text-blue-800"
-                                              : "bg-purple-100 text-purple-800"
-                                    )}>
-                                      Current
-                                    </div>
-                                  )}
-                                </div>
-                                
-                                <div className="text-sm text-gray-600 mt-1">
-                                  <span className="font-medium">{tier.minPoints} - {tier.maxPoints < Infinity 
-                                    ? tier.maxPoints 
-                                    : "∞"}</span> points
-                                </div>
-                                
-                                {stats && getUserRankTier(stats.points).minPoints <= stats.points && 
-                                 tier.maxPoints > stats.points && tier.maxPoints < Infinity && (
-                                  <div className="mt-2 w-full bg-gray-200 rounded-full h-1.5">
-                                    <div 
-                                      className={cn(
-                                        "h-1.5 rounded-full",
-                                        tier.name === 'Bronze' 
-                                          ? "bg-amber-500"
-                                          : tier.name === 'Silver'
-                                            ? "bg-gray-500"
-                                            : tier.name === 'Gold'
-                                              ? "bg-yellow-500"
-                                              : tier.name === 'Platinum'
-                                                ? "bg-blue-500"
-                                                : "bg-purple-500"
-                                      )}
-                                      style={{ 
-                                        width: `${Math.min(100, (stats.points - tier.minPoints) / 
-                                          (tier.maxPoints - tier.minPoints) * 100)}%` 
-                                      }}
-                                    ></div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
                 </div>
               </div>
             </div>
