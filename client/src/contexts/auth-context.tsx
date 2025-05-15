@@ -3,6 +3,7 @@ import { queryClient, apiRequest } from '@/lib/queryClient';
 import { User } from '@/lib/types';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 
 interface AuthContextType {
   user: User | null;
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
+  const [_, setLocation] = useLocation();
   
   const { data: user, isLoading, refetch } = useQuery({
     queryKey: ['/api/user'],
@@ -42,7 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await apiRequest("/api/auth/logout", null, "POST");
       queryClient.clear();
-      window.location.href = '/login';
+      // Use client-side navigation instead of page reload
+      setLocation('/login');
     } catch (error) {
       console.error('Logout error:', error);
       toast({
