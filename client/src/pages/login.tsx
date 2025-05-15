@@ -50,8 +50,9 @@ export default function LoginPage() {
       
       // Small delay to ensure the auth state is updated
       setTimeout(() => {
-        // Redirect to dashboard using client-side navigation
-        setLocation("/");
+        // Force a hard navigation to the dashboard using window.location
+        // This is more reliable across environments than client-side routing
+        window.location.href = "/";
       }, 500);
       
     } catch (error) {
