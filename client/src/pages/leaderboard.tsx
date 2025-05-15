@@ -447,12 +447,8 @@ const Leaderboard = () => {
                       <div className="flex justify-between text-xs text-gray-500">
                         <span>{getUserRankTier(stats.points).minPoints} pts</span>
                         {stats.points < getUserRankTier(stats.points).maxPoints && (
-                          <span className="text-center">
-                            <span className="text-primary font-medium">
-                              {getUserRankTier(stats.points).maxPoints - stats.points} more
-                            </span> to unlock <span className="font-medium">{
-                              getNextRankTier(stats.points).name
-                            }</span>
+                          <span className="text-center text-primary font-medium">
+                            {getUserRankTier(stats.points).maxPoints - stats.points} points to next level
                           </span>
                         )}
                         <span>{getUserRankTier(stats.points).maxPoints} pts</span>
