@@ -1,4 +1,5 @@
 import { LeaderboardUser } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface TopUsersProps {
   topUsers: LeaderboardUser[];
@@ -34,6 +35,28 @@ const getAvatarColor = (userId: number): string => {
   return colors[userId % colors.length];
 };
 
+// Badge mapping for top 3 positions
+const positionBadges = {
+  1: {
+    icon: 'emoji_events',
+    gradient: 'from-yellow-300 to-yellow-500', 
+    podiumHeight: 'h-24',
+    label: '1st'
+  },
+  2: { 
+    icon: 'workspace_premium',
+    gradient: 'from-gray-300 to-gray-400',
+    podiumHeight: 'h-16',
+    label: '2nd'
+  },
+  3: { 
+    icon: 'military_tech',
+    gradient: 'from-amber-600 to-amber-700', 
+    podiumHeight: 'h-12',
+    label: '3rd'
+  }
+};
+
 const TopUsers = ({ topUsers, currentUserId }: TopUsersProps) => {
   if (topUsers.length === 0) {
     return null;
@@ -42,83 +65,121 @@ const TopUsers = ({ topUsers, currentUserId }: TopUsersProps) => {
   // Create an array of the top 3 users, or fewer if not available
   const top3 = topUsers.slice(0, Math.min(3, topUsers.length));
 
+  // Sort positions with 1st in the middle, 2nd on the left, 3rd on the right
+  const podiumPositions = [
+    { position: 2, user: top3.length > 1 ? top3[1] : null },
+    { position: 1, user: top3[0] },
+    { position: 3, user: top3.length > 2 ? top3[2] : null }
+  ];
+  
   return (
-    <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-      {/* 2nd place - if available */}
-      {top3.length > 1 && (
-        <div className="flex flex-col items-center">
-          <div className={`w-16 h-16 rounded-full overflow-hidden border-2 border-accent flex items-center justify-center ${
-            top3[1].id === currentUserId ? "ring-2 ring-primary" : ""
-          } ${getAvatarColor(top3[1].id)}`}>
-            {top3[1].profileImageUrl ? (
-              <img
-                src={top3[1].profileImageUrl}
-                alt={`${top3[1].name}'s avatar`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-lg font-bold">{getInitials(top3[1].name)}</span>
-            )}
-          </div>
-          <div className="flex items-center mt-2">
-            <span className="material-icons text-accent">looks_two</span>
-            <span className="text-sm font-medium ml-1">
-              {top3[1].id === currentUserId ? "You" : top3[1].name.split(' ')[0]}
-            </span>
-          </div>
-          <div className="text-sm text-gray-500">{top3[1].points_total} pts</div>
-        </div>
-      )}
-
-      {/* 1st place */}
-      <div className="flex flex-col items-center">
-        <div className={`w-20 h-20 rounded-full overflow-hidden border-4 border-accent flex items-center justify-center ${
-          top3[0].id === currentUserId ? "ring-2 ring-primary" : ""
-        } ${getAvatarColor(top3[0].id)}`}>
-          {top3[0].profileImageUrl ? (
-            <img
-              src={top3[0].profileImageUrl}
-              alt={`${top3[0].name}'s avatar`}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-xl font-bold">{getInitials(top3[0].name)}</span>
-          )}
-        </div>
-        <div className="flex items-center mt-2">
-          <span className="material-icons text-accent">looks_one</span>
-          <span className="text-sm font-medium ml-1">
-            {top3[0].id === currentUserId ? "You" : top3[0].name.split(' ')[0]}
-          </span>
-        </div>
-        <div className="text-sm text-gray-500">{top3[0].points_total} pts</div>
+    <div className="flex flex-col mb-10">
+      {/* Podium visualization */}
+      <div className="flex justify-center items-end mx-auto w-full max-w-lg mb-8">
+        {podiumPositions.map(({ position, user }) => {
+          if (!user) return <div key={`empty-${position}`} className="flex-1" />;
+          
+          const badge = positionBadges[position as keyof typeof positionBadges];
+          const isCurrentUser = user.id === currentUserId;
+          
+          return (
+            <div 
+              key={user.id} 
+              className={cn(
+                "flex flex-col items-center transition-all mx-1",
+                isCurrentUser ? "scale-105" : "",
+                position === 1 ? "order-2" : position === 2 ? "order-1" : "order-3"
+              )}
+            >
+              {/* User avatar */}
+              <div className="mb-2 relative">
+                {/* Badge icon */}
+                <div className={cn(
+                  "absolute -top-4 -right-4 w-8 h-8 rounded-full flex items-center justify-center",
+                  `bg-gradient-to-br ${badge.gradient}`
+                )}>
+                  <span className="material-icons text-white text-sm">{badge.icon}</span>
+                </div>
+                
+                {/* User image/initials */}
+                <div className={cn(
+                  "rounded-full overflow-hidden",
+                  "animate-[bounce_3s_ease-in-out_infinite]",
+                  position === 1 ? "w-20 h-20 border-4" : "w-16 h-16 border-2",
+                  isCurrentUser 
+                    ? "ring-2 ring-primary border-yellow-400" 
+                    : position === 1 
+                      ? "border-yellow-400"
+                      : position === 2
+                        ? "border-gray-300"
+                        : "border-amber-600",
+                  "flex items-center justify-center shadow-lg",
+                  getAvatarColor(user.id)
+                )}>
+                  {user.profileImageUrl ? (
+                    <img
+                      src={user.profileImageUrl}
+                      alt={`${user.name}'s avatar`}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className={cn(
+                      "font-bold",
+                      position === 1 ? "text-xl" : "text-lg"
+                    )}>
+                      {getInitials(user.name)}
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              {/* User name */}
+              <div className={cn(
+                "font-medium text-center",
+                isCurrentUser ? "text-primary" : "text-gray-800",
+                position === 1 ? "text-base" : "text-sm"
+              )}>
+                {user.id === currentUserId ? "You" : user.name.split(' ')[0]}
+              </div>
+              
+              {/* Points display with animated wrapper */}
+              <div className={cn(
+                "flex items-center mt-1 px-3 py-1 rounded-full",
+                position === 1 
+                  ? "bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800" 
+                  : position === 2
+                    ? "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700"
+                    : "bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800"
+              )}>
+                <span className="material-icons text-xs mr-1">
+                  {position === 1 ? "star" : "star_half"}
+                </span>
+                <span className={cn(
+                  "font-semibold",
+                  position === 1 ? "text-sm" : "text-xs"
+                )}>
+                  {user.points_total} pts
+                </span>
+              </div>
+              
+              {/* Podium visualization */}
+              <div className={cn(
+                "mt-2 w-24 rounded-t-lg flex justify-center items-end",
+                badge.podiumHeight,
+                position === 1 
+                  ? "bg-gradient-to-b from-yellow-300 to-yellow-400" 
+                  : position === 2
+                    ? "bg-gradient-to-b from-gray-300 to-gray-400"
+                    : "bg-gradient-to-b from-amber-600 to-amber-700"
+              )}>
+                <div className="text-white font-bold text-sm mb-1">
+                  {badge.label}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
-
-      {/* 3rd place - if available */}
-      {top3.length > 2 && (
-        <div className="flex flex-col items-center">
-          <div className={`w-16 h-16 rounded-full overflow-hidden border-2 border-accent flex items-center justify-center ${
-            top3[2].id === currentUserId ? "ring-2 ring-primary" : ""
-          } ${getAvatarColor(top3[2].id)}`}>
-            {top3[2].profileImageUrl ? (
-              <img
-                src={top3[2].profileImageUrl}
-                alt={`${top3[2].name}'s avatar`}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <span className="text-lg font-bold">{getInitials(top3[2].name)}</span>
-            )}
-          </div>
-          <div className="flex items-center mt-2">
-            <span className="material-icons text-accent">looks_3</span>
-            <span className="text-sm font-medium ml-1">
-              {top3[2].id === currentUserId ? "You" : top3[2].name.split(' ')[0]}
-            </span>
-          </div>
-          <div className="text-sm text-gray-500">{top3[2].points_total} pts</div>
-        </div>
-      )}
     </div>
   );
 };
