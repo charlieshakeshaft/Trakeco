@@ -243,14 +243,19 @@ const Profile = () => {
     }) => {
       return await apiRequest(`/api/user/update?userId=${user?.id}`, data, "PATCH");
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: "Password updated",
         description: "Your password has been changed successfully.",
       });
       
-      // Invalidate auth user query to refresh user data
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      // Directly force refresh user data
+      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      
+      // Reload the current page after a brief delay to ensure auth state is updated
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
       
       // Reset password form
       setPasswordData({
@@ -259,7 +264,7 @@ const Profile = () => {
         confirm_password: ""
       });
       
-      // Invalidate queries to refresh data
+      // Invalidate all other relevant queries
       queryClient.invalidateQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
     },
     onError: (error: Error) => {

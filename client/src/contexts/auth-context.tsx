@@ -10,6 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (username: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   // Backward compatibility
   setCurrentUser: (user: User) => void;
 }
@@ -52,6 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Function to refresh user data
+  const refreshUser = async () => {
+    try {
+      await refetch();
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
+  
   // For backward compatibility
   const setCurrentUser = (updatedUser: User) => {
     console.warn('setCurrentUser is deprecated. Use query invalidation instead.');
@@ -66,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated: !!user,
         login,
         logout,
+        refreshUser,
         setCurrentUser,
       }}
     >
