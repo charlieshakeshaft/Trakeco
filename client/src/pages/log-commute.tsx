@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
-import WeeklyCommuteFormSimple from "@/components/commute/weekly-commute-form-simple";
+import { Check } from "lucide-react";
+import CommuteForm from "@/components/commute/CommuteForm";
 import CommuteBenefitsCard from "@/components/commute/commute-benefits-card";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -26,13 +27,13 @@ const LogCommute = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <WeeklyCommuteFormSimple userId={userId} onSuccess={handleSuccess} />
+          <CommuteForm userId={userId} onSuccess={handleSuccess} />
           
           {submitted && (
             <Card className="mt-6 bg-green-50 border-green-200">
               <CardContent className="pt-6">
                 <div className="flex items-center text-green-600 mb-2">
-                  <span className="material-icons mr-2">check_circle</span>
+                  <Check className="mr-2 h-5 w-5" />
                   <span className="font-semibold">Commutes Logged Successfully!</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
