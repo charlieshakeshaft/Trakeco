@@ -39,22 +39,28 @@ export default function LoginPage() {
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
     try {
-      await login(data.username, data.password);
+      const user = await login(data.username, data.password);
+      console.log("Login successful, user data:", user);
       
-      // Redirect to dashboard using client-side navigation
-      setLocation("/");
-      
+      // Show success message
       toast({
         title: "Login successful!",
         description: "Welcome back to Trak.",
       });
+      
+      // Small delay to ensure the auth state is updated
+      setTimeout(() => {
+        // Redirect to dashboard using client-side navigation
+        setLocation("/");
+      }, 500);
+      
     } catch (error) {
+      console.error("Login error details:", error);
       toast({
         variant: "destructive",
         title: "Login failed",
         description: error instanceof Error ? error.message : "Invalid credentials, please try again.",
       });
-    } finally {
       setIsLoading(false);
     }
   }

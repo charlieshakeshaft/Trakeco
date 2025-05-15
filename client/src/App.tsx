@@ -97,10 +97,24 @@ function Router() {
   
   console.log("Router - auth state:", { user, isLoading, path: location });
   
-  // Password redirection is now handled directly in the AuthenticatedApp component
+  useEffect(() => {
+    // If user is authenticated and tries to access login page, redirect to dashboard
+    if (user && !isLoading && (location === '/login' || location === '/signup')) {
+      console.log("Redirecting authenticated user to dashboard");
+      setLocation('/');
+    }
+  }, [user, isLoading, location, setLocation]);
   
+  // Show loading state
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
   }
   
   // Public routes
