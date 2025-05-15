@@ -97,6 +97,19 @@ function Router() {
   
   console.log("Router - auth state:", { user, isLoading, path: location });
   
+  // Check for successful login and handle force redirection
+  useEffect(() => {
+    const authSuccess = localStorage.getItem('auth_success');
+    
+    if (authSuccess === 'true' && location === '/login') {
+      console.log("Auth success detected in localStorage, forcing redirect to dashboard");
+      localStorage.removeItem('auth_success'); // Clear the flag
+      
+      // Force hard navigation in case client-side routing isn't working
+      window.location.replace('/');
+    }
+  }, [location]);
+  
   useEffect(() => {
     // If user is authenticated and tries to access login page, redirect to dashboard
     if (user && !isLoading && (location === '/login' || location === '/signup')) {

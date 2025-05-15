@@ -30,16 +30,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const login = async (username: string, password: string): Promise<User> => {
     try {
+      // Make the login request
       const response = await apiRequest("/api/auth/login", { username, password }, "POST");
       
-      // Clear any stale data
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/commutes/current'] });
+      console.log("Login API response:", response);
+      
+      // Clear all cached data to ensure fresh state
+      queryClient.clear();
       
       // Force refresh user data
       const userData = await refetch();
       console.log("Auth login - user data after refetch:", userData.data);
+      
+      // Set a flag in localStorage to indicate successful login
+      // This helps with cross-environment compatibility
+      localStorage.setItem('auth_success', 'true');
       
       return response;
     } catch (error) {

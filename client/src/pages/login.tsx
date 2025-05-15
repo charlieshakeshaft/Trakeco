@@ -39,6 +39,7 @@ export default function LoginPage() {
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
     try {
+      // Attempt login
       const user = await login(data.username, data.password);
       console.log("Login successful, user data:", user);
       
@@ -48,12 +49,13 @@ export default function LoginPage() {
         description: "Welcome back to Trak.",
       });
       
-      // Small delay to ensure the auth state is updated
+      // Force a page reload to ensure proper session state
+      // This is the most reliable approach across all environments
       setTimeout(() => {
-        // Force a hard navigation to the dashboard using window.location
-        // This is more reliable across environments than client-side routing
-        window.location.href = "/";
-      }, 500);
+        console.log("Forcing page reload and redirect to dashboard");
+        // Use replace to avoid back-button issues
+        window.location.replace('/');
+      }, 800);
       
     } catch (error) {
       console.error("Login error details:", error);
