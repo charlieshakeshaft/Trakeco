@@ -5,6 +5,7 @@ interface RankingListProps {
   users: LeaderboardUser[];
   currentUserId: number;
   startRank?: number;
+  className?: string;
 }
 
 // Generate initials from a name
@@ -80,7 +81,7 @@ const getRankBadge = (rank: number, isCurrentUser: boolean) => {
   };
 };
 
-const RankingList = ({ users, currentUserId, startRank = 1 }: RankingListProps) => {
+const RankingList = ({ users, currentUserId, startRank = 1, className }: RankingListProps) => {
   if (users.length === 0) {
     return (
       <div className="text-center py-4 text-gray-500">
@@ -90,7 +91,7 @@ const RankingList = ({ users, currentUserId, startRank = 1 }: RankingListProps) 
   }
 
   return (
-    <div className="pt-4 space-y-3">
+    <div className={cn("pt-4 space-y-3", className)}>
       {users.map((user, index) => {
         const rank = startRank + index;
         const isCurrentUser = user.id === currentUserId;

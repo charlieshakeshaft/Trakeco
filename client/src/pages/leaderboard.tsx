@@ -350,10 +350,10 @@ const Leaderboard = () => {
                 </div>
               ) : leaderboard && leaderboard.length > 0 ? (
                 <>
-                  <TopUsers users={leaderboard.slice(0, 3)} />
+                  <TopUsers topUsers={leaderboard.slice(0, 3)} currentUserId={user?.id || 0} />
                   <RankingList 
                     users={leaderboard} 
-                    userId={user?.id || 0}
+                    currentUserId={user?.id || 0}
                     className="mt-6"
                   />
                 </>
