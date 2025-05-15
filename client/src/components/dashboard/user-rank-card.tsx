@@ -335,49 +335,7 @@ const UserRankCard = ({ userId }: UserRankCardProps) => {
                 </div>
               </div>
               
-              {/* Badge benefits */}
-              <div className="mt-4 border-t border-gray-100 pt-4">
-                {getUserRankTier(stats.points).maxPoints < Infinity ? (
-                  <>
-                    <h3 className="font-medium text-gray-700 mb-2">
-                      Next Level: {getNextRankTier(stats.points).name} Badge 
-                    </h3>
-                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                      {stats.points < 500 && (
-                        <li className="flex items-start">
-                          <span className="material-icons text-primary text-sm mr-1">emoji_events</span>
-                          <span className="text-gray-700">Special rewards access</span>
-                        </li>
-                      )}
-                      {stats.points < 1000 && (
-                        <li className="flex items-start">
-                          <span className="material-icons text-primary text-sm mr-1">emoji_events</span>
-                          <span className="text-gray-700">Premium challenges</span>
-                        </li>
-                      )}
-                      {stats.points < 2000 && (
-                        <li className="flex items-start">
-                          <span className="material-icons text-primary text-sm mr-1">emoji_events</span>
-                          <span className="text-gray-700">Exclusive badges</span>
-                        </li>
-                      )}
-                      {stats.points < 3000 && (
-                        <li className="flex items-start">
-                          <span className="material-icons text-primary text-sm mr-1">emoji_events</span>
-                          <span className="text-gray-700">Elite leaderboard status</span>
-                        </li>
-                      )}
-                    </ul>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="font-medium text-gray-700 mb-2">
-                      Maximum Level Achieved!
-                    </h3>
-                    <p className="text-sm text-gray-700">You've reached the highest level. Congratulations on your commitment to sustainable commuting!</p>
-                  </>
-                )}
-              </div>
+              {/* Extra details section - removed "Next Level" badge */}
             </div>
           ) : (
             <div className="text-center py-4">
