@@ -145,18 +145,7 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
   // Get users around the current user (exclude top 3)
   const otherUsers = leaderboardUsers.slice(3);
 
-  // Retrieve user stats
-  interface UserStats {
-    streak: number;
-    points: number;
-    co2_saved: number;
-    completed_challenges: number;
-  }
-  
-  const { data: stats } = useQuery<UserStats>({
-    queryKey: [`/api/user/stats?userId=${userId}`],
-    staleTime: 60000, // 1 minute
-  });
+  // This section has been moved to a separate component
 
   return (
     <section className="mb-8">
@@ -401,89 +390,7 @@ const LeaderboardSection = ({ userId }: LeaderboardSectionProps) => {
                     </div>
                   )}
                     
-                  {/* Your rank card */}
-                  <div className="mt-6 bg-gray-50 rounded-lg p-4 border border-gray-100">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-medium text-gray-800 flex items-center">
-                          <span className="material-icons text-primary mr-1 text-sm">military_tech</span>
-                          Your Rank: {stats && <span className="ml-1 text-primary">{getUserRankTier(stats.points).name}</span>}
-                        </h3>
-                        
-                        {stats && (
-                          <div className="mt-3">
-                            <div className="text-xs text-gray-500 mb-1">
-                              {stats.points} / {getUserRankTier(stats.points).maxPoints < Infinity 
-                                ? getUserRankTier(stats.points).maxPoints 
-                                : "∞"} points
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
-                              <div 
-                                className="bg-primary h-2 rounded-full" 
-                                style={{ 
-                                  width: `${Math.min(100, (stats.points - getUserRankTier(stats.points).minPoints) / 
-                                    (getUserRankTier(stats.points).maxPoints - getUserRankTier(stats.points).minPoints) * 100)}%` 
-                                }}
-                              ></div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                      
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-xs">
-                            <span className="material-icons text-sm mr-1">visibility</span>
-                            All Ranks
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Rank Tiers</DialogTitle>
-                            <DialogDescription>
-                              Earn points from your sustainable commutes to level up your rank
-                            </DialogDescription>
-                          </DialogHeader>
-                          
-                          <div className="space-y-3 mt-2">
-                            {getRankTiers().map((tier) => (
-                              <div 
-                                key={tier.name} 
-                                className={cn(
-                                  "flex items-center p-3 rounded-lg border",
-                                  stats && getUserRankTier(stats.points).name === tier.name
-                                    ? "border-primary bg-primary/5"
-                                    : "border-gray-200"
-                                )}
-                              >
-                                <div className={cn(
-                                  "w-10 h-10 rounded-full flex items-center justify-center mr-3",
-                                  tier.color
-                                )}>
-                                  <span className="material-icons">{tier.icon}</span>
-                                </div>
-                                
-                                <div className="flex-1">
-                                  <div className="font-medium">{tier.name}</div>
-                                  <div className="text-xs text-gray-500">
-                                    {tier.minPoints} - {tier.maxPoints < Infinity 
-                                      ? tier.maxPoints 
-                                      : "∞"} points
-                                  </div>
-                                </div>
-                                
-                                {stats && getUserRankTier(stats.points).name === tier.name && (
-                                  <div className="bg-primary/20 text-primary text-xs font-medium px-2 py-1 rounded">
-                                    Current
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </div>
+                  {/* Removed rank card - it's now a separate component */}
                 </>
               )}
             </>
