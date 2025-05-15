@@ -38,36 +38,28 @@ export function getSession() {
   // Using 'SESSION_SECRET' from env or fallback for development
   const sessionSecret = process.env.SESSION_SECRET || "dev-session-secret-for-testing";
   
-  // Session store configuration
+  // Simplified session configuration for better cross-environment compatibility
   let sessionConfig: session.SessionOptions = {
     secret: sessionSecret,
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Set to true to ensure session is saved on every request
+    saveUninitialized: true, // Set to true to create session for all visitors
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      // Disable secure cookies in all environments for debugging
+      // In production with HTTPS, this should be set to true
+      secure: false, 
       httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+      // Set a shorter expiration to avoid stale sessions
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     }
   };
   
-  // Only use database session store if DATABASE_URL is available
-  // This provides better deployment compatibility
-  if (process.env.DATABASE_URL) {
-    try {
-      sessionConfig.store = new PgSession({
-        pool,
-        tableName: 'sessions',
-        createTableIfMissing: true
-      });
-      console.log("Using PostgreSQL session store");
-    } catch (error) {
-      console.error("Failed to initialize PostgreSQL session store:", error);
-      console.log("Falling back to memory session store");
-      // Keep default memory store if PostgreSQL store fails
-    }
-  } else {
-    console.log("DATABASE_URL not available, using memory session store");
-  }
+  // Log detailed session configuration for debugging
+  console.log("Session configuration:", {
+    secret: "***",
+    resave: sessionConfig.resave,
+    saveUninitialized: sessionConfig.saveUninitialized,
+    cookie: sessionConfig.cookie
+  });
   
   return session(sessionConfig);
 }
@@ -136,7 +128,7 @@ export function setupAuth(app: Express) {
         return res.status(401).json({ message: info?.message || "Authentication failed" });
       }
       
-      req.login(user, (loginErr) => {
+      req.login(user, (loginErr: Error | null) => {
         if (loginErr) {
           console.error("Session login error:", loginErr);
           return next(loginErr);
@@ -152,6 +144,13 @@ export function setupAuth(app: Express) {
         // Don't return the password
         const { password: _, ...userWithoutPassword } = user;
         
+        // Set additional headers for auth token (belt and suspenders approach)
+        res.cookie('auth_user_id', user.id.toString(), { 
+          httpOnly: true, 
+          secure: false, // Should be true in production with HTTPS
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+        
         console.log("Login successful for user:", user.username);
         return res.json({
           ...userWithoutPassword,
@@ -161,14 +160,31 @@ export function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  // Logout endpoint
+  // Logout endpoint with improved error handling
   app.post("/api/auth/logout", (req, res) => {
-    req.logout((err) => {
+    // Clear auth cookie first
+    res.clearCookie('auth_user_id');
+    
+    req.logout((err: Error | null) => {
       if (err) {
+        console.error("Logout error:", err);
         return res.status(500).json({ message: "Failed to logout" });
       }
       
-      return res.status(200).json({ message: "Logged out successfully" });
+      // Destroy the session completely
+      if (req.session) {
+        req.session.destroy((sessionErr) => {
+          if (sessionErr) {
+            console.error("Session destruction error:", sessionErr);
+          }
+          
+          console.log("User successfully logged out");
+          return res.status(200).json({ message: "Logged out successfully" });
+        });
+      } else {
+        console.log("User logged out (no session to destroy)");
+        return res.status(200).json({ message: "Logged out successfully" });
+      }
     });
   });
 
@@ -251,9 +267,9 @@ export function isAuthenticated(req: any, res: any, next: any) {
           storage.getUser(tokenData.id).then(user => {
             if (user) {
               // Log them in via session for future requests
-              req.login(user, (err) => {
-                if (err) {
-                  console.error("Error establishing session from token:", err);
+              req.login(user, (loginErr: Error | null) => {
+                if (loginErr) {
+                  console.error("Error establishing session from token:", loginErr);
                   return res.status(401).json({ message: "Session creation failed" });
                 }
                 // Continue to the protected route

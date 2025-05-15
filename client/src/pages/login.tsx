@@ -39,19 +39,33 @@ export default function LoginPage() {
   async function onSubmit(data: LoginFormValues) {
     setIsLoading(true);
     try {
-      // Attempt login
-      const user = await login(data.username, data.password);
-      console.log("Login successful, user data:", user);
+      // Display a logging in message
+      toast({
+        title: "Logging in...",
+        description: "Please wait while we authenticate you.",
+      });
       
-      // Show success message in a way that doesn't interrupt navigation
+      // Attempt login with additional logging for troubleshooting
+      console.log(`Login attempt for ${data.username} at ${new Date().toISOString()}`);
+      
+      // Track the current time to measure authentication duration
+      const startTime = Date.now();
+      
+      // Perform the login request
+      const user = await login(data.username, data.password);
+      
+      // Calculate how long authentication took
+      const authDuration = Date.now() - startTime;
+      console.log(`Authentication successful after ${authDuration}ms`);
+      
+      // Show a success message
       toast({
         title: "Login successful!",
         description: "Welcome back to Trak.",
       });
       
-      // Set auth success flag but don't use window.location.replace here
-      // We'll let the Auth context handle the redirection
-      localStorage.setItem('auth_success', 'true');
+      // The login function in auth-context will handle the redirection
+      // with a forced page reload for maximum compatibility
       
     } catch (error) {
       console.error("Login error details:", error);

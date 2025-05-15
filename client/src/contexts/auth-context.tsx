@@ -30,27 +30,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const login = async (username: string, password: string): Promise<User> => {
     try {
+      // For debugging only - record what time login was attempted
+      console.log("Login attempt:", { username, timestamp: new Date().toISOString() });
+      
       // Make the login request
       const response = await apiRequest("/api/auth/login", { username, password }, "POST");
+      console.log("Login API response (success):", response);
       
       // Store auth token in localStorage for cross-session compatibility
       if (response.authToken) {
         localStorage.setItem('authToken', JSON.stringify(response.authToken));
+        console.log("Auth token stored in localStorage");
       }
       
       // Clear all cached data to ensure fresh state
       queryClient.clear();
       
-      // Add the user to the cache immediately for faster UI response
+      // Put user in the cache for immediate UI updates
       queryClient.setQueryData(['/api/user'], response);
       
-      // Force refresh user data
-      await refetch();
+      // Mark a successful login in localStorage to help with navigation
+      localStorage.setItem('login_success', 'true');
+      localStorage.setItem('login_timestamp', new Date().toISOString());
       
-      // Use client-side navigation for smoother UX
+      // Use hard page navigation for maximum reliability (even if less smooth)
+      // We want to prioritize reliability over UX for now
       setTimeout(() => {
-        window.location.href = '/';
-      }, 300);
+        // Use replace instead of href to avoid history issues
+        window.location.replace('/');
+      }, 500);
       
       return response;
     } catch (error) {
