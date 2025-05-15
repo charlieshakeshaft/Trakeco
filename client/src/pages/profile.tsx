@@ -365,6 +365,30 @@ const Profile = () => {
           </div>
         </div>
       )}
+      
+      {/* Location settings reminder - only show if user doesn't have commute locations set */}
+      {user && !user.home_address && !user.work_address && (
+        <div className="bg-green-50 border-green-200 border rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <span className="material-icons text-green-500">directions_bike</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-lg font-medium text-green-800">Add your commute locations!</h3>
+              <div className="mt-2 text-green-700">
+                <p>To log your commutes and earn points, you need to set up your home and work locations.</p>
+                <Button 
+                  className="mt-3 bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => handleTabChange("settings")}
+                >
+                  Set up locations
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <h1 className="text-2xl md:text-3xl font-semibold text-gray-800 mb-6">Your Profile</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
