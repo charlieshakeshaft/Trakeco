@@ -33,6 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // For debugging only - record what time login was attempted
       console.log("Login attempt:", { username, timestamp: new Date().toISOString() });
       
+      // Store transition state in localStorage so we can detect and show a loading screen
+      localStorage.setItem('auth_transition', 'login');
+      
       // Make the login request
       const response = await apiRequest("/api/auth/login", { username, password }, "POST");
       console.log("Login API response (success):", response);
@@ -53,15 +56,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('login_success', 'true');
       localStorage.setItem('login_timestamp', new Date().toISOString());
       
-      // Use hard page navigation for maximum reliability (even if less smooth)
-      // We want to prioritize reliability over UX for now
-      setTimeout(() => {
-        // Use replace instead of href to avoid history issues
+      // Try client-side navigation first
+      try {
+        setLocation('/');
+        
+        // Use a fallback hard navigation for reliability after a delay
+        // This ensures we still get reliable auth even if the client navigation fails
+        setTimeout(() => {
+          if (window.location.pathname !== '/') {
+            console.log("Client navigation seems to have failed, using fallback");
+            window.location.replace('/');
+          }
+        }, 300);
+      } catch (navError) {
+        console.error("Navigation error:", navError);
+        // Fallback to hard navigation
         window.location.replace('/');
-      }, 500);
+      }
       
       return response;
     } catch (error) {
+      // Clear transition state
+      localStorage.removeItem('auth_transition');
       console.error('Login error:', error);
       throw error;
     }
@@ -71,10 +87,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log("Logout attempt at:", new Date().toISOString());
       
+      // Set transition state for smoother UX
+      localStorage.setItem('auth_transition', 'logout');
+      
       // First clear local storage items that might be keeping the user logged in
       localStorage.removeItem('authToken');
       localStorage.removeItem('login_success');
       localStorage.removeItem('login_timestamp');
+      
+      // Update UI state immediately
+      queryClient.setQueryData(['/api/user'], null);
       
       // Then make the server request
       await apiRequest("/api/auth/logout", null, "POST");
@@ -82,16 +104,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Clear all cache data
       queryClient.clear();
-      queryClient.setQueryData(['/api/user'], null);
       
-      // Force a complete page reload to clear any in-memory state
-      console.log("Forcing hard logout with page reload");
-      setTimeout(() => {
-        // Use replace for a cleaner history
+      // Try client-side navigation first
+      try {
+        setLocation('/login');
+        
+        // Use a fallback hard navigation for reliability after a delay
+        setTimeout(() => {
+          if (window.location.pathname !== '/login') {
+            console.log("Client navigation seems to have failed, using fallback");
+            window.location.replace('/login?loggedout=true');
+          }
+        }, 300);
+      } catch (navError) {
+        console.error("Navigation error:", navError);
+        // Fallback to hard navigation
         window.location.replace('/login?loggedout=true');
-      }, 300);
+      }
     } catch (error) {
       console.error('Logout error:', error);
+      
+      // Clear transition state
+      localStorage.removeItem('auth_transition');
       
       // Even if server logout fails, try to clear local state
       queryClient.clear();

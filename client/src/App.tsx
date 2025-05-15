@@ -94,8 +94,26 @@ function AuthenticatedApp({ user }: { user: User }) {
 function Router() {
   const { user, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
+  const [authTransition, setAuthTransition] = useState<string | null>(null);
   
   console.log("Router - auth state:", { user, isLoading, path: location });
+  
+  // Check for auth transition state (login/logout)
+  useEffect(() => {
+    // Check if we're in a transition (login/logout)
+    const transition = localStorage.getItem('auth_transition');
+    if (transition) {
+      setAuthTransition(transition);
+      
+      // Clear transition state after showing loading screen
+      const timer = setTimeout(() => {
+        localStorage.removeItem('auth_transition');
+        setAuthTransition(null);
+      }, 1500); // Show transition screen for 1.5 seconds
+      
+      return () => clearTimeout(timer);
+    }
+  }, [location]); // Check on location change
   
   // Check for successful login from localStorage only as a last resort
   // for cross-environment compatibility
@@ -118,6 +136,25 @@ function Router() {
       setLocation('/');
     }
   }, [user, isLoading, location, setLocation]);
+  
+  // If we're in a transition state, show a smoother transition screen
+  if (authTransition) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-background to-secondary/10">
+        <div className="text-center px-4 py-8 rounded-lg backdrop-blur-sm bg-background/80 shadow-lg border border-border">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold mb-2">
+            {authTransition === 'login' ? 'Signing in...' : 'Signing out...'}
+          </h2>
+          <p className="text-muted-foreground">
+            {authTransition === 'login' 
+              ? 'Setting up your dashboard...' 
+              : 'See you soon!'}
+          </p>
+        </div>
+      </div>
+    );
+  }
   
   // Only show loading state if we're not at the login page to prevent flashing during auth
   if (isLoading && location !== '/login') {
