@@ -37,6 +37,8 @@ const Sidebar = ({ user }: SidebarProps) => {
     if (tab && path === '/profile') {
       setLocation(`/profile?tab=${tab}`);
     } else {
+      // Directly navigate to the path
+      console.log(`Navigating to: ${path}`);
       setLocation(path);
     }
   };
@@ -74,7 +76,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         </a>
         <a 
           href="/challenges" 
-          onClick={(e) => handleNavigation(e, "/challenges", "impact")}
+          onClick={(e) => handleNavigation(e, "/challenges")}
           className={linkClasses("/challenges")}
         >
           <span className="material-icons text-gray-500 mr-3">emoji_events</span>
@@ -82,7 +84,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         </a>
         <a 
           href="/rewards" 
-          onClick={(e) => handleNavigation(e, "/rewards", "history")}
+          onClick={(e) => handleNavigation(e, "/rewards")}
           className={linkClasses("/rewards")}
         >
           <span className="material-icons text-gray-500 mr-3">redeem</span>

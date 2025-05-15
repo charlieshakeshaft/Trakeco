@@ -21,6 +21,8 @@ const MobileNavigation = () => {
     if (tab && path === '/profile') {
       setLocation(`/profile?tab=${tab}`);
     } else {
+      // Directly navigate to the path
+      console.log(`Mobile navigating to: ${path}`);
       setLocation(path);
     }
   };
@@ -46,7 +48,7 @@ const MobileNavigation = () => {
         </a>
         <a
           href="/challenges"
-          onClick={(e) => handleNavigation(e, "/challenges", "impact")} 
+          onClick={(e) => handleNavigation(e, "/challenges")} 
           className={`flex flex-col items-center py-2 ${isActive("/challenges") ? "text-primary" : "text-gray-500"}`}
         >
           <span className="material-icons">emoji_events</span>
@@ -54,7 +56,7 @@ const MobileNavigation = () => {
         </a>
         <a
           href="/rewards"
-          onClick={(e) => handleNavigation(e, "/rewards", "history")}
+          onClick={(e) => handleNavigation(e, "/rewards")}
           className={`flex flex-col items-center py-2 ${isActive("/rewards") ? "text-primary" : "text-gray-500"}`}
         >
           <span className="material-icons">redeem</span>
