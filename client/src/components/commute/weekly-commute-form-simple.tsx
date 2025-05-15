@@ -273,6 +273,33 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
   
   // Save the current entry form
   const saveEntryForm = (data: SingleCommuteValues) => {
+    // Log form submission for debugging
+    console.log("Saving commute entry with data:", data);
+    
+    // Check if at least one day is selected
+    const anyDaySelected = [
+      data.monday, data.tuesday, data.wednesday, data.thursday, 
+      data.friday, data.saturday, data.sunday
+    ].some(Boolean);
+    
+    if (!data.commute_type) {
+      toast({
+        title: "Missing commute type",
+        description: "Please select a commute method",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!anyDaySelected) {
+      toast({
+        title: "No days selected",
+        description: "Please select at least one day for this commute method",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     const newEntry: CommuteEntry = {
       commute_type: data.commute_type,
       days: {
@@ -286,6 +313,12 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       }
     };
     
+    // Show a success toast
+    toast({
+      title: activeEntryIndex === -1 ? "Method Added" : "Method Updated",
+      description: `Your ${data.commute_type} commute has been ${activeEntryIndex === -1 ? 'added' : 'updated'}.`,
+    });
+    
     if (activeEntryIndex === -1) {
       // Add new entry
       setCommuteEntries(current => [...current, newEntry]);
@@ -298,8 +331,11 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       });
     }
     
-    // Clear active entry index
+    // Clear active entry index to close the form
     setActiveEntryIndex(null);
+    
+    // Log success for debugging
+    console.log("Entry saved successfully:", newEntry);
   };
   
   // Handle week change
