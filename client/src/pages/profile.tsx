@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
+import UserRankCard from "@/components/dashboard/user-rank-card";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,143 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+
+// Define the RankBadge component
+interface RankBadgeProps {
+  points: number;
+  showDialog?: boolean;
+}
+
+interface RankTier {
+  name: string;
+  color: string;
+  minPoints: number;
+  maxPoints: number;
+  icon: string;
+}
+
+const getUserRankTier = (points: number): RankTier => {
+  if (points >= 2000) {
+    return { 
+      name: "Elite", 
+      color: "bg-gradient-to-r from-purple-600 to-blue-500 text-white",
+      minPoints: 2000,
+      maxPoints: Infinity,
+      icon: "stars"
+    };
+  } else if (points >= 1500) {
+    return { 
+      name: "Platinum", 
+      color: "bg-gradient-to-r from-blue-500 to-teal-400 text-white",
+      minPoints: 1500,
+      maxPoints: 2000,
+      icon: "diamond"
+    };
+  } else if (points >= 1000) {
+    return { 
+      name: "Gold", 
+      color: "bg-gradient-to-r from-yellow-400 to-amber-500 text-white",
+      minPoints: 1000,
+      maxPoints: 1500,
+      icon: "workspace_premium"
+    };
+  } else if (points >= 500) {
+    return { 
+      name: "Silver", 
+      color: "bg-gradient-to-r from-gray-300 to-gray-400 text-white",
+      minPoints: 500,
+      maxPoints: 1000,
+      icon: "emoji_events"
+    };
+  } else {
+    return { 
+      name: "Bronze", 
+      color: "bg-gradient-to-r from-amber-700 to-amber-800 text-white",
+      minPoints: 0,
+      maxPoints: 500,
+      icon: "military_tech"
+    };
+  }
+};
+
+const RankBadge = ({ points, showDialog = false }: RankBadgeProps) => {
+  const rankTier = getUserRankTier(points);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const allTiers = [
+    getUserRankTier(0),    // Bronze
+    getUserRankTier(500),  // Silver
+    getUserRankTier(1000), // Gold
+    getUserRankTier(1500), // Platinum
+    getUserRankTier(2000)  // Elite
+  ];
+  
+  return (
+    <>
+      <div 
+        className={cn(
+          "px-2 py-1 rounded-full flex items-center cursor-pointer transition-all",
+          rankTier.color,
+          showDialog ? "hover:shadow-md" : ""
+        )}
+        onClick={() => showDialog && setIsDialogOpen(true)}
+      >
+        <span className="material-icons text-sm mr-1">{rankTier.icon}</span>
+        <span className="text-xs font-medium">{rankTier.name}</span>
+      </div>
+      
+      {showDialog && (
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rank System</DialogTitle>
+              <DialogDescription>
+                Earn points by tracking your sustainable commutes to reach higher ranks.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              {allTiers.map((tier, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center mr-3",
+                      tier.color
+                    )}>
+                      <span className="material-icons text-sm">{tier.icon}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium">{tier.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {tier.minPoints === 0 ? "Start" : `${tier.minPoints}+ points`}
+                        {tier.maxPoints !== Infinity && ` - ${tier.maxPoints} points`}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {tier.name === rankTier.name && (
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                      Current
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-center text-gray-600">
+                You currently have <span className="font-bold text-primary">{points} points</span>
+                {rankTier.maxPoints !== Infinity && (
+                  <>, need <span className="font-bold text-primary">{rankTier.maxPoints - points}</span> more for next rank</>
+                )}
+              </p>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+};
 
 // Define interfaces for the profile data
 interface Company {
@@ -422,6 +560,24 @@ const Profile = () => {
                 <p className="text-gray-500 mb-4 truncate max-w-[90%] text-center mx-auto">{user?.email || "No email"}</p>
                 
                 <div className="w-full p-4 rounded-lg bg-blue-50 mt-2">
+                  {/* Rank Section */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-medium text-gray-700">Rank</span>
+                    <div className="flex items-center">
+                      {profileData.points_total !== undefined && (
+                        <div 
+                          className={cn(
+                            "px-2 py-1 rounded-full flex items-center cursor-pointer transition-all hover:shadow-md",
+                            getUserRankTier(profileData.points_total).color
+                          )}
+                        >
+                          <span className="material-icons text-sm mr-1">{getUserRankTier(profileData.points_total).icon}</span>
+                          <span className="text-xs font-medium">{getUserRankTier(profileData.points_total).name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium text-gray-700">Company</span>
                     <span className="text-sm text-primary font-medium truncate ml-2 max-w-[150px]">
@@ -492,6 +648,13 @@ const Profile = () => {
             
             <TabsContent value="impact">
               <StatsSummary userId={user?.id || 0} />
+              
+              {/* User Rank Card */}
+              {user?.id && (
+                <div className="mb-6">
+                  <UserRankCard userId={user.id} />
+                </div>
+              )}
               
               <Card>
                 <CardContent className="pt-6">
