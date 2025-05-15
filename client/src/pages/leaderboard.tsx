@@ -10,6 +10,7 @@ import { useCurrentWeekCommuteLogs } from "@/hooks/use-commute";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import { cn } from "@/lib/utils";
 
 const Leaderboard = () => {
   const [timeFrame, setTimeFrame] = useState("month");
