@@ -264,20 +264,7 @@ const UserRankCard = ({ userId }: UserRankCardProps) => {
                   </div>
                   
                   <div>
-                    <div className={cn(
-                      "inline-flex px-3 py-1 rounded-full text-sm font-medium mb-1",
-                      getUserRankTier(stats.points).name === 'Bronze' 
-                        ? "bg-amber-100 text-amber-800"
-                        : getUserRankTier(stats.points).name === 'Silver'
-                          ? "bg-gray-200 text-gray-800"
-                          : getUserRankTier(stats.points).name === 'Gold'
-                            ? "bg-yellow-100 text-yellow-800"
-                            : getUserRankTier(stats.points).name === 'Platinum'
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-purple-100 text-purple-800"
-                    )}>
-                      {getUserRankTier(stats.points).name} Badge
-                    </div>
+                    {/* Removed Bronze Badge label */}
                     <div className="text-sm text-gray-600">
                       {stats.points} / {getUserRankTier(stats.points).maxPoints < Infinity 
                         ? getUserRankTier(stats.points).maxPoints
