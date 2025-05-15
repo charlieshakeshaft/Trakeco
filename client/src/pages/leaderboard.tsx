@@ -433,12 +433,147 @@ const Leaderboard = () => {
                 </div>
               ) : leaderboard && leaderboard.length > 0 ? (
                 <>
-                  <TopUsers topUsers={leaderboard.slice(0, 3)} currentUserId={user?.id || 0} />
-                  <RankingList 
-                    users={leaderboard} 
-                    currentUserId={user?.id || 0}
-                    className="mt-6"
-                  />
+                  {/* Top user */}
+                  {leaderboard.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex justify-center mb-4">
+                        <div className="relative">
+                          <div className={cn(
+                            "w-20 h-20 rounded-full border-4 border-yellow-400 flex items-center justify-center shadow-lg",
+                            getAvatarColor(leaderboard[0].id)
+                          )}>
+                            {leaderboard[0].profileImageUrl ? (
+                              <img
+                                src={leaderboard[0].profileImageUrl}
+                                alt={`${leaderboard[0].name}'s avatar`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-2xl font-bold">
+                                {getInitials(leaderboard[0].name)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="absolute -top-2 -right-2 bg-yellow-400 text-white w-8 h-8 rounded-full flex items-center justify-center shadow-md">
+                            <span className="material-icons text-sm">emoji_events</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="text-center">
+                        <h3 className="font-medium text-lg">
+                          {leaderboard[0].id === userId ? "You" : leaderboard[0].name}
+                        </h3>
+                        <div className="flex justify-center items-center gap-2 text-gray-600">
+                          <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {leaderboard[0].points_total} points
+                          </span>
+                          
+                          {leaderboard[0].streak_count > 0 && (
+                            <span className="bg-amber-100 text-amber-800 flex items-center px-3 py-1 rounded-full text-sm">
+                              <span className="material-icons text-amber-500 text-xs mr-1">local_fire_department</span>
+                              {leaderboard[0].streak_count} day streak
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* All users in a ranked list */}
+                  <div className="space-y-3">
+                    {leaderboard.slice(1).map((user, index) => {
+                      const rank = index + 2; // Start from rank 2 since we already showed the top user
+                      const isCurrentUser = user.id === userId;
+                      
+                      return (
+                        <div 
+                          key={user.id} 
+                          className={cn(
+                            "flex items-center justify-between p-3 rounded-lg transition-all",
+                            isCurrentUser 
+                              ? "bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 shadow-md" 
+                              : "border border-gray-100 hover:shadow-sm hover:bg-gray-50"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Rank number */}
+                            <div className={cn(
+                              "w-8 h-8 flex items-center justify-center rounded-full shadow-sm",
+                              rank === 2 
+                                ? "bg-gradient-to-r from-gray-300 to-gray-400 text-white"
+                                : rank === 3
+                                  ? "bg-gradient-to-r from-amber-600 to-amber-700 text-white"
+                                  : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700"
+                            )}>
+                              {rank}
+                            </div>
+                            
+                            {/* User avatar */}
+                            <div className={cn(
+                              "w-10 h-10 rounded-full overflow-hidden border-2",
+                              rank === 2 
+                                ? "border-gray-300" 
+                                : rank === 3 
+                                  ? "border-amber-500"
+                                  : "border-gray-200",
+                              "flex items-center justify-center",
+                              getAvatarColor(user.id)
+                            )}>
+                              {user.profileImageUrl ? (
+                                <img
+                                  src={user.profileImageUrl}
+                                  alt={`${user.name}'s avatar`}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-base font-bold">{getInitials(user.name)}</span>
+                              )}
+                            </div>
+                            
+                            {/* User info */}
+                            <div>
+                              <div className="flex items-center gap-1">
+                                <span className={cn(
+                                  "font-medium",
+                                  isCurrentUser ? "text-blue-800" : "text-gray-800"
+                                )}>
+                                  {isCurrentUser ? "You" : user.name}
+                                </span>
+                                {isCurrentUser && (
+                                  <span className="material-icons text-blue-500 text-sm">verified</span>
+                                )}
+                              </div>
+                              
+                              {/* Streak visualization */}
+                              {user.streak_count > 0 && (
+                                <div className="flex items-center text-amber-500">
+                                  <span className="material-icons text-xs">local_fire_department</span>
+                                  <span className="text-xs text-gray-500 ml-1">
+                                    {user.streak_count} day streak
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Points */}
+                          <div className={cn(
+                            "text-sm font-semibold px-3 py-1 rounded-full",
+                            isCurrentUser 
+                              ? "bg-gradient-to-r from-blue-100 to-green-100 text-blue-800"
+                              : rank === 2
+                                ? "bg-gray-100 text-gray-700"
+                                : rank === 3
+                                  ? "bg-amber-100 text-amber-800"
+                                  : "bg-gray-100 text-gray-700"
+                          )}>
+                            {user.points_total} pts
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </>
               ) : (
                 <div className="text-center py-12">
