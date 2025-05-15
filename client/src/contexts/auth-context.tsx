@@ -33,19 +33,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Make the login request
       const response = await apiRequest("/api/auth/login", { username, password }, "POST");
       
+      // Store auth token in localStorage for cross-session compatibility
+      if (response.authToken) {
+        localStorage.setItem('authToken', JSON.stringify(response.authToken));
+      }
+      
       // Clear all cached data to ensure fresh state
       queryClient.clear();
       
-      // Force refresh user data
-      const userData = await refetch();
+      // Add the user to the cache immediately for faster UI response
+      queryClient.setQueryData(['/api/user'], response);
       
-      // After successful login and data refresh, redirect to dashboard
-      if (userData.data) {
-        // Use smooth client-side navigation
-        setTimeout(() => {
-          setLocation('/');
-        }, 100);
-      }
+      // Force refresh user data
+      await refetch();
+      
+      // Use client-side navigation for smoother UX
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 300);
       
       return response;
     } catch (error) {

@@ -12,12 +12,20 @@ export async function apiRequest(
   data?: any,
   method: string = "GET"
 ): Promise<any> {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  // Add auth token if available (for cross-environment compatibility)
+  const authToken = localStorage.getItem('authToken');
+  if (authToken) {
+    headers['X-Auth-Token'] = authToken;
+  }
+  
   const options: RequestInit = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: "include",
+    headers,
+    credentials: "include", // For session cookies
   };
   
   if (data && (method === "POST" || method === "PUT" || method === "PATCH")) {
@@ -25,7 +33,17 @@ export async function apiRequest(
   }
   
   const res = await fetch(url, options);
-  await throwIfResNotOk(res);
+  
+  // Handle different error scenarios
+  if (!res.ok) {
+    // Special handling for auth failures
+    if (res.status === 401) {
+      console.error("Authentication failure at:", url);
+      localStorage.removeItem('authToken');
+    }
+    
+    await throwIfResNotOk(res);
+  }
   
   try {
     return await res.json();
@@ -40,12 +58,29 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const headers: HeadersInit = {};
+    
+    // Add auth token if available (for cross-environment compatibility)
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      headers['X-Auth-Token'] = authToken;
+    }
+    
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      headers
     });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
+    if (res.status === 401) {
+      // Clear token on auth failures
+      if (authToken) {
+        console.log("Clearing invalid auth token");
+        localStorage.removeItem('authToken');
+      }
+      
+      if (unauthorizedBehavior === "returnNull") {
+        return null;
+      }
     }
 
     await throwIfResNotOk(res);
