@@ -83,7 +83,7 @@ const Rewards = () => {
             <>
               {user?.role === 'admin' && user?.company_id && (
                 <div className="flex justify-end mb-4">
-                  <Link to="/company?tab=rewards">
+                  <Link to="/company">
                     <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
                       <span className="material-icons text-sm mr-1">add_circle</span>
                       Manage Company Rewards
@@ -140,7 +140,7 @@ const Rewards = () => {
             <>
               {user?.role === 'admin' && user?.company_id && (
                 <div className="flex justify-end mb-4">
-                  <Link to="/company?tab=rewards">
+                  <Link to="/company">
                     <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
                       <span className="material-icons text-sm mr-1">add_circle</span>
                       Manage Company Rewards
@@ -172,7 +172,7 @@ const Rewards = () => {
                   Great job! You have enough points for all available rewards.
                 </p>
                 {user?.role === 'admin' && user?.company_id && (
-                  <Link to="/company?tab=rewards">
+                  <Link to="/company">
                     <button className="flex items-center px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-dark">
                       <span className="material-icons text-sm mr-1">add_circle</span>
                       Manage Company Rewards
