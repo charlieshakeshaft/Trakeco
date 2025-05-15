@@ -35,7 +35,7 @@ interface LocationSettings {
 }
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const { data: profile, isLoading } = useUserProfile(user?.id || 0);
   const profileData: ProfileData = profile as ProfileData || {};
   const { toast } = useToast();
@@ -249,14 +249,6 @@ const Profile = () => {
         description: "Your password has been changed successfully.",
       });
       
-      // Directly force refresh user data
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
-      
-      // Reload the current page after a brief delay to ensure auth state is updated
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-      
       // Reset password form
       setPasswordData({
         current_password: "",
@@ -264,8 +256,13 @@ const Profile = () => {
         confirm_password: ""
       });
       
+      // Use refreshUser to update the auth state
+      await refreshUser();
+      
       // Invalidate all other relevant queries
       queryClient.invalidateQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
+      
+      // No need for page reload, the state will be updated via refreshUser
     },
     onError: (error: Error) => {
       setPasswordErrors(prev => ({
