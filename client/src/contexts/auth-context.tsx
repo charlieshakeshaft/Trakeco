@@ -33,18 +33,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Make the login request
       const response = await apiRequest("/api/auth/login", { username, password }, "POST");
       
-      console.log("Login API response:", response);
-      
       // Clear all cached data to ensure fresh state
       queryClient.clear();
       
       // Force refresh user data
       const userData = await refetch();
-      console.log("Auth login - user data after refetch:", userData.data);
       
-      // Set a flag in localStorage to indicate successful login
-      // This helps with cross-environment compatibility
-      localStorage.setItem('auth_success', 'true');
+      // After successful login and data refresh, redirect to dashboard
+      if (userData.data) {
+        // Use smooth client-side navigation
+        setTimeout(() => {
+          setLocation('/');
+        }, 100);
+      }
       
       return response;
     } catch (error) {

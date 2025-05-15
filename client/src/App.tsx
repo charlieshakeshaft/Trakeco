@@ -97,18 +97,19 @@ function Router() {
   
   console.log("Router - auth state:", { user, isLoading, path: location });
   
-  // Check for successful login and handle force redirection
+  // Check for successful login from localStorage only as a last resort
+  // for cross-environment compatibility
   useEffect(() => {
     const authSuccess = localStorage.getItem('auth_success');
     
     if (authSuccess === 'true' && location === '/login') {
-      console.log("Auth success detected in localStorage, forcing redirect to dashboard");
+      console.log("Auth success detected in localStorage");
       localStorage.removeItem('auth_success'); // Clear the flag
       
-      // Force hard navigation in case client-side routing isn't working
-      window.location.replace('/');
+      // Use client-side routing for smoother navigation
+      setLocation('/');
     }
-  }, [location]);
+  }, [location, setLocation]);
   
   useEffect(() => {
     // If user is authenticated and tries to access login page, redirect to dashboard
@@ -118,8 +119,8 @@ function Router() {
     }
   }, [user, isLoading, location, setLocation]);
   
-  // Show loading state
-  if (isLoading) {
+  // Only show loading state if we're not at the login page to prevent flashing during auth
+  if (isLoading && location !== '/login') {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">

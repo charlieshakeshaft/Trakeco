@@ -43,19 +43,15 @@ export default function LoginPage() {
       const user = await login(data.username, data.password);
       console.log("Login successful, user data:", user);
       
-      // Show success message
+      // Show success message in a way that doesn't interrupt navigation
       toast({
         title: "Login successful!",
         description: "Welcome back to Trak.",
       });
       
-      // Force a page reload to ensure proper session state
-      // This is the most reliable approach across all environments
-      setTimeout(() => {
-        console.log("Forcing page reload and redirect to dashboard");
-        // Use replace to avoid back-button issues
-        window.location.replace('/');
-      }, 800);
+      // Set auth success flag but don't use window.location.replace here
+      // We'll let the Auth context handle the redirection
+      localStorage.setItem('auth_success', 'true');
       
     } catch (error) {
       console.error("Login error details:", error);
