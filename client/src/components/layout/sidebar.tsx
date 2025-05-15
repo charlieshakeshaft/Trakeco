@@ -24,9 +24,9 @@ const Sidebar = ({ user }: SidebarProps) => {
   const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     e.preventDefault();
     
-    // For all navigation, use direct navigation
+    // Use wouter's setLocation for client-side navigation 
     console.log(`Navigating to: ${path}`);
-    window.location.href = path;
+    setLocation(path);
   };
 
   return (

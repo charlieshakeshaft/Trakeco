@@ -10,9 +10,9 @@ const MobileNavigation = () => {
   const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     e.preventDefault();
     
-    // For all navigation, use direct navigation
+    // Use wouter's setLocation for client-side navigation
     console.log(`Mobile navigating to: ${path}`);
-    window.location.href = path;
+    setLocation(path);
   };
   
   return (

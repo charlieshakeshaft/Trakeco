@@ -50,8 +50,8 @@ function AuthenticatedApp({ user }: { user: User }) {
   // Directly handle password change redirection in the component render
   if (user?.needs_password_change && location !== '/profile') {
     console.log("Password change required - redirecting to profile");
-    // Use window.location to force a complete refresh and avoid React state issues
-    window.location.href = '/profile';
+    // Use wouter's setLocation for client-side navigation
+    setLocation('/profile');
     return null;
   }
   
