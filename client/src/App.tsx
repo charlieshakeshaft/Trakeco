@@ -40,12 +40,20 @@ function PrivateRoute({ component: Component, ...rest }: { component: React.FC<a
 function AuthenticatedApp({ user }: { user: User }) {
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   
   // Close mobile menu when navigating
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
+  
+  // Directly handle password change redirection in the component render
+  if (user?.needs_password_change && location !== '/profile') {
+    console.log("Password change required - redirecting to profile");
+    // Use window.location to force a complete refresh and avoid React state issues
+    window.location.href = '/profile?tab=settings';
+    return null;
+  }
   
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -89,18 +97,7 @@ function Router() {
   
   console.log("Router - auth state:", { user, isLoading, path: location });
   
-  // Redirect users who need to change password to profile page when visiting other routes
-  useEffect(() => {
-    // Only redirect from main navigation routes, not within the profile page itself
-    const mainRoutes = ['/', '/log-commute', '/challenges', '/rewards', '/leaderboard', '/company'];
-    
-    if (user?.needs_password_change && mainRoutes.includes(location)) {
-      console.log("User needs password change, redirecting to profile settings tab");
-      
-      // Always redirect to settings tab when password change is needed
-      setLocation('/profile?tab=settings');
-    }
-  }, [user, location, setLocation]);
+  // Password redirection is now handled directly in the AuthenticatedApp component
   
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;

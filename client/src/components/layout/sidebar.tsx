@@ -24,22 +24,16 @@ const Sidebar = ({ user }: SidebarProps) => {
   const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string, tab?: string) => {
     e.preventDefault();
     
-    // Always use normal navigation for regular paths, 
-    // unless the user needs to change password
-    if (user?.needs_password_change) {
-      // Always redirect to profile settings tab if password change is needed
-      console.log(`User needs password change, redirecting to profile with settings tab`);
-      setLocation('/profile?tab=settings');
-      return;
-    }
+    // Don't handle password change redirection here - it's handled in App.tsx
     
     // Normal navigation with optional tab parameter for profile page
     if (tab && path === '/profile') {
-      setLocation(`/profile?tab=${tab}`);
+      // For profile tabs, use the tab parameter
+      window.location.href = `${path}?tab=${tab}`;
     } else {
-      // Directly navigate to the path
+      // For all other navigation, use direct navigation
       console.log(`Navigating to: ${path}`);
-      setLocation(path);
+      window.location.href = path;
     }
   };
 
