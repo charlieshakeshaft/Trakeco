@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { commuteTypeOptions } from "@/lib/constants";
 import { startOfWeek, subWeeks, format } from "date-fns";
 import { Link } from "wouter";
-import { Plus, X, HelpCircle } from "lucide-react";
+import { Plus, X, HelpCircle, Check, ArrowRight } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -26,9 +26,9 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -283,7 +283,7 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
     // Log form submission for debugging
     console.log("Saving commute entry with data:", data);
     
-    // Check if at least one day is selected
+    // Check if at least one day is selected - this is required even with the form validation
     const anyDaySelected = [
       data.monday, data.tuesday, data.wednesday, data.thursday, 
       data.friday, data.saturday, data.sunday
@@ -320,29 +320,56 @@ const WeeklyCommuteFormSimple = ({ userId, onSuccess }: WeeklyCommuteFormProps) 
       }
     };
     
-    // Show a success toast
-    toast({
-      title: activeEntryIndex === -1 ? "Method Added" : "Method Updated",
-      description: `Your ${data.commute_type} commute has been ${activeEntryIndex === -1 ? 'added' : 'updated'}.`,
-    });
-    
-    if (activeEntryIndex === -1) {
-      // Add new entry
-      setCommuteEntries(current => [...current, newEntry]);
-    } else {
-      // Update existing entry
-      setCommuteEntries(current => {
-        const updated = [...current];
-        updated[activeEntryIndex] = newEntry;
-        return updated;
+    try {
+      // Update entries - we use a state update function to ensure we're working with the latest state
+      let updatedEntries: CommuteEntry[];
+      
+      if (activeEntryIndex === -1) {
+        // Add new entry
+        updatedEntries = [...commuteEntries, newEntry];
+        console.log("Adding new entry, new entries array:", updatedEntries);
+      } else {
+        // Update existing entry
+        updatedEntries = [...commuteEntries];
+        updatedEntries[activeEntryIndex] = newEntry;
+        console.log("Updating existing entry, new entries array:", updatedEntries);
+      }
+      
+      // Directly update the state (this ensures the UI updates immediately)
+      setCommuteEntries(updatedEntries);
+      
+      // Show a success toast
+      toast({
+        title: activeEntryIndex === -1 ? "Method Added" : "Method Updated",
+        description: `Your ${data.commute_type.replace('_', ' ')} commute has been ${activeEntryIndex === -1 ? 'added' : 'updated'}.`,
+      });
+      
+      // Reset the form
+      entryForm.reset({
+        commute_type: "",
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false,
+      });
+      
+      // Clear active entry index to close the form
+      setActiveEntryIndex(null);
+      
+      // Log current entries for debugging
+      console.log("Current commute entries after save:", updatedEntries);
+      
+    } catch (error) {
+      console.error("Error saving entry:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save commute method. Please try again.",
+        variant: "destructive"
       });
     }
-    
-    // Clear active entry index to close the form
-    setActiveEntryIndex(null);
-    
-    // Log success for debugging
-    console.log("Entry saved successfully:", newEntry);
   };
   
   // Handle week change
