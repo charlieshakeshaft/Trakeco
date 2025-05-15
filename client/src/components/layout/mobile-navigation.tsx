@@ -7,20 +7,12 @@ const MobileNavigation = () => {
   
   const isActive = (path: string) => location === path;
   
-  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string, tab?: string) => {
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     e.preventDefault();
     
-    // Don't handle password change redirection here - it's handled in App.tsx
-    
-    // Normal navigation
-    if (tab && path === '/profile') {
-      // For profile tabs, use the tab parameter
-      window.location.href = `${path}?tab=${tab}`;
-    } else {
-      // For all other navigation, use direct navigation
-      console.log(`Mobile navigating to: ${path}`);
-      window.location.href = path;
-    }
+    // For all navigation, use direct navigation
+    console.log(`Mobile navigating to: ${path}`);
+    window.location.href = path;
   };
   
   return (

@@ -51,7 +51,7 @@ function AuthenticatedApp({ user }: { user: User }) {
   if (user?.needs_password_change && location !== '/profile') {
     console.log("Password change required - redirecting to profile");
     // Use window.location to force a complete refresh and avoid React state issues
-    window.location.href = '/profile?tab=settings';
+    window.location.href = '/profile';
     return null;
   }
   

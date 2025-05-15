@@ -45,35 +45,19 @@ const Profile = () => {
   // Active tab state with URL sync - completely refactored for reliability
   const [activeTab, setActiveTab] = useState('impact');
   
-  // Initialize tab from URL on component mount and route changes
+  // Initialize tab - default to settings if password change is needed
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tabFromUrl = params.get('tab');
-    
-    console.log("Profile page: location changed to", location, "with params", window.location.search);
-    
-    if (tabFromUrl && ['impact', 'history', 'settings'].includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
-      console.log("Setting active tab from URL:", tabFromUrl);
-    } else if (user?.needs_password_change) {
-      // If user needs to change password and no tab is specified, default to settings
+    if (user?.needs_password_change) {
+      // If user needs to change password, default to settings tab
       setActiveTab('settings');
       console.log("User needs password change, defaulting to settings tab");
     }
-  }, [location, user]);
+  }, [user]);
   
-  // Handler for tab change
+  // Simple handler for tab change
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    
-    // Update URL with new tab parameter through wouter's setLocation
-    // This replaces window.history manipulation to ensure consistency
-    setLocation(`/profile?tab=${value}`);
-    
-    // Add a short delay for UI updates to propagate
-    setTimeout(() => {
-      console.log("Tab changed to:", value);
-    }, 50);
+    console.log("Tab changed to:", value);
   };
   
   // State for location settings

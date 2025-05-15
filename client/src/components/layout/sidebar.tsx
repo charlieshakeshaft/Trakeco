@@ -20,21 +20,13 @@ const Sidebar = ({ user }: SidebarProps) => {
     }`;
   };
   
-  // Enhanced navigation handler with tab support
-  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string, tab?: string) => {
+  // Simplified navigation handler - no tab support
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: string) => {
     e.preventDefault();
     
-    // Don't handle password change redirection here - it's handled in App.tsx
-    
-    // Normal navigation with optional tab parameter for profile page
-    if (tab && path === '/profile') {
-      // For profile tabs, use the tab parameter
-      window.location.href = `${path}?tab=${tab}`;
-    } else {
-      // For all other navigation, use direct navigation
-      console.log(`Navigating to: ${path}`);
-      window.location.href = path;
-    }
+    // For all navigation, use direct navigation
+    console.log(`Navigating to: ${path}`);
+    window.location.href = path;
   };
 
   return (
@@ -98,7 +90,7 @@ const Sidebar = ({ user }: SidebarProps) => {
         </div>
         <a 
           href="/profile" 
-          onClick={(e) => handleNavigation(e, "/profile", user?.needs_password_change ? "settings" : "impact")}
+          onClick={(e) => handleNavigation(e, "/profile")}
           className={linkClasses("/profile")}
         >
           <span className="material-icons text-gray-500 mr-3">account_circle</span>
