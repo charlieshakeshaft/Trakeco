@@ -336,9 +336,92 @@ const Leaderboard = () => {
         
         {/* Leaderboard Section */}
         <div>
-          <h2 className="text-xl font-medium text-gray-800 mb-3">
-            Top Performers
-          </h2>
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-3">
+            <h2 className="text-xl font-medium text-gray-800">
+              Top Performers
+            </h2>
+            
+            {/* Points Info Card */}
+            <div className="flex items-center mt-2 md:mt-0">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-1 text-primary">
+                    <span className="material-icons text-sm">info</span>
+                    Points Guide
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>How to Earn Points</DialogTitle>
+                    <DialogDescription>
+                      Log your sustainable commutes to earn points and climb the leaderboard
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-3 mt-4">
+                    <div className="bg-green-50 p-3 rounded-lg border border-green-100">
+                      <div className="flex items-center gap-2 font-medium text-green-700 mb-1">
+                        <span className="material-icons text-green-500">directions_walk</span>
+                        Walking
+                      </div>
+                      <p className="text-sm text-green-600">
+                        <span className="font-bold">100 points</span> per day - The most sustainable way to commute
+                      </p>
+                    </div>
+                    
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-2 font-medium text-blue-700 mb-1">
+                        <span className="material-icons text-blue-500">directions_bike</span>
+                        Cycling
+                      </div>
+                      <p className="text-sm text-blue-600">
+                        <span className="font-bold">80 points</span> per day - A fast and sustainable option
+                      </p>
+                    </div>
+                    
+                    <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                      <div className="flex items-center gap-2 font-medium text-purple-700 mb-1">
+                        <span className="material-icons text-purple-500">directions_transit</span>
+                        Public Transit
+                      </div>
+                      <p className="text-sm text-purple-600">
+                        <span className="font-bold">60 points</span> per day - Efficient for longer distances
+                      </p>
+                    </div>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
+                      <div className="flex items-center gap-2 font-medium text-amber-700 mb-1">
+                        <span className="material-icons text-amber-500">electric_car</span>
+                        Electric Vehicle
+                      </div>
+                      <p className="text-sm text-amber-600">
+                        <span className="font-bold">40 points</span> per day - Better than conventional vehicles
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2 font-medium text-gray-700 mb-1">
+                        <span className="material-icons text-gray-500">directions_car</span>
+                        Carpool
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        <span className="font-bold">30 points</span> per day - Sharing rides reduces emissions
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <h4 className="font-medium text-blue-700 mb-1">Bonus Points</h4>
+                    <ul className="text-sm text-blue-600 space-y-1">
+                      <li>• <span className="font-medium">Streak Bonus:</span> +10 points per day of continuous logging</li>
+                      <li>• <span className="font-medium">Challenge Completion:</span> +50-200 points depending on difficulty</li>
+                      <li>• <span className="font-medium">Team Goals:</span> +100 points when your company meets targets</li>
+                    </ul>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
           
           <Card>
             <CardContent className="pt-6">
