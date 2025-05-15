@@ -479,7 +479,7 @@ const Leaderboard = () => {
                         Walking
                       </div>
                       <p className="text-sm text-green-600">
-                        <span className="font-bold">100 points</span> per day - The most sustainable way to commute
+                        <span className="font-bold">30 points</span> per day - The most sustainable way to commute
                       </p>
                     </div>
                     
@@ -489,7 +489,7 @@ const Leaderboard = () => {
                         Cycling
                       </div>
                       <p className="text-sm text-blue-600">
-                        <span className="font-bold">80 points</span> per day - A fast and sustainable option
+                        <span className="font-bold">25 points</span> per day - A fast and sustainable option
                       </p>
                     </div>
                     
@@ -499,17 +499,17 @@ const Leaderboard = () => {
                         Public Transit
                       </div>
                       <p className="text-sm text-purple-600">
-                        <span className="font-bold">60 points</span> per day - Efficient for longer distances
+                        <span className="font-bold">20 points</span> per day - Efficient for longer distances
                       </p>
                     </div>
                     
-                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
-                      <div className="flex items-center gap-2 font-medium text-amber-700 mb-1">
-                        <span className="material-icons text-amber-500">electric_car</span>
-                        Electric Vehicle
+                    <div className="bg-teal-50 p-3 rounded-lg border border-teal-100">
+                      <div className="flex items-center gap-2 font-medium text-teal-700 mb-1">
+                        <span className="material-icons text-teal-500">home</span>
+                        Remote Work
                       </div>
-                      <p className="text-sm text-amber-600">
-                        <span className="font-bold">40 points</span> per day - Better than conventional vehicles
+                      <p className="text-sm text-teal-600">
+                        <span className="font-bold">15 points</span> per day - Zero commute emissions
                       </p>
                     </div>
                     
@@ -519,7 +519,17 @@ const Leaderboard = () => {
                         Carpool
                       </div>
                       <p className="text-sm text-gray-600">
-                        <span className="font-bold">30 points</span> per day - Sharing rides reduces emissions
+                        <span className="font-bold">15 points</span> per day - Sharing rides reduces emissions
+                      </p>
+                    </div>
+                    
+                    <div className="bg-amber-50 p-3 rounded-lg border border-amber-100">
+                      <div className="flex items-center gap-2 font-medium text-amber-700 mb-1">
+                        <span className="material-icons text-amber-500">electric_car</span>
+                        Electric Vehicle
+                      </div>
+                      <p className="text-sm text-amber-600">
+                        <span className="font-bold">10 points</span> per day - Better than conventional vehicles
                       </p>
                     </div>
                   </div>
@@ -527,7 +537,7 @@ const Leaderboard = () => {
                   <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                     <h4 className="font-medium text-blue-700 mb-1">Bonus Points</h4>
                     <ul className="text-sm text-blue-600 space-y-1">
-                      <li>• <span className="font-medium">Streak Bonus:</span> +10 points per day of continuous logging</li>
+                      <li>• <span className="font-medium">Consistency Bonus:</span> +25 points when you use the same sustainable commute for 3+ days in a week</li>
                       <li>• <span className="font-medium">Challenge Completion:</span> +50-200 points depending on difficulty</li>
                       <li>• <span className="font-medium">Team Goals:</span> +100 points when your company meets targets</li>
                     </ul>
