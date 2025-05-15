@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -25,6 +25,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const { isLoading: authLoading, login } = useAuth();
+  const [_, setLocation] = useLocation();
   
   // Login form
   const form = useForm<LoginFormValues>({
@@ -40,8 +41,8 @@ export default function LoginPage() {
     try {
       await login(data.username, data.password);
       
-      // Redirect to dashboard
-      window.location.href = "/";
+      // Redirect to dashboard using client-side navigation
+      setLocation("/");
       
       toast({
         title: "Login successful!",
