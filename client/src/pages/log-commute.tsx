@@ -42,7 +42,7 @@ const LogCommute = () => {
                   {!user.commute_distance_km && <li>Commute distance is not set</li>}
                 </ul>
                 <div className="mt-2">
-                  <Link to="/profile" className="font-medium text-orange-800 hover:text-orange-600 underline">
+                  <Link to="/profile#settings" className="font-medium text-orange-800 hover:text-orange-600 underline">
                     Go to Profile Settings
                   </Link>
                 </div>

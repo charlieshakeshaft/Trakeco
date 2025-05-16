@@ -201,6 +201,14 @@ const Profile = () => {
     }
   }, [user]);
   
+  // Check URL hash on component mount
+  useEffect(() => {
+    if (window.location.hash === '#settings') {
+      setActiveTab('settings');
+      console.log("Setting active tab to settings from URL hash");
+    }
+  }, []);
+  
   // Simple handler for tab change
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -462,6 +470,29 @@ const Profile = () => {
 
   return (
     <div className="p-4 md:p-8">
+      {/* Warning banner specifically for missing commute distance */}
+      {user && (!user.commute_distance_km || user.commute_distance_km === 0) && (
+        <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <span className="material-icons text-orange-500">warning</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-orange-800">Commute Distance Required</h3>
+              <div className="mt-2 text-sm text-orange-700">
+                <p>Please set your commute distance in the settings below to accurately track CO₂ savings.</p>
+                <Button 
+                  className="mt-3 bg-orange-600 hover:bg-orange-700 text-white"
+                  onClick={() => handleTabChange("settings")}
+                >
+                  Go to Location Settings
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {user?.is_new_user && (
         <div className="bg-amber-50 border-amber-200 border rounded-lg p-4 mb-6">
           <div className="flex items-start">
