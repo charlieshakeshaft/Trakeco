@@ -367,13 +367,13 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         if (daysLogged === 0) continue;
         
         // Log the commute data
-        await apiRequest(`/api/commutes/log?userId=${userId}`, {
+        await apiRequest('POST', '/api/commutes/log', {
           commute_type: entry.commute_type,
           days_logged: daysLogged,
           distance_km: commuteDistance,
           week_start: format(weekStart, 'yyyy-MM-dd'),
           ...entry.days
-        }, "POST");
+        });
       }
       
       // Success notification
@@ -382,16 +382,57 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         description: "Your weekly commutes have been logged successfully!",
       });
       
-      // Refresh commute logs data
-      queryClient.invalidateQueries({ queryKey: [`/api/commutes/current?userId=${userId}`] });
+      // Refresh all relevant data
+      await queryClient.invalidateQueries({ queryKey: ['/api/commutes/current'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/user/stats'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/leaderboard'] });
+      
+      // Reload the commute logs to ensure we have the latest data
+      const response = await fetch(`/api/commutes/current?userId=${userId}`);
+      if (response.ok) {
+        const updatedLogs = await response.json();
+        
+        // Convert backend format to our UI format
+        if (updatedLogs && Array.isArray(updatedLogs)) {
+          const entriesByType: Record<string, CommuteEntry> = {};
+          
+          updatedLogs.forEach((log) => {
+            if (!entriesByType[log.commute_type]) {
+              entriesByType[log.commute_type] = {
+                commute_type: log.commute_type,
+                days: {
+                  monday: false,
+                  tuesday: false,
+                  wednesday: false,
+                  thursday: false,
+                  friday: false,
+                  saturday: false,
+                  sunday: false
+                }
+              };
+            }
+            
+            // Update days based on the log
+            if (log.monday) entriesByType[log.commute_type].days.monday = true;
+            if (log.tuesday) entriesByType[log.commute_type].days.tuesday = true;
+            if (log.wednesday) entriesByType[log.commute_type].days.wednesday = true;
+            if (log.thursday) entriesByType[log.commute_type].days.thursday = true;
+            if (log.friday) entriesByType[log.commute_type].days.friday = true;
+            if (log.saturday) entriesByType[log.commute_type].days.saturday = true;
+            if (log.sunday) entriesByType[log.commute_type].days.sunday = true;
+          });
+          
+          // Update the state with the fresh data from the server
+          setCommuteEntries(Object.values(entriesByType));
+        }
+      }
       
       // Notify parent component of success if callback is provided
       if (onSuccess) {
         onSuccess();
       }
       
-      // Reset form
-      setCommuteEntries([]);
+      // Close form
       setShowForm(false);
       
     } catch (error) {
