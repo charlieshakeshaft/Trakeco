@@ -495,7 +495,7 @@ const Profile = () => {
   // Save location settings
   const saveLocationSettings = () => {
     // Validate that all required fields are filled in
-    if (!locationSettings.home_address || !locationSettings.work_address || !locationSettings.commute_distance_km) {
+    if (!locationSettings.home_address || !locationSettings.work_address || displayDistance <= 0) {
       toast({
         title: "Missing Information",
         description: "Please fill in home address, work address, and commute distance before saving",
@@ -504,20 +504,31 @@ const Profile = () => {
       return;
     }
     
-    // If we're in miles mode, ensure we convert back to km for storage
+    // Always ensure we have the correct kilometers value regardless of display unit
     let finalSettings = {...locationSettings};
     
+    // Always recalculate the km value from the current display value and unit
+    // This ensures we never have mismatched values
     if (distanceUnit === 'miles') {
-      // Make sure the value stored in locationSettings is in km
-      // This is a safety check in case the displayDistance and locationSettings got out of sync
       finalSettings.commute_distance_km = convertMilesToKm(displayDistance);
-      
       console.log('Saving distance in km:', finalSettings.commute_distance_km, 
                   '(converted from miles:', displayDistance, ')');
     } else {
+      finalSettings.commute_distance_km = displayDistance;
       console.log('Saving distance in km:', finalSettings.commute_distance_km);
     }
     
+    // Extra validation to be sure the value is numeric and positive
+    if (isNaN(finalSettings.commute_distance_km) || finalSettings.commute_distance_km <= 0) {
+      toast({
+        title: "Invalid Distance",
+        description: "Please enter a valid commute distance greater than zero",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log('Final settings being sent to server:', finalSettings);
     updateLocationMutation.mutate(finalSettings);
   };
   
@@ -1043,8 +1054,16 @@ const Profile = () => {
                             onClick={() => {
                               if (distanceUnit !== 'km') {
                                 // Convert miles to km for display
-                                const kmValue = displayDistance / 0.621371;
-                                setDisplayDistance(parseFloat(kmValue.toFixed(2)));
+                                const kmValue = convertMilesToKm(displayDistance);
+                                
+                                // Update both the display value and the locationSettings
+                                setDisplayDistance(kmValue);
+                                setLocationSettings(prev => ({
+                                  ...prev,
+                                  commute_distance_km: kmValue
+                                }));
+                                
+                                console.log('Switched to KM - display value:', kmValue, 'km');
                                 setDistanceUnit('km');
                               }
                             }}
@@ -1053,12 +1072,16 @@ const Profile = () => {
                           </button>
                           <button
                             type="button"
-                            className={`px-3 py-1.5 text-sm font-medium ${distanceUnit === 'miles' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            className={`px-4 py-1.5 text-sm font-medium ${distanceUnit === 'miles' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
                             onClick={() => {
                               if (distanceUnit !== 'miles') {
-                                // Convert km to miles for display
-                                const milesValue = displayDistance * 0.621371;
-                                setDisplayDistance(parseFloat(milesValue.toFixed(2)));
+                                // Convert km to miles for display only
+                                const milesValue = convertKmToMiles(displayDistance);
+                                
+                                // Update only the display value (km value is preserved in locationSettings)
+                                setDisplayDistance(milesValue);
+                                
+                                console.log('Switched to MILES - display value:', milesValue, 'miles, stored value remains:', locationSettings.commute_distance_km, 'km');
                                 setDistanceUnit('miles');
                               }
                             }}
