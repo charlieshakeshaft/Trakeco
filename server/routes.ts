@@ -723,15 +723,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         commuteLog = await storage.createCommuteLog(commuteData);
       }
       
-      // Award points for the commute
-      const pointsEarned = calculateCommutePoints(commuteData.commute_type, commuteData.days_logged);
+      // Calculate points only for new days
+      let newDaysLogged = commuteData.days_logged;
       
-      if (pointsEarned > 0) {
-        await storage.createPointsTransaction({
-          user_id: user.id,
-          source: `${commuteData.commute_type} commute`,
-          points: pointsEarned
-        });
+      // If updating an existing log, only award points for new days
+      if (existingLogForType) {
+        // Calculate which days were previously logged
+        const previouslyLoggedDays = dayFields.filter(day => existingLogForType[day] === true).length;
+        
+        // Calculate net change in days
+        const daysDifference = newDaysLogged - previouslyLoggedDays;
+        
+        // Only award points for net new days
+        if (daysDifference > 0) {
+          // Points only for added days
+          const pointsEarned = calculateCommutePoints(commuteData.commute_type, daysDifference);
+          
+          if (pointsEarned > 0) {
+            await storage.createPointsTransaction({
+              user_id: user.id,
+              source: `${commuteData.commute_type} commute (added days)`,
+              points: pointsEarned
+            });
+          }
+        } else if (daysDifference < 0) {
+          // Negative points for removed days
+          const pointsDeducted = calculateCommutePoints(commuteData.commute_type, Math.abs(daysDifference));
+          
+          if (pointsDeducted > 0) {
+            await storage.createPointsTransaction({
+              user_id: user.id,
+              source: `${commuteData.commute_type} commute (removed days)`,
+              points: -pointsDeducted
+            });
+          }
+        }
+        // No change in days, no points awarded
+      } else {
+        // New commute log, award points for all days
+        const pointsEarned = calculateCommutePoints(commuteData.commute_type, newDaysLogged);
+        
+        if (pointsEarned > 0) {
+          await storage.createPointsTransaction({
+            user_id: user.id,
+            source: `${commuteData.commute_type} commute`,
+            points: pointsEarned
+          });
+        }
       }
       
       // Update challenge progress for matching challenges
