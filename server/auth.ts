@@ -113,7 +113,7 @@ export function setupAuth(app: Express) {
   });
 
   // Login endpoint with enhanced error handling and debugging
-  app.post("/api/auth/login", (req, res, next) => {
+  app.post(["/api/auth/login", "/api/login"], (req, res, next) => {
     console.log("Login attempt for:", req.body.username);
     
     passport.authenticate("local", (err: Error | null, user: User | false, info: { message: string } | undefined) => {
@@ -160,7 +160,7 @@ export function setupAuth(app: Express) {
   });
 
   // Logout endpoint with improved error handling
-  app.post("/api/auth/logout", (req, res) => {
+  app.post(["/api/auth/logout", "/api/logout"], (req, res) => {
     // Clear auth cookie first
     res.clearCookie('auth_user_id');
     

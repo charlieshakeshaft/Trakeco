@@ -36,8 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Store transition state in localStorage so we can detect and show a loading screen
       localStorage.setItem('auth_transition', 'login');
       
-      // Make the login request
-      const response = await apiRequest("/api/auth/login", { username, password }, "POST");
+      // Make the login request - supports both endpoint formats
+      const response = await apiRequest("/api/login", { username, password }, "POST");
       console.log("Login API response (success):", response);
       
       // Store auth token in localStorage for cross-session compatibility
@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       queryClient.setQueryData(['/api/user'], null);
       
       // Then make the server request
-      await apiRequest("/api/auth/logout", null, "POST");
+      await apiRequest("/api/logout", null, "POST");
       console.log("Logout API response successful");
       
       // Clear all cache data
