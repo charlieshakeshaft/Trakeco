@@ -133,11 +133,33 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   // Get commute distance
   const commuteDistance = userProfile?.commute_distance_km || 0;
   
+  // Track which days are already used by other commute methods
+  const [usedDays, setUsedDays] = useState({
+    monday: false,
+    tuesday: false,
+    wednesday: false,
+    thursday: false,
+    friday: false,
+    saturday: false,
+    sunday: false
+  });
+  
   // Process existing commute logs and populate entries when data loads
   useEffect(() => {
     if (existingCommuteLogs && Array.isArray(existingCommuteLogs) && existingCommuteLogs.length > 0 && commuteEntries.length === 0) {
       // Group logs by commute type
       const entriesByType: Record<string, CommuteEntry> = {};
+      
+      // Also track which days are already used
+      const daysInUse = {
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+        saturday: false,
+        sunday: false
+      };
       
       existingCommuteLogs.forEach((log) => {
         // Create entry if it doesn't exist for this type
@@ -157,21 +179,76 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         }
         
         // Update days based on the log
-        if (log.monday) entriesByType[log.commute_type].days.monday = true;
-        if (log.tuesday) entriesByType[log.commute_type].days.tuesday = true;
-        if (log.wednesday) entriesByType[log.commute_type].days.wednesday = true;
-        if (log.thursday) entriesByType[log.commute_type].days.thursday = true;
-        if (log.friday) entriesByType[log.commute_type].days.friday = true;
-        if (log.saturday) entriesByType[log.commute_type].days.saturday = true;
-        if (log.sunday) entriesByType[log.commute_type].days.sunday = true;
+        if (log.monday) {
+          entriesByType[log.commute_type].days.monday = true;
+          daysInUse.monday = true;
+        }
+        if (log.tuesday) {
+          entriesByType[log.commute_type].days.tuesday = true;
+          daysInUse.tuesday = true;
+        }
+        if (log.wednesday) {
+          entriesByType[log.commute_type].days.wednesday = true;
+          daysInUse.wednesday = true;
+        }
+        if (log.thursday) {
+          entriesByType[log.commute_type].days.thursday = true;
+          daysInUse.thursday = true;
+        }
+        if (log.friday) {
+          entriesByType[log.commute_type].days.friday = true;
+          daysInUse.friday = true;
+        }
+        if (log.saturday) {
+          entriesByType[log.commute_type].days.saturday = true;
+          daysInUse.saturday = true;
+        }
+        if (log.sunday) {
+          entriesByType[log.commute_type].days.sunday = true;
+          daysInUse.sunday = true;
+        }
       });
       
       // Convert to array of entries and update state
       const entries = Object.values(entriesByType);
       console.log("Loading existing commute logs:", entries);
       setCommuteEntries(entries);
+      
+      // Set the used days
+      setUsedDays(daysInUse);
     }
   }, [existingCommuteLogs, commuteEntries.length]);
+  
+  // Update usedDays when editing an entry
+  useEffect(() => {
+    // Calculate which days are used by entries except the one being edited
+    const daysInUse = {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false
+    };
+    
+    commuteEntries.forEach((entry, index) => {
+      // Skip the entry being edited
+      if (editingIndex !== null && index === editingIndex) {
+        return;
+      }
+      
+      if (entry.days.monday) daysInUse.monday = true;
+      if (entry.days.tuesday) daysInUse.tuesday = true;
+      if (entry.days.wednesday) daysInUse.wednesday = true;
+      if (entry.days.thursday) daysInUse.thursday = true;
+      if (entry.days.friday) daysInUse.friday = true;
+      if (entry.days.saturday) daysInUse.saturday = true;
+      if (entry.days.sunday) daysInUse.sunday = true;
+    });
+    
+    setUsedDays(daysInUse);
+  }, [commuteEntries, editingIndex]);
 
   // Add new commute method
   const addCommuteMethod = () => {
@@ -441,26 +518,35 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                 <div>
                   <FormLabel>Days Used</FormLabel>
                   <div className="grid grid-cols-2 gap-4 mt-2">
-                    {DAYS_OF_WEEK.map((day) => (
-                      <FormField
-                        key={day.id}
-                        control={form.control}
-                        name={day.id as "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday"}
-                        render={({ field }) => (
-                          <FormItem className="flex space-x-3 space-y-0 items-center">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="cursor-pointer">
-                              {day.name}
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
-                    ))}
+                    {DAYS_OF_WEEK.map((day) => {
+                      const dayId = day.id as "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+                      const isDisabled = usedDays[dayId];
+                      
+                      return (
+                        <FormField
+                          key={day.id}
+                          control={form.control}
+                          name={dayId}
+                          render={({ field }) => (
+                            <FormItem className="flex space-x-3 space-y-0 items-center">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value || isDisabled}
+                                  onCheckedChange={isDisabled ? undefined : field.onChange}
+                                  disabled={isDisabled && !field.value}
+                                />
+                              </FormControl>
+                              <FormLabel className={`${isDisabled && !field.value ? 'text-gray-400' : 'cursor-pointer'}`}>
+                                {day.name}
+                                {isDisabled && !field.value && (
+                                  <span className="ml-1 text-xs text-gray-400">(in use)</span>
+                                )}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      );
+                    })}
                   </div>
                   <FormDescription className="mt-2">
                     Select the days you used this commute method
