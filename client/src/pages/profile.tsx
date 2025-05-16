@@ -840,6 +840,23 @@ const Profile = () => {
                 <CardContent className="pt-6">
                   <h2 className="text-xl font-semibold mb-4">Commute Locations</h2>
                   
+                  {/* Warning banner when commute distance is not set */}
+                  {(!locationSettings.commute_distance_km || locationSettings.commute_distance_km === 0) && (
+                    <div className="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6">
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <span className="material-icons text-orange-500">warning</span>
+                        </div>
+                        <div className="ml-3">
+                          <h3 className="text-sm font-medium text-orange-800">Profile Setup Required</h3>
+                          <p className="text-sm text-orange-700 mt-1">
+                            Please set your commute distance below to accurately track CO₂ savings.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
