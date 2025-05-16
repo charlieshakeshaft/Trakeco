@@ -68,7 +68,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
         
         <p className="text-sm font-medium text-green-800 mb-2">You've saved the equivalent of:</p>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-blue-600 mb-1" style={{fontSize: '24px'}}>directions_car</span>
             <div className="text-sm font-semibold">{carKilometers} km</div>
@@ -85,12 +85,6 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <span className="material-icons text-purple-600 mb-1" style={{fontSize: '24px'}}>celebration</span>
             <div className="text-sm font-semibold">{balloonsEquivalent} balloons</div>
             <div className="text-xs text-green-600">of CO₂ prevented</div>
-          </div>
-          
-          <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
-            <span className="material-icons text-amber-600 mb-1" style={{fontSize: '24px'}}>directions_bus</span>
-            <div className="text-sm font-semibold">{Math.round(carKilometers * 1.3)} km</div>
-            <div className="text-xs text-green-600">of bus travel</div>
           </div>
         </div>
       </div>
