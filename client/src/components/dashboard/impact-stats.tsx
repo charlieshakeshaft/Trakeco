@@ -97,28 +97,39 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
       
       {/* Main cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* CO2 Breakdown Card - Alternative to the large CO2 banner */}
+        {/* Transport Breakdown Card */}
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-gray-500 text-sm font-medium">Transport Breakdown</p>
               <h3 className="text-3xl font-semibold text-gray-800 mt-1">
-                {co2SavedKg} <span className="text-lg font-normal text-gray-500">kg</span>
+                3 <span className="text-lg font-normal text-gray-500">commutes</span>
               </h3>
             </div>
-            <IconBadge icon="directions_bus" color="primary" bgColor="green-50" />
+            <IconBadge icon="directions_transit" color="primary" bgColor="green-50" />
           </div>
-          <div className="mt-3 text-xs text-gray-600">
-            CO₂ avoided per transport type
-          </div>
-          <div className="mt-1 flex justify-between items-center text-xs">
-            <div className="flex items-center">
-              <span className="material-icons text-green-600 mr-1" style={{fontSize: '16px'}}>directions_walk</span>
-              <span>Walking: 100%</span>
-            </div>
-            <div className="flex items-center">
-              <span className="material-icons text-blue-500 mr-1" style={{fontSize: '16px'}}>directions_bike</span>
-              <span>Cycling: 100%</span>
+          <div className="mt-3">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center">
+                <span className="material-icons text-green-600 mr-1" style={{fontSize: '16px'}}>directions_walk</span>
+                <span className="flex-1">Walking</span>
+                <span className="font-medium">0 days</span>
+              </div>
+              <div className="flex items-center">
+                <span className="material-icons text-blue-500 mr-1" style={{fontSize: '16px'}}>directions_bike</span>
+                <span className="flex-1">Cycling</span>
+                <span className="font-medium">0 days</span>
+              </div>
+              <div className="flex items-center">
+                <span className="material-icons text-amber-500 mr-1" style={{fontSize: '16px'}}>directions_car</span>
+                <span className="flex-1">Carpool</span>
+                <span className="font-medium">1 day</span>
+              </div>
+              <div className="flex items-center">
+                <span className="material-icons text-indigo-500 mr-1" style={{fontSize: '16px'}}>home</span>
+                <span className="flex-1">Remote</span>
+                <span className="font-medium">2 days</span>
+              </div>
             </div>
           </div>
         </div>
@@ -165,53 +176,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
         </div>
       </div>
       
-      {/* Extended Carbon Impact Visualization - New Section */}
-      {co2SavedKg > 0 && (
-        <div className="mt-6 bg-green-50 rounded-xl p-5 border border-green-100">
-          <h3 className="text-md font-semibold text-gray-800 mb-3 flex items-center">
-            <span className="material-icons text-green-600 mr-2">eco</span>
-            Your Carbon Reduction Visualized
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Trees Visualization */}
-            <div className="bg-white rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="flex mb-2">
-                {Array.from({ length: Math.min(treeEquivalent, 5) }).map((_, i) => (
-                  <span key={i} className="material-icons text-green-600" style={{fontSize: '28px'}}>park</span>
-                ))}
-                {treeEquivalent > 5 && <span className="text-sm font-medium ml-1 self-end">+{treeEquivalent - 5} more</span>}
-              </div>
-              <p className="text-sm font-medium text-gray-800">{treeEquivalent} Trees</p>
-              <p className="text-xs text-gray-600 mt-1">Your CO₂ savings equal the yearly absorption of {treeEquivalent} trees</p>
-            </div>
-            
-            {/* Balloons Visualization */}
-            <div className="bg-white rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="flex mb-2">
-                {Array.from({ length: Math.min(5, Math.ceil(balloonsEquivalent/100)) }).map((_, i) => (
-                  <span key={i} className="material-icons text-blue-500" style={{fontSize: '28px'}}>celebration</span>
-                ))}
-                {balloonsEquivalent > 500 && <span className="text-sm font-medium ml-1 self-end">+more</span>}
-              </div>
-              <p className="text-sm font-medium text-gray-800">{balloonsEquivalent.toLocaleString()} Balloons</p>
-              <p className="text-xs text-gray-600 mt-1">Your CO₂ savings would fill {balloonsEquivalent.toLocaleString()} party balloons</p>
-            </div>
-            
-            {/* Car Distance Visualization */}
-            <div className="bg-white rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="flex mb-2">
-                <span className="material-icons text-blue-600" style={{fontSize: '28px'}}>directions_car</span>
-                <span className="material-icons text-slate-300" style={{fontSize: '28px'}}>arrow_right_alt</span>
-                <span className="material-icons text-slate-300" style={{fontSize: '28px'}}>arrow_right_alt</span>
-                <span className="material-icons text-green-600" style={{fontSize: '28px'}}>location_on</span>
-              </div>
-              <p className="text-sm font-medium text-gray-800">{carKilometers} Kilometers</p>
-              <p className="text-xs text-gray-600 mt-1">You've saved emissions equal to driving {carKilometers} km in an average car</p>
-            </div>
-          </div>
-        </div>
-      )}
+
     </section>
   );
 };
