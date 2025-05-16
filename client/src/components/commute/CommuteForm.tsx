@@ -288,82 +288,19 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     setShowForm(true);
   };
 
-  // Remove commute method
+  // Remove commute method - only removes from UI, doesn't sync with server until Save is clicked
   const removeCommuteMethod = (index: number) => {
-    const entryToRemove = commuteEntries[index];
+    // Just remove from UI - no server call until Save button is clicked
+    setCommuteEntries(current => {
+      const updated = [...current];
+      updated.splice(index, 1);
+      return updated;
+    });
     
-    // Show confirmation dialog
-    if (window.confirm(`Are you sure you want to delete your ${entryToRemove.commute_type.replace('_', ' ')} commute method?`)) {
-      // Remove from UI immediately for better responsiveness
-      setCommuteEntries(current => {
-        const updated = [...current];
-        updated.splice(index, 1);
-        return updated;
-      });
-
-      // If the user is logged in, we need to sync with the server
-      if (userId) {
-        try {
-          setIsLoading(true); // Show loading overlay
-          
-          // Create a deletion payload with the commute type but all days set to false
-          const deletionPayload = {
-            commute_type: entryToRemove.commute_type,
-            days_logged: 0,
-            distance_km: commuteDistance,
-            week_start: format(weekStart, 'yyyy-MM-dd'),
-            monday: false,
-            tuesday: false,
-            wednesday: false,
-            thursday: false,
-            friday: false,
-            saturday: false,
-            sunday: false
-          };
-          
-          // Send request to delete this commute log
-          apiRequest('/api/commutes/log', deletionPayload, 'POST')
-            .then(async () => {
-              // Force refresh all relevant data
-              await queryClient.invalidateQueries({ queryKey: ['/api/commutes/current'] });
-              await queryClient.invalidateQueries({ queryKey: ['/api/user/stats'] });
-              await queryClient.invalidateQueries({ queryKey: ['/api/leaderboard'] });
-              
-              toast({
-                title: "Method Removed",
-                description: `Your ${entryToRemove.commute_type.replace('_', ' ')} commute has been deleted.`,
-              });
-            })
-            .catch(error => {
-              console.error("Failed to delete commute method:", error);
-              toast({
-                title: "Error",
-                description: `Failed to delete commute method: ${(error as Error).message}`,
-                variant: "destructive",
-              });
-              
-              // Put the entry back if deletion failed
-              setCommuteEntries(current => [...current, entryToRemove]);
-            })
-            .finally(() => {
-              setIsLoading(false); // Hide loading overlay
-            });
-        } catch (error) {
-          console.error("Failed to delete commute method:", error);
-          toast({
-            title: "Error",
-            description: `Failed to delete commute method: ${(error as Error).message}`,
-            variant: "destructive",
-          });
-          setIsLoading(false);
-        }
-      } else {
-        toast({
-          title: "Method Removed",
-          description: "Commute method has been removed.",
-        });
-      }
-    }
+    toast({
+      title: "Method Removed",
+      description: "Commute method has been removed from the form. Click 'Save All Commute Entries' to save your changes.",
+    });
   };
 
   // Handle form submission
