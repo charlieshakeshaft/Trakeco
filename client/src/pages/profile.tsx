@@ -998,7 +998,7 @@ const Profile = () => {
                       </div>
                       <Button 
                         className="bg-primary hover:bg-primary-dark"
-                        disabled={!locationSettings.home_address || !locationSettings.work_address || !locationSettings.commute_distance_km}
+                        disabled={!locationSettings.home_address || !locationSettings.work_address || !locationSettings.commute_distance_km || updateLocationMutation.isPending}
                         onClick={async (e) => {
                           e.preventDefault();
                           // Calculate distance if both addresses are provided before saving
@@ -1017,7 +1017,6 @@ const Profile = () => {
                             updateLocationMutation.mutate(locationSettings);
                           }
                         }}
-                        disabled={updateLocationMutation.isPending}
                       >
                         {updateLocationMutation.isPending ? (
                           <>
