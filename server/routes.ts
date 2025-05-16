@@ -671,6 +671,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             commuteLog = await storage.updateCommuteLog(existingLogForType.id, updateData);
           } else {
             // No days selected, delete this log
+            
+            // Calculate previously logged days to deduct points
+            const previouslyLoggedDays = dayFields.filter(day => existingLogForType[day] === true).length;
+            
+            if (previouslyLoggedDays > 0) {
+              // Deduct points for all removed days
+              const pointsToDeduct = calculateCommutePoints(existingLogForType.commute_type, previouslyLoggedDays);
+              
+              if (pointsToDeduct > 0) {
+                await storage.createPointsTransaction({
+                  user_id: user.id,
+                  source: `${existingLogForType.commute_type} commute (deleted)`,
+                  points: -pointsToDeduct
+                });
+                
+                // Update user's total points
+                await storage.updateUserPoints(user.id, -pointsToDeduct);
+              }
+            }
+            
+            // Delete the log
             await storage.deleteCommuteLog(existingLogForType.id);
             return res.json({ message: "Commute log deleted" });
           }
