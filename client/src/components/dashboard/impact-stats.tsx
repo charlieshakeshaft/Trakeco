@@ -100,7 +100,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
                 3 <span className="text-lg font-normal text-gray-500">commutes</span>
               </h3>
             </div>
-            <IconBadge icon="directions_transit" color="primary" bgColor="green-50" />
+            <IconBadge icon="commute" color="primary" bgColor="green-50" />
           </div>
           
           {/* Transport method list - only showing methods with days > 0 */}
@@ -140,7 +140,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
                 {userStats.points || 0} <span className="text-lg font-normal text-gray-500">pts</span>
               </h3>
             </div>
-            <IconBadge icon="stars" color="accent-dark" bgColor="amber-50" />
+            <IconBadge icon="workspace_premium" color="accent-dark" bgColor="amber-50" />
           </div>
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs">
