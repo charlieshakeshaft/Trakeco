@@ -889,26 +889,42 @@ const Profile = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Walking Distance (km)
+                        Commute Distance (km)
                       </label>
                       <div className="flex items-center gap-2">
-                        <div className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700">
-                          {locationSettings.commute_distance_km ? 
-                            `${locationSettings.commute_distance_km} km` : 
-                            'Enter home and work addresses above to calculate distance'
-                          }
-                        </div>
-                        {/* Keep as hidden input for form submission */}
                         <input 
-                          type="hidden" 
+                          type="number" 
+                          step="0.1"
+                          min="0"
                           name="commute_distance_km"
-                          value={locationSettings.commute_distance_km}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          placeholder="Enter your commute distance in kilometers"
+                          value={locationSettings.commute_distance_km || ''}
+                          onChange={(e) => {
+                            const value = parseFloat(e.target.value);
+                            setLocationSettings(prev => ({
+                              ...prev,
+                              commute_distance_km: isNaN(value) ? 0 : value
+                            }));
+                          }}
                         />
+                        <span className="text-gray-700">km</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
-                        The walking distance will be automatically calculated when you save.
+                      <div className="flex items-center mt-2">
+                        <a 
+                          href={`https://www.google.com/maps/dir/${encodeURIComponent(locationSettings.home_address || '')}/${encodeURIComponent(locationSettings.work_address || '')}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
+                        >
+                          <span className="material-icons text-sm mr-1">map</span>
+                          Calculate using Google Maps
+                        </a>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        <span className="font-medium">Note:</span> For remote work, the distance will be set to 0 when calculating CO₂ savings.
                         <br/>
-                        <span className="font-medium">Note:</span> When logging commutes, distances for different transport modes will be adjusted accordingly.
+                        Different transport modes may have different route distances in reality.
                       </p>
                     </div>
                     
