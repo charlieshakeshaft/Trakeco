@@ -136,6 +136,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Use query param userId if provided (for development), otherwise use authenticated user
       const userId = req.query.userId ? Number(req.query.userId) : user.id;
       
+      console.log('[PROFILE UPDATE] Request body:', req.body);
+      
       // Define the location settings schema
       const locationSettingsSchema = z.object({
         home_address: z.string().optional(),
@@ -148,9 +150,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const locationData = locationSettingsSchema.parse(req.body);
+      console.log('[PROFILE UPDATE] Parsed location data:', locationData);
       
       // Update the user with location settings
+      console.log('[PROFILE UPDATE] Calling updateUserLocationSettings with userId:', userId);
       const updatedUser = await storage.updateUserLocationSettings(userId, locationData);
+      console.log('[PROFILE UPDATE] Updated user result:', {
+        ...updatedUser,
+        password: '***REDACTED***'
+      });
       
       if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
@@ -159,11 +167,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Don't return the password
       const { password, ...userWithoutPassword } = updatedUser;
       
+      console.log('[PROFILE UPDATE] Sending response with updated user data (without password)');
       res.json(userWithoutPassword);
     } catch (error) {
-      console.error("Error updating user profile:", error);
+      console.error("[PROFILE UPDATE] Error updating user profile:", error);
       
       if (error instanceof z.ZodError) {
+        console.error('[PROFILE UPDATE] Zod validation error:', error.errors);
         return res.status(400).json({ message: "Invalid data", errors: error.errors });
       }
       
