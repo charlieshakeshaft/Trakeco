@@ -405,9 +405,13 @@ const Profile = () => {
   // Mutation for updating user's location settings
   const updateLocationMutation = useMutation({
     mutationFn: async (data: LocationSettings) => {
-      return await apiRequest(`/api/user/update-profile?userId=${user?.id}`, data, "PATCH");
+      console.log('Sending location update request with data:', data);
+      const response = await apiRequest(`/api/user/update-profile?userId=${user?.id}`, data, "PATCH");
+      console.log('Response from server:', response);
+      return response;
     },
     onSuccess: (data) => {
+      console.log('Location settings updated successfully:', data);
       toast({
         title: "Location settings updated",
         description: "Your commute location settings have been saved successfully.",
@@ -418,8 +422,12 @@ const Profile = () => {
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
+      
+      // Force refresh the profile data
+      queryClient.refetchQueries({ queryKey: [`/api/user/profile?userId=${user?.id}`] });
     },
     onError: (error: Error) => {
+      console.error('Error updating location settings:', error);
       toast({
         title: "Failed to update location settings",
         description: error.message,
