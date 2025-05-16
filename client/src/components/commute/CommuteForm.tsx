@@ -507,11 +507,17 @@ const CommuteForm = ({ userId, onSuccess, isProfileComplete = true }: CommuteFor
       </CardHeader>
       
       <CardContent className="pt-6">
-        {!isLoadingProfile && !locationConfigured && (
-          <Alert className="mb-4 bg-amber-50">
-            <AlertDescription>
-              Please <Link href="/profile" className="underline font-medium">update your profile</Link> with home and work addresses to better track your carbon impact.
-            </AlertDescription>
+        {!isProfileComplete && (
+          <Alert className="mb-4 bg-orange-50 border-orange-200">
+            <div className="flex items-start">
+              <span className="material-icons text-orange-500 mr-2">warning</span>
+              <div>
+                <AlertTitle className="text-orange-800">Profile Setup Required</AlertTitle>
+                <AlertDescription className="text-orange-700">
+                  Please <Link to="/profile" className="underline font-semibold">complete your profile</Link> with both home and work postcodes and set your commute distance to accurately track CO₂ savings.
+                </AlertDescription>
+              </div>
+            </div>
           </Alert>
         )}
         
@@ -697,6 +703,7 @@ const CommuteForm = ({ userId, onSuccess, isProfileComplete = true }: CommuteFor
             onClick={addCommuteMethod} 
             variant="outline" 
             className="w-full mb-6"
+            disabled={!isProfileComplete}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Commute Method
@@ -704,21 +711,37 @@ const CommuteForm = ({ userId, onSuccess, isProfileComplete = true }: CommuteFor
         )}
       </CardContent>
       
-      <CardFooter className="bg-gray-50 flex justify-end border-t">
-        <Button
-          onClick={saveAllEntries}
-          disabled={commuteEntries.length === 0 || isSubmitting}
-          className="gap-2"
-        >
-          {isSubmitting ? (
-            "Saving..."
-          ) : (
-            <>
-              <Check className="h-4 w-4" />
-              Save All Commute Entries
-            </>
-          )}
-        </Button>
+      <CardFooter className="bg-gray-50 flex justify-between border-t">
+        {!isProfileComplete ? (
+          <div className="w-full flex justify-center">
+            <Link to="/profile">
+              <Button 
+                type="button" 
+                className="bg-orange-600 hover:bg-orange-700"
+              >
+                <span className="material-icons text-sm mr-2">settings</span>
+                Complete Profile Settings First
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="w-full flex justify-end">
+            <Button
+              onClick={saveAllEntries}
+              disabled={commuteEntries.length === 0 || isSubmitting}
+              className="gap-2"
+            >
+              {isSubmitting ? (
+                "Saving..."
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  Save All Commute Entries
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </CardFooter>
     </Card>
   );
