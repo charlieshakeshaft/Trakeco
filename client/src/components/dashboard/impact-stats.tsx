@@ -72,13 +72,13 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
           </div>
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Next tier at 1000 pts</span>
-              <span className="font-medium">{Math.min(Math.round((userStats.points || 0) / 10), 100)}%</span>
+              <span className="text-gray-500">Next badge at 500 pts</span>
+              <span className="font-medium">{Math.min(Math.round((userStats.points || 0) / 5), 100)}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
               <div 
                 className="bg-accent h-1.5 rounded-full progress-bar" 
-                style={{ width: `${Math.min(Math.round((userStats.points || 0) / 10), 100)}%` }}
+                style={{ width: `${Math.min(Math.round((userStats.points || 0) / 5), 100)}%` }}
               ></div>
             </div>
           </div>
