@@ -144,6 +144,9 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     sunday: false
   });
   
+  // Track which commute methods are already in use
+  const [usedMethods, setUsedMethods] = useState<string[]>([]);
+  
   // Process existing commute logs and populate entries when data loads
   useEffect(() => {
     if (existingCommuteLogs && Array.isArray(existingCommuteLogs) && existingCommuteLogs.length > 0 && commuteEntries.length === 0) {
@@ -216,10 +219,15 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       
       // Set the used days
       setUsedDays(daysInUse);
+      
+      // Set the used commute methods
+      const methods = Object.keys(entriesByType);
+      console.log("Used commute methods:", methods);
+      setUsedMethods(methods);
     }
   }, [existingCommuteLogs, commuteEntries.length]);
   
-  // Update usedDays when editing an entry
+  // Update usedDays and usedMethods when editing an entry
   useEffect(() => {
     // Calculate which days are used by entries except the one being edited
     const daysInUse = {
@@ -232,12 +240,21 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       sunday: false
     };
     
+    // Track which commute methods are used (except the one being edited)
+    const methodsInUse: string[] = [];
+    
     commuteEntries.forEach((entry, index) => {
       // Skip the entry being edited
       if (editingIndex !== null && index === editingIndex) {
         return;
       }
       
+      // Add commute method to list
+      if (!methodsInUse.includes(entry.commute_type)) {
+        methodsInUse.push(entry.commute_type);
+      }
+      
+      // Mark days as used
       if (entry.days.monday) daysInUse.monday = true;
       if (entry.days.tuesday) daysInUse.tuesday = true;
       if (entry.days.wednesday) daysInUse.wednesday = true;
@@ -248,6 +265,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     });
     
     setUsedDays(daysInUse);
+    setUsedMethods(methodsInUse);
   }, [commuteEntries, editingIndex]);
 
   // Add new commute method
@@ -500,11 +518,22 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {commuteTypeOptions.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
+                          {commuteTypeOptions.map((option) => {
+                            const isDisabled = editingIndex === null && usedMethods.includes(option.value);
+                            
+                            return (
+                              <SelectItem 
+                                key={option.value} 
+                                value={option.value}
+                                disabled={isDisabled}
+                              >
+                                {option.label}
+                                {isDisabled && (
+                                  <span className="ml-1 text-xs text-gray-400">(already logged)</span>
+                                )}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       <FormDescription>
