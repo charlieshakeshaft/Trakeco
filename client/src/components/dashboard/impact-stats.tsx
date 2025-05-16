@@ -51,34 +51,46 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
     <section className="mb-8">
       <h2 className="text-lg font-semibold text-gray-700 mb-4">Your Impact This Month</h2>
       
-      {/* Large CO2 Banner Card */}
+      {/* Single Carbon Savings Card - Simplified */}
       <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-xl shadow-sm p-5 border border-green-200 mb-6">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center mb-4 md:mb-0">
-            <div className="bg-white p-4 rounded-full mr-5">
-              <span className="material-icons text-green-600" style={{fontSize: '36px'}}>eco</span>
-            </div>
-            <div>
-              <p className="text-green-800 text-sm font-medium uppercase tracking-wide">Carbon Footprint Reduction</p>
-              <h3 className="text-4xl font-bold text-green-900 mt-1 flex items-baseline">
-                {co2SavedKg} <span className="text-xl font-normal text-green-700 ml-1">kg CO₂ saved</span>
-              </h3>
-            </div>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-green-800 text-sm font-medium uppercase tracking-wide">Your Carbon Savings</p>
+            <h3 className="text-4xl font-bold text-green-900 mt-1 flex items-baseline">
+              {co2SavedKg} <span className="text-xl font-normal text-green-700 ml-1">kg CO₂</span>
+            </h3>
+            <p className="text-sm text-green-700 mt-1">through your sustainable commuting choices</p>
+          </div>
+          <div className="bg-white p-3 rounded-full">
+            <span className="material-icons text-green-600" style={{fontSize: '32px'}}>eco</span>
+          </div>
+        </div>
+        
+        <p className="text-sm font-medium text-green-800 mb-2">This is equivalent to:</p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
+            <span className="material-icons text-blue-600 mb-1" style={{fontSize: '24px'}}>directions_car</span>
+            <div className="text-sm font-semibold">{carKilometers} km</div>
+            <div className="text-xs text-gray-600">not driven by car</div>
           </div>
           
-          <div className="flex items-center gap-3 text-sm">
-            <div className="bg-white px-3 py-2 rounded-lg flex items-center">
-              <span className="material-icons text-green-600 mr-1">forest</span>
-              <div className="font-medium">{treeEquivalent} trees</div>
-            </div>
-            <div className="bg-white px-3 py-2 rounded-lg flex items-center">
-              <span className="material-icons text-blue-500 mr-1">directions_car</span>
-              <div className="font-medium">{carKilometers} km</div>
-            </div>
-            <div className="bg-white px-3 py-2 rounded-lg flex items-center">
-              <span className="material-icons text-purple-500 mr-1">celebration</span>
-              <div className="font-medium">{balloonsEquivalent} balloons</div>
-            </div>
+          <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
+            <span className="material-icons text-green-600 mb-1" style={{fontSize: '24px'}}>forest</span>
+            <div className="text-sm font-semibold">{treeEquivalent} trees</div>
+            <div className="text-xs text-gray-600">absorbing CO₂ for a year</div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
+            <span className="material-icons text-purple-600 mb-1" style={{fontSize: '24px'}}>celebration</span>
+            <div className="text-sm font-semibold">{balloonsEquivalent} balloons</div>
+            <div className="text-xs text-gray-600">of CO₂ not released</div>
+          </div>
+          
+          <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
+            <span className="material-icons text-amber-600 mb-1" style={{fontSize: '24px'}}>directions_bus</span>
+            <div className="text-sm font-semibold">{Math.round(carKilometers * 1.3)} km</div>
+            <div className="text-xs text-gray-600">by public transport</div>
           </div>
         </div>
       </div>
