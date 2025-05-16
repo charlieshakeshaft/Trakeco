@@ -855,7 +855,7 @@ const Profile = () => {
                           onChange={handleFieldChange}
                         />
                         <p className="text-xs text-gray-500">
-                          Enter your home postcode to automatically calculate your commute distance
+                          Enter your home postcode to help calculate your car commute distance for CO₂ savings
                         </p>
                         
                         {/* Hidden fields for API compatibility */}
@@ -878,7 +878,7 @@ const Profile = () => {
                           onChange={handleFieldChange}
                         />
                         <p className="text-xs text-gray-500">
-                          Enter your work postcode to automatically calculate your commute distance
+                          Enter your work postcode to help calculate your car commute distance for CO₂ savings
                         </p>
                         
                         {/* Hidden fields for API compatibility */}
@@ -897,7 +897,7 @@ const Profile = () => {
                           step="0.1"
                           min="0"
                           name="commute_distance_km"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                          className={`w-full px-3 py-2 border ${!locationSettings.commute_distance_km || locationSettings.commute_distance_km === 0 ? 'border-orange-300 bg-orange-50' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
                           placeholder="Enter your commute distance in kilometers"
                           value={locationSettings.commute_distance_km || ''}
                           onChange={(e) => {
@@ -910,21 +910,27 @@ const Profile = () => {
                         />
                         <span className="text-gray-700">km</span>
                       </div>
+                      {(!locationSettings.commute_distance_km || locationSettings.commute_distance_km === 0) && (
+                        <div className="mt-2 text-orange-600 text-xs flex items-center">
+                          <span className="material-icons text-xs mr-1">warning</span>
+                          Setting your commute distance is required to accurately track CO₂ savings
+                        </div>
+                      )}
                       <div className="flex items-center mt-2">
                         <a 
-                          href={`https://www.google.com/maps/dir/${encodeURIComponent(locationSettings.home_address || '')}/${encodeURIComponent(locationSettings.work_address || '')}/`}
+                          href={`https://www.google.com/maps/dir/${encodeURIComponent(locationSettings.home_address || '')}/${encodeURIComponent(locationSettings.work_address || '')}/data=!4m2!4m1!3e0`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-800 flex items-center"
                         >
-                          <span className="material-icons text-sm mr-1">map</span>
-                          Calculate using Google Maps
+                          <span className="material-icons text-sm mr-1">directions_car</span>
+                          Find car travel distance on Google Maps
                         </a>
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
-                        <span className="font-medium">Note:</span> For remote work, the distance will be set to 0 when calculating CO₂ savings.
+                        <span className="font-medium">Important:</span> We use car travel distance as our baseline for calculating how much CO₂ you save by choosing greener commute options.
                         <br/>
-                        Different transport modes may have different route distances in reality.
+                        For remote work, we use this distance to calculate the emissions you've prevented by not commuting.
                       </p>
                     </div>
                     

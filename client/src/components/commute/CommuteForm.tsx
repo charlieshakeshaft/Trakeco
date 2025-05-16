@@ -36,6 +36,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 interface CommuteFormProps {
   userId: number;
   onSuccess?: () => void;
+  isProfileComplete?: boolean;
 }
 
 // A single commute entry
@@ -87,7 +88,7 @@ const DAYS_OF_WEEK = [
   { id: "sunday", name: "Sunday", short: "Sun" }
 ];
 
-const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
+const CommuteForm = ({ userId, onSuccess, isProfileComplete = true }: CommuteFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
