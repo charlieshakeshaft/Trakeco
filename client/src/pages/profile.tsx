@@ -1017,7 +1017,7 @@ const Profile = () => {
                         <div className="flex border border-gray-300 rounded-md overflow-hidden">
                           <button
                             type="button"
-                            className={`px-2 py-1 text-xs ${distanceUnit === 'km' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            className={`px-3 py-1.5 text-sm font-medium ${distanceUnit === 'km' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
                             onClick={() => {
                               if (distanceUnit !== 'km') {
                                 // Convert miles to km for display
@@ -1031,7 +1031,7 @@ const Profile = () => {
                           </button>
                           <button
                             type="button"
-                            className={`px-2 py-1 text-xs ${distanceUnit === 'miles' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            className={`px-3 py-1.5 text-sm font-medium ${distanceUnit === 'miles' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
                             onClick={() => {
                               if (distanceUnit !== 'miles') {
                                 // Convert km to miles for display
@@ -1041,7 +1041,7 @@ const Profile = () => {
                               }
                             }}
                           >
-                            mi
+                            miles
                           </button>
                         </div>
                       </div>
