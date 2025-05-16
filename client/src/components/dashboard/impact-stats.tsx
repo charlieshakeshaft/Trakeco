@@ -51,30 +51,62 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
     <section className="mb-8">
       <h2 className="text-lg font-semibold text-gray-700 mb-4">Your Impact This Month</h2>
       
+      {/* Large CO2 Banner Card */}
+      <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-xl shadow-sm p-5 border border-green-200 mb-6">
+        <div className="flex flex-col md:flex-row items-center justify-between">
+          <div className="flex items-center mb-4 md:mb-0">
+            <div className="bg-white p-4 rounded-full mr-5">
+              <span className="material-icons text-green-600" style={{fontSize: '36px'}}>eco</span>
+            </div>
+            <div>
+              <p className="text-green-800 text-sm font-medium uppercase tracking-wide">Carbon Footprint Reduction</p>
+              <h3 className="text-4xl font-bold text-green-900 mt-1 flex items-baseline">
+                {co2SavedKg} <span className="text-xl font-normal text-green-700 ml-1">kg CO₂ saved</span>
+              </h3>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 text-sm">
+            <div className="bg-white px-3 py-2 rounded-lg flex items-center">
+              <span className="material-icons text-green-600 mr-1">forest</span>
+              <div className="font-medium">{treeEquivalent} trees</div>
+            </div>
+            <div className="bg-white px-3 py-2 rounded-lg flex items-center">
+              <span className="material-icons text-blue-500 mr-1">directions_car</span>
+              <div className="font-medium">{carKilometers} km</div>
+            </div>
+            <div className="bg-white px-3 py-2 rounded-lg flex items-center">
+              <span className="material-icons text-purple-500 mr-1">celebration</span>
+              <div className="font-medium">{balloonsEquivalent} balloons</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       {/* Main cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* CO2 Saved Card - Enhanced */}
+        {/* CO2 Breakdown Card - Alternative to the large CO2 banner */}
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-gray-500 text-sm font-medium">CO₂ Saved</p>
+              <p className="text-gray-500 text-sm font-medium">Transport Breakdown</p>
               <h3 className="text-3xl font-semibold text-gray-800 mt-1">
                 {co2SavedKg} <span className="text-lg font-normal text-gray-500">kg</span>
               </h3>
             </div>
-            <IconBadge icon="nature" color="primary" bgColor="green-50" />
+            <IconBadge icon="directions_bus" color="primary" bgColor="green-50" />
           </div>
           <div className="mt-3 text-xs text-gray-600">
-            That's equivalent to...
+            CO₂ avoided per transport type
           </div>
           <div className="mt-1 flex justify-between items-center text-xs">
             <div className="flex items-center">
-              <span className="material-icons text-green-600 mr-1" style={{fontSize: '16px'}}>forest</span>
-              <span>{treeEquivalent} trees for a year</span>
+              <span className="material-icons text-green-600 mr-1" style={{fontSize: '16px'}}>directions_walk</span>
+              <span>Walking: 100%</span>
             </div>
             <div className="flex items-center">
-              <span className="material-icons text-blue-500 mr-1" style={{fontSize: '16px'}}>directions_car</span>
-              <span>{carKilometers} km not driven</span>
+              <span className="material-icons text-blue-500 mr-1" style={{fontSize: '16px'}}>directions_bike</span>
+              <span>Cycling: 100%</span>
             </div>
           </div>
         </div>
