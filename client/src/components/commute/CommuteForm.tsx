@@ -95,6 +95,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   const [showForm, setShowForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // For loading overlay
   const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   
   // Fetch existing commute logs for the current week
@@ -354,6 +355,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     }
     
     setIsSubmitting(true);
+    setIsLoading(true); // Enable loading overlay
     
     try {
       // Process each entry
@@ -400,11 +402,23 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       });
     } finally {
       setIsSubmitting(false);
+      setIsLoading(false); // Disable loading overlay
     }
   };
   
   return (
     <Card className="overflow-hidden">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/80 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-card p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full mb-4"></div>
+            <p className="text-foreground font-medium">Saving your commute data...</p>
+            <p className="text-muted-foreground text-sm mt-2">Please don't navigate away</p>
+          </div>
+        </div>
+      )}
+      
       <CardHeader className="bg-primary/5">
         <CardTitle className="text-xl">Log Weekly Commutes</CardTitle>
         <CardDescription>
