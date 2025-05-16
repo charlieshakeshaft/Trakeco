@@ -171,6 +171,15 @@ interface ProfileData {
   points_total?: number;
 }
 
+// Helper functions for unit conversion
+const convertKmToMiles = (km: number): number => {
+  return parseFloat((km * 0.621371).toFixed(2));
+};
+
+const convertMilesToKm = (miles: number): number => {
+  return parseFloat((miles / 0.621371).toFixed(2));
+};
+
 interface LocationSettings {
   home_address: string;
   home_latitude: string;
@@ -247,6 +256,16 @@ const Profile = () => {
     form: ""
   });
   
+  // Update display distance when location settings or unit changes
+  useEffect(() => {
+    if (distanceUnit === 'km') {
+      setDisplayDistance(locationSettings.commute_distance_km);
+    } else {
+      // Convert to miles for display
+      setDisplayDistance(convertKmToMiles(locationSettings.commute_distance_km));
+    }
+  }, [locationSettings.commute_distance_km, distanceUnit]);
+  
   // Calculate distance between postcodes
   const calculateDistance = async (homePostcode: string, workPostcode: string) => {
     if (!homePostcode || !workPostcode) return;
@@ -275,6 +294,7 @@ const Profile = () => {
       // Round to 1 decimal place for realism
       const calculatedDistance = Math.round(baseDistance * 10) / 10;
       
+      // Update the location settings with the calculated distance in km
       setLocationSettings(prev => ({
         ...prev,
         commute_distance_km: calculatedDistance,
@@ -285,9 +305,22 @@ const Profile = () => {
         work_longitude: (workHash % 180).toString()
       }));
       
+      // Update the display distance based on the current unit
+      if (distanceUnit === 'km') {
+        setDisplayDistance(calculatedDistance);
+      } else {
+        // Convert to miles for display
+        setDisplayDistance(convertKmToMiles(calculatedDistance));
+      }
+      
+      // Show toast with the distance in the current unit
+      const displayedDistance = distanceUnit === 'km' 
+        ? calculatedDistance 
+        : convertKmToMiles(calculatedDistance);
+      
       toast({
         title: "Distance calculated",
-        description: `Estimated commute is ${calculatedDistance} km`,
+        description: `Estimated commute is ${displayedDistance} ${distanceUnit}`,
       });
     } catch (error) {
       toast({
@@ -953,26 +986,64 @@ const Profile = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Commute Distance (km) <span className="text-red-500">*</span>
+                        Commute Distance <span className="text-red-500">*</span>
                       </label>
                       <div className="flex items-center gap-2">
                         <input 
                           type="number" 
                           step="0.1"
                           min="0"
-                          name="commute_distance_km"
                           className={`w-full px-3 py-2 border ${!locationSettings.commute_distance_km || locationSettings.commute_distance_km === 0 ? 'border-orange-300 bg-orange-50' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                          placeholder="Enter your commute distance in kilometers"
-                          value={locationSettings.commute_distance_km || ''}
+                          placeholder={`Enter your commute distance in ${distanceUnit}`}
+                          value={displayDistance || ''}
                           onChange={(e) => {
-                            const value = parseFloat(e.target.value);
+                            const inputValue = parseFloat(e.target.value);
+                            
+                            // Update the display value
+                            setDisplayDistance(isNaN(inputValue) ? 0 : inputValue);
+                            
+                            // Convert to km if miles is selected
+                            const kmValue = distanceUnit === 'miles' 
+                              ? (isNaN(inputValue) ? 0 : inputValue / 0.621371) 
+                              : (isNaN(inputValue) ? 0 : inputValue);
+                            
+                            // Update the actual km value in locationSettings
                             setLocationSettings(prev => ({
                               ...prev,
-                              commute_distance_km: isNaN(value) ? 0 : value
+                              commute_distance_km: parseFloat(kmValue.toFixed(2))
                             }));
                           }}
                         />
-                        <span className="text-gray-700">km</span>
+                        <div className="flex border border-gray-300 rounded-md overflow-hidden">
+                          <button
+                            type="button"
+                            className={`px-2 py-1 text-xs ${distanceUnit === 'km' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            onClick={() => {
+                              if (distanceUnit !== 'km') {
+                                // Convert miles to km for display
+                                const kmValue = displayDistance / 0.621371;
+                                setDisplayDistance(parseFloat(kmValue.toFixed(2)));
+                                setDistanceUnit('km');
+                              }
+                            }}
+                          >
+                            km
+                          </button>
+                          <button
+                            type="button"
+                            className={`px-2 py-1 text-xs ${distanceUnit === 'miles' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                            onClick={() => {
+                              if (distanceUnit !== 'miles') {
+                                // Convert km to miles for display
+                                const milesValue = displayDistance * 0.621371;
+                                setDisplayDistance(parseFloat(milesValue.toFixed(2)));
+                                setDistanceUnit('miles');
+                              }
+                            }}
+                          >
+                            mi
+                          </button>
+                        </div>
                       </div>
                       {(!locationSettings.commute_distance_km || locationSettings.commute_distance_km === 0) && (
                         <div className="mt-2 text-orange-600 text-xs flex items-center">
