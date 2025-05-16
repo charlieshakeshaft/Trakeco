@@ -78,7 +78,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-green-600 mb-1" style={{fontSize: '24px'}}>forest</span>
             <div className="text-sm font-semibold">{treeEquivalent} trees</div>
-            <div className="text-xs text-green-600">working for a year</div>
+            <div className="text-xs text-green-600">absorbing CO₂ annually</div>
           </div>
           
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
