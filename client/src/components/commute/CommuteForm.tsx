@@ -97,6 +97,12 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   
+  // Fetch existing commute logs for the current week
+  const { data: existingCommuteLogs, isLoading: isLoadingCommutes } = useQuery({
+    queryKey: [`/api/commutes/current?userId=${userId}`],
+    enabled: !!userId,
+  });
+  
   // Entry form
   const form = useForm<z.infer<typeof singleCommuteSchema>>({
     resolver: zodResolver(singleCommuteSchema),
@@ -126,6 +132,46 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   
   // Get commute distance
   const commuteDistance = userProfile?.commute_distance_km || 0;
+  
+  // Process existing commute logs and populate entries when data loads
+  useEffect(() => {
+    if (existingCommuteLogs && Array.isArray(existingCommuteLogs) && existingCommuteLogs.length > 0 && commuteEntries.length === 0) {
+      // Group logs by commute type
+      const entriesByType: Record<string, CommuteEntry> = {};
+      
+      existingCommuteLogs.forEach((log) => {
+        // Create entry if it doesn't exist for this type
+        if (!entriesByType[log.commute_type]) {
+          entriesByType[log.commute_type] = {
+            commute_type: log.commute_type,
+            days: {
+              monday: false,
+              tuesday: false,
+              wednesday: false,
+              thursday: false,
+              friday: false,
+              saturday: false,
+              sunday: false
+            }
+          };
+        }
+        
+        // Update days based on the log
+        if (log.monday) entriesByType[log.commute_type].days.monday = true;
+        if (log.tuesday) entriesByType[log.commute_type].days.tuesday = true;
+        if (log.wednesday) entriesByType[log.commute_type].days.wednesday = true;
+        if (log.thursday) entriesByType[log.commute_type].days.thursday = true;
+        if (log.friday) entriesByType[log.commute_type].days.friday = true;
+        if (log.saturday) entriesByType[log.commute_type].days.saturday = true;
+        if (log.sunday) entriesByType[log.commute_type].days.sunday = true;
+      });
+      
+      // Convert to array of entries and update state
+      const entries = Object.values(entriesByType);
+      console.log("Loading existing commute logs:", entries);
+      setCommuteEntries(entries);
+    }
+  }, [existingCommuteLogs, commuteEntries.length]);
 
   // Add new commute method
   const addCommuteMethod = () => {
