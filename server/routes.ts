@@ -1273,8 +1273,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
               savedCO2 = standardEmission * distance * log.days_logged * 1.2;
             } 
             else if (log.commute_type === 'remote_work') {
-              // Remote work saves 100% of commute emissions 
-              savedCO2 = standardEmission * distance * log.days_logged;
+              // Remote work - use the user's commute distance from profile
+              // Since we want to show how much CO2 was saved by not commuting
+              // We need to use the actual commute distance the user would have traveled
+              
+              // If the user has a commute distance in their profile settings, use that
+              // Otherwise fallback to the distance from the log or default
+              const userDistance = log.user_id === user.id && user.commute_distance_km && user.commute_distance_km > 0
+                ? user.commute_distance_km 
+                : distance;
+              
+              // Remote work saves 100% of commute emissions
+              savedCO2 = standardEmission * userDistance * log.days_logged;
             }
             else if (log.commute_type === 'public_transport') {
               // Public transit saves emissions compared to car
