@@ -97,9 +97,9 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
       
       {/* Main cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Transport Breakdown Card */}
+        {/* Transport Breakdown Card - Improved for small screens */}
         <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between mb-3">
             <div>
               <p className="text-gray-500 text-sm font-medium">Transport Breakdown</p>
               <h3 className="text-3xl font-semibold text-gray-800 mt-1">
@@ -108,28 +108,39 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             </div>
             <IconBadge icon="directions_transit" color="primary" bgColor="green-50" />
           </div>
-          <div className="mt-3">
-            <div className="grid grid-cols-2 gap-2 text-xs">
+          
+          {/* Transport method list - stacked on mobile, side-by-side on larger screens */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
-                <span className="material-icons text-green-600 mr-1" style={{fontSize: '16px'}}>directions_walk</span>
-                <span className="flex-1">Walking</span>
-                <span className="font-medium">0 days</span>
+                <span className="material-icons text-green-600 mr-2" style={{fontSize: '18px'}}>directions_walk</span>
+                <span className="text-sm">Walking</span>
               </div>
+              <span className="text-sm font-medium">0 days</span>
+            </div>
+            
+            <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
-                <span className="material-icons text-blue-500 mr-1" style={{fontSize: '16px'}}>directions_bike</span>
-                <span className="flex-1">Cycling</span>
-                <span className="font-medium">0 days</span>
+                <span className="material-icons text-blue-500 mr-2" style={{fontSize: '18px'}}>directions_bike</span>
+                <span className="text-sm">Cycling</span>
               </div>
+              <span className="text-sm font-medium">0 days</span>
+            </div>
+            
+            <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
-                <span className="material-icons text-amber-500 mr-1" style={{fontSize: '16px'}}>directions_car</span>
-                <span className="flex-1">Carpool</span>
-                <span className="font-medium">1 day</span>
+                <span className="material-icons text-amber-500 mr-2" style={{fontSize: '18px'}}>directions_car</span>
+                <span className="text-sm">Carpool</span>
               </div>
+              <span className="text-sm font-medium">1 day</span>
+            </div>
+            
+            <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
-                <span className="material-icons text-indigo-500 mr-1" style={{fontSize: '16px'}}>home</span>
-                <span className="flex-1">Remote</span>
-                <span className="font-medium">2 days</span>
+                <span className="material-icons text-indigo-500 mr-2" style={{fontSize: '18px'}}>home</span>
+                <span className="text-sm">Remote</span>
               </div>
+              <span className="text-sm font-medium">2 days</span>
             </div>
           </div>
         </div>
