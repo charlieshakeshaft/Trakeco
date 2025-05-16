@@ -818,6 +818,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Delete commute log by ID
+  app.delete("/api/commutes/:id", authenticate, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const logId = parseInt(req.params.id);
+      
+      if (isNaN(logId)) {
+        return res.status(400).json({ message: "Invalid commute log ID" });
+      }
+      
+      // Get the commute log to verify ownership
+      const commuteLog = await storage.getCommuteLog(logId);
+      
+      if (!commuteLog) {
+        return res.status(404).json({ message: "Commute log not found" });
+      }
+      
+      // Verify ownership
+      if (commuteLog.user_id !== user.id) {
+        return res.status(403).json({ message: "Not authorized to delete this commute log" });
+      }
+      
+      // Calculate points to deduct
+      const dayFields = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      const daysLogged = dayFields.filter(day => commuteLog[day] === true).length;
+      
+      // Delete the commute log
+      const success = await storage.deleteCommuteLog(logId);
+      
+      if (success) {
+        // If we have days logged, create a negative points transaction
+        if (daysLogged > 0) {
+          const pointsToDeduct = calculateCommutePoints(commuteLog.commute_type, daysLogged);
+          
+          if (pointsToDeduct > 0) {
+            await storage.createPointsTransaction({
+              user_id: user.id,
+              source: `${commuteLog.commute_type} commute (deleted)`,
+              points: -pointsToDeduct
+            });
+          }
+        }
+        
+        res.json({ message: "Commute log deleted successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to delete commute log" });
+      }
+    } catch (error) {
+      console.error("Error deleting commute log:", error);
+      res.status(500).json({ message: "Error deleting commute log" });
+    }
+  });
+  
   app.get("/api/commutes/current", authenticate, async (req, res) => {
     try {
       const user = (req as any).user;

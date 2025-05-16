@@ -50,6 +50,7 @@ export interface IStorage {
   
   // Commute operations
   createCommuteLog(commuteLog: InsertCommuteLog): Promise<CommuteLog>;
+  getCommuteLog(id: number): Promise<CommuteLog | undefined>;
   getCommuteLogsByUserId(userId: number): Promise<CommuteLog[]>;
   getCommuteLogByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog | undefined>;
   getCommuteLogsByUserIdAndWeek(userId: number, weekStart: Date): Promise<CommuteLog[]>;
@@ -364,6 +365,10 @@ export class MemStorage implements IStorage {
     
     this.commuteLogs.set(id, commuteLog);
     return commuteLog;
+  }
+
+  async getCommuteLog(id: number): Promise<CommuteLog | undefined> {
+    return this.commuteLogs.get(id);
   }
   
   async getCommuteLogsByUserId(userId: number): Promise<CommuteLog[]> {
@@ -1150,6 +1155,15 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return commuteLog;
+  }
+  
+  async getCommuteLog(id: number): Promise<CommuteLog | undefined> {
+    const [log] = await db
+      .select()
+      .from(schema.commuteLogs)
+      .where(eq(schema.commuteLogs.id, id));
+    
+    return log || undefined;
   }
   
   async getCommuteLogsByUserId(userId: number): Promise<CommuteLog[]> {

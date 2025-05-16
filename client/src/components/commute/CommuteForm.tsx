@@ -360,7 +360,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
 
   // Save all commute entries
   const saveAllEntries = async () => {
-    if (commuteEntries.length === 0) {
+    if (commuteEntries.length === 0 && deletedLogIds.length === 0) {
       toast({
         title: "No Methods Added",
         description: "Please add at least one commute method.",
@@ -373,6 +373,24 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
     setIsLoading(true); // Enable loading overlay
     
     try {
+      // First, delete any logs that were removed
+      for (const logId of deletedLogIds) {
+        try {
+          // Delete the commute log on the server
+          await fetch(`/api/commutes/${logId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          console.log(`Deleted commute log with ID: ${logId}`);
+        } catch (err) {
+          console.error(`Failed to delete commute log with ID: ${logId}`, err);
+        }
+      }
+      
       // Process each entry
       for (const entry of commuteEntries) {
         // Count selected days
@@ -390,6 +408,9 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
           ...entry.days
         }, 'POST');
       }
+      
+      // Reset deleted log IDs after processing
+      setDeletedLogIds([]);
       
       // Success notification
       toast({
