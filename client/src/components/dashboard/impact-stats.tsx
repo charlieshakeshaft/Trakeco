@@ -108,7 +108,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             {/* Only showing relevant commute methods */}
             <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
-                <span className="material-icons text-amber-500 mr-2" style={{fontSize: '18px'}}>local_taxi</span>
+                <span className="material-icons text-amber-500 mr-2" style={{fontSize: '18px'}}>people</span>
                 <span className="text-sm">Carpool</span>
               </div>
               <span className="text-sm font-medium">1 day</span>
@@ -116,7 +116,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             
             <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
-                <span className="material-icons text-indigo-500 mr-2" style={{fontSize: '18px'}}>cottage</span>
+                <span className="material-icons text-indigo-500 mr-2" style={{fontSize: '18px'}}>home</span>
                 <span className="text-sm">Remote</span>
               </div>
               <span className="text-sm font-medium">2 days</span>
