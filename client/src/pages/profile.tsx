@@ -999,23 +999,10 @@ const Profile = () => {
                       <Button 
                         className="bg-primary hover:bg-primary-dark"
                         disabled={!locationSettings.home_address || !locationSettings.work_address || !locationSettings.commute_distance_km || updateLocationMutation.isPending}
-                        onClick={async (e) => {
+                        onClick={(e) => {
                           e.preventDefault();
-                          // Calculate distance if both addresses are provided before saving
-                          if (locationSettings.home_address && locationSettings.work_address) {
-                            try {
-                              await calculateDistance(locationSettings.home_address, locationSettings.work_address);
-                              // Give a moment for the state to update with the new distance
-                              setTimeout(() => {
-                                updateLocationMutation.mutate(locationSettings);
-                              }, 100);
-                            } catch (error) {
-                              console.error('Error calculating distance:', error);
-                              updateLocationMutation.mutate(locationSettings);
-                            }
-                          } else {
-                            updateLocationMutation.mutate(locationSettings);
-                          }
+                          // Just call the saveLocationSettings function which has the validation
+                          saveLocationSettings();
                         }}
                       >
                         {updateLocationMutation.isPending ? (
