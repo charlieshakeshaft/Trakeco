@@ -113,13 +113,13 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   });
   
   // Fetch user profile
-  const { data: userProfile } = useQuery({
+  const { data: userProfile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ["/api/user/profile"],
     enabled: !!userId,
   });
   
-  // Check if location is configured
-  const locationConfigured = !!(
+  // Check if location is configured (only after data is loaded)
+  const locationConfigured = !isLoadingProfile && !!(
     userProfile?.home_address && 
     userProfile?.work_address
   );
@@ -272,7 +272,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       </CardHeader>
       
       <CardContent className="pt-6">
-        {!locationConfigured && (
+        {!isLoadingProfile && !locationConfigured && (
           <Alert className="mb-4 bg-amber-50">
             <AlertDescription>
               Please <Link href="/profile" className="underline font-medium">update your profile</Link> with home and work addresses to better track your carbon impact.
