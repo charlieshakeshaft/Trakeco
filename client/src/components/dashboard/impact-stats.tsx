@@ -103,24 +103,9 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <IconBadge icon="directions_transit" color="primary" bgColor="green-50" />
           </div>
           
-          {/* Transport method list - stacked on mobile, side-by-side on larger screens */}
+          {/* Transport method list - only showing methods with days > 0 */}
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
-              <div className="flex items-center">
-                <span className="material-icons text-green-600 mr-2" style={{fontSize: '18px'}}>directions_walk</span>
-                <span className="text-sm">Walking</span>
-              </div>
-              <span className="text-sm font-medium">0 days</span>
-            </div>
-            
-            <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
-              <div className="flex items-center">
-                <span className="material-icons text-blue-500 mr-2" style={{fontSize: '18px'}}>directions_bike</span>
-                <span className="text-sm">Cycling</span>
-              </div>
-              <span className="text-sm font-medium">0 days</span>
-            </div>
-            
+            {/* Only showing relevant commute methods */}
             <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-lg">
               <div className="flex items-center">
                 <span className="material-icons text-amber-500 mr-2" style={{fontSize: '18px'}}>directions_car</span>
@@ -136,6 +121,13 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
               </div>
               <span className="text-sm font-medium">2 days</span>
             </div>
+            
+            {/* Empty state if needed */}
+            {false && (
+              <div className="flex items-center justify-center py-4 text-gray-400 text-sm">
+                No commutes logged yet this week
+              </div>
+            )}
           </div>
         </div>
 
