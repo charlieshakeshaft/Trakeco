@@ -1230,20 +1230,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error fetching user challenges:", e);
       }
       
-      // Get the actual user to ensure we have correct points
-      let userPoints = 0;
+      // Calculate points directly from commute logs instead of using stored value
       let userStreak = 0;
+      let userPoints = 0;
+      
       try {
+        // Calculate total points from commute logs
+        for (const log of commuteLogs) {
+          // Calculate points for this commute log
+          const commutePoints = calculateCommutePoints(log.commute_type, log.days_logged);
+          userPoints += commutePoints;
+        }
+        
+        // Get streak info from user record
         const userData = await storage.getUser(userId);
         if (userData) {
-          userPoints = userData.points_total;
           userStreak = userData.streak_count;
         }
+        
+        console.log(`Calculated total points from commute logs: ${userPoints}`);
       } catch (e) {
-        console.error("Error fetching user data for stats:", e);
-        // Use the authenticated user's data as fallback
-        userPoints = user.points_total;
-        userStreak = user.streak_count;
+        console.error("Error calculating points from commute logs:", e);
+        // Fallback to stored value in case of error
+        try {
+          const userData = await storage.getUser(userId);
+          if (userData) {
+            userPoints = userData.points_total;
+            userStreak = userData.streak_count;
+          }
+        } catch (fallbackError) {
+          console.error("Error fetching fallback user data for stats:", fallbackError);
+        }
       }
       
       // Response with stats
