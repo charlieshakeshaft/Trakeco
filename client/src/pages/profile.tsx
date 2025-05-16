@@ -496,7 +496,21 @@ const Profile = () => {
       return;
     }
     
-    updateLocationMutation.mutate(locationSettings);
+    // If we're in miles mode, ensure we convert back to km for storage
+    let finalSettings = {...locationSettings};
+    
+    if (distanceUnit === 'miles') {
+      // Make sure the value stored in locationSettings is in km
+      // This is a safety check in case the displayDistance and locationSettings got out of sync
+      finalSettings.commute_distance_km = convertMilesToKm(displayDistance);
+      
+      console.log('Saving distance in km:', finalSettings.commute_distance_km, 
+                  '(converted from miles:', displayDistance, ')');
+    } else {
+      console.log('Saving distance in km:', finalSettings.commute_distance_km);
+    }
+    
+    updateLocationMutation.mutate(finalSettings);
   };
   
   const handleLogout = async () => {
