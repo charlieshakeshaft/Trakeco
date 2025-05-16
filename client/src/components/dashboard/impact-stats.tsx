@@ -84,7 +84,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-purple-600 mb-1" style={{fontSize: '24px'}}>celebration</span>
             <div className="text-sm font-semibold">{balloonsEquivalent} balloons</div>
-            <div className="text-xs text-green-600">worth of fresh air</div>
+            <div className="text-xs text-green-600">of CO₂ prevented</div>
           </div>
           
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
