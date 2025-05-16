@@ -50,6 +50,7 @@ interface CommuteEntry {
     saturday: boolean;
     sunday: boolean;
   };
+  id?: number; // ID from the database for existing entries
 }
 
 // Simplified schema for a single commute method
@@ -97,6 +98,7 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // For loading overlay
   const [weekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [deletedLogIds, setDeletedLogIds] = useState<number[]>([]); // Store IDs of logs to delete
   
   // Fetch existing commute logs for the current week
   const { data: existingCommuteLogs, isLoading: isLoadingCommutes } = useQuery({
@@ -152,6 +154,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   // Process existing commute logs and populate entries when data loads
   useEffect(() => {
     if (existingCommuteLogs && Array.isArray(existingCommuteLogs) && existingCommuteLogs.length > 0 && commuteEntries.length === 0) {
+      console.log("Loading existing commute logs:", existingCommuteLogs);
+      
       // Group logs by commute type
       const entriesByType: Record<string, CommuteEntry> = {};
       
@@ -179,7 +183,8 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
               friday: false,
               saturday: false,
               sunday: false
-            }
+            },
+            id: log.id // Store the ID for deletion tracking
           };
         }
         
@@ -290,7 +295,14 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
 
   // Remove commute method - only removes from UI, doesn't sync with server until Save is clicked
   const removeCommuteMethod = (index: number) => {
-    // Just remove from UI - no server call until Save button is clicked
+    const entryToRemove = commuteEntries[index];
+    
+    // If this entry has an ID, add it to the list of logs to delete on save
+    if (entryToRemove.id) {
+      setDeletedLogIds(current => [...current, entryToRemove.id!]);
+    }
+    
+    // Remove from UI - no server call until Save button is clicked
     setCommuteEntries(current => {
       const updated = [...current];
       updated.splice(index, 1);
