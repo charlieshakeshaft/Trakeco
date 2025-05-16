@@ -312,7 +312,7 @@ const UserRankCard = ({ userId }: UserRankCardProps) => {
                         <span>{getUserRankTier(stats.points).minPoints} pts</span>
                         {stats.points < getUserRankTier(stats.points).maxPoints && (
                           <span className="text-center text-primary font-medium">
-                            {getUserRankTier(stats.points).maxPoints - stats.points} points to next level
+                            {getUserRankTier(stats.points).maxPoints - stats.points} points to next badge
                           </span>
                         )}
                         <span>{getUserRankTier(stats.points).maxPoints} pts</span>
