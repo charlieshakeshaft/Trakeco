@@ -226,6 +226,12 @@ const Profile = () => {
     commute_distance_km: user?.commute_distance_km || 0
   });
   
+  // State for distance unit selection (km or miles)
+  const [distanceUnit, setDistanceUnit] = useState<'km' | 'miles'>('km');
+  
+  // State for the displayed distance value (could be in km or miles)
+  const [displayDistance, setDisplayDistance] = useState<number>(user?.commute_distance_km || 0);
+  
   // Password change state
   const [passwordData, setPasswordData] = useState({
     current_password: "",
