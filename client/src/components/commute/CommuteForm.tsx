@@ -126,9 +126,10 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
   });
   
   // Check if location is configured (only after data is loaded)
-  const locationConfigured = !isLoadingProfile && !!(
-    userProfile?.home_address && 
-    userProfile?.work_address
+  // Use a more robust check that accounts for empty strings and null values
+  const locationConfigured = !isLoadingProfile && (
+    !!userProfile?.home_address && userProfile.home_address.trim() !== '' && 
+    !!userProfile?.work_address && userProfile.work_address.trim() !== ''
   );
   
   // Get commute distance
