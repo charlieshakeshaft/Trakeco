@@ -367,13 +367,13 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
         if (daysLogged === 0) continue;
         
         // Log the commute data
-        await apiRequest('POST', '/api/commutes/log', {
+        await apiRequest('/api/commutes/log', {
           commute_type: entry.commute_type,
           days_logged: daysLogged,
           distance_km: commuteDistance,
           week_start: format(weekStart, 'yyyy-MM-dd'),
           ...entry.days
-        });
+        }, 'POST');
       }
       
       // Success notification
