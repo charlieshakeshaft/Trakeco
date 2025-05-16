@@ -1253,14 +1253,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         commuteLogs = [];
       }
       
-      // Calculate total CO2 saved with more robust error handling
+      // Calculate total CO2 saved with enhanced calculation for active commuting methods
       const totalCO2Saved = commuteLogs.reduce((total, log) => {
         try {
-          // Handle null, undefined, or NaN values safely
-          if (log.co2_saved_kg === null || log.co2_saved_kg === undefined || isNaN(log.co2_saved_kg)) {
-            console.log(`Skipping log ${log.id} with invalid CO2 value:`, log.co2_saved_kg);
-            return total;
+          // For logs with no CO2 saved, calculate it dynamically based on commute type
+          if (log.co2_saved_kg === null || log.co2_saved_kg === undefined || isNaN(log.co2_saved_kg) || log.co2_saved_kg === 0) {
+            console.log(`Recalculating CO2 for log ${log.id} with commute type: ${log.commute_type}`);
+            
+            // Default distance if none provided (15km is average commute)
+            const defaultDistance = 15;
+            const distance = (log.distance_km && log.distance_km > 0) ? log.distance_km : defaultDistance;
+            
+            // Different CO2 savings by transport type
+            const standardEmission = 0.19; // kg CO2 per km for gas vehicle
+            let savedCO2 = 0;
+            
+            if (log.commute_type === 'walk' || log.commute_type === 'cycle') {
+              // Active transport saves 100% emissions plus health benefit bonus
+              savedCO2 = standardEmission * distance * log.days_logged * 1.2;
+            } 
+            else if (log.commute_type === 'remote_work') {
+              // Remote work saves 100% of commute emissions 
+              savedCO2 = standardEmission * distance * log.days_logged;
+            }
+            else if (log.commute_type === 'public_transport') {
+              // Public transit saves emissions compared to car
+              savedCO2 = (standardEmission - 0.03) * distance * log.days_logged;
+            }
+            else if (log.commute_type === 'carpool') {
+              // Carpooling saves emissions compared to individual driving
+              savedCO2 = (standardEmission - 0.07) * distance * log.days_logged;
+            }
+            else if (log.commute_type === 'electric_vehicle') {
+              // EVs save some emissions compared to gas vehicles
+              savedCO2 = (standardEmission - 0.05) * distance * log.days_logged;
+            }
+            
+            return total + Math.round(savedCO2);
           }
+          
           return total + log.co2_saved_kg;
         } catch (e) {
           console.error("Error processing log for CO2:", log.id, e);
