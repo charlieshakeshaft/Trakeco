@@ -447,6 +447,16 @@ const Profile = () => {
   
   // Save location settings
   const saveLocationSettings = () => {
+    // Validate that all required fields are filled in
+    if (!locationSettings.home_address || !locationSettings.work_address || !locationSettings.commute_distance_km) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in home address, work address, and commute distance before saving",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     updateLocationMutation.mutate(locationSettings);
   };
   
@@ -891,7 +901,7 @@ const Profile = () => {
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Home Postcode
+                        Home Postcode <span className="text-red-500">*</span>
                       </label>
                       <div className="flex flex-col space-y-4">
                         <input 
@@ -914,7 +924,7 @@ const Profile = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Work Postcode
+                        Work Postcode <span className="text-red-500">*</span>
                       </label>
                       <div className="flex flex-col space-y-4">
                         <input 
@@ -937,7 +947,7 @@ const Profile = () => {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Commute Distance (km)
+                        Commute Distance (km) <span className="text-red-500">*</span>
                       </label>
                       <div className="flex items-center gap-2">
                         <input 
@@ -982,9 +992,13 @@ const Profile = () => {
                       </p>
                     </div>
                     
-                    <div className="pt-4 flex justify-end">
+                    <div className="pt-4 flex justify-between">
+                      <div className="text-xs text-gray-500 italic">
+                        <span className="text-red-500">*</span> Required fields
+                      </div>
                       <Button 
                         className="bg-primary hover:bg-primary-dark"
+                        disabled={!locationSettings.home_address || !locationSettings.work_address || !locationSettings.commute_distance_km}
                         onClick={async (e) => {
                           e.preventDefault();
                           // Calculate distance if both addresses are provided before saving
