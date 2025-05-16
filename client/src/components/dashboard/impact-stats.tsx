@@ -51,7 +51,7 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
     <section className="mb-8">
       <h2 className="text-lg font-semibold text-gray-700 mb-4">Your Impact This Month</h2>
       
-      {/* Single Carbon Savings Card - Simplified */}
+      {/* Single Carbon Savings Card - More Positive Tone */}
       <div className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-xl shadow-sm p-5 border border-green-200 mb-6">
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -59,38 +59,38 @@ const ImpactStats = ({ userId }: ImpactStatsProps) => {
             <h3 className="text-4xl font-bold text-green-900 mt-1 flex items-baseline">
               {co2SavedKg} <span className="text-xl font-normal text-green-700 ml-1">kg CO₂</span>
             </h3>
-            <p className="text-sm text-green-700 mt-1">through your sustainable commuting choices</p>
+            <p className="text-sm text-green-700 mt-1">Amazing work with your sustainable choices!</p>
           </div>
           <div className="bg-white p-3 rounded-full">
             <span className="material-icons text-green-600" style={{fontSize: '32px'}}>eco</span>
           </div>
         </div>
         
-        <p className="text-sm font-medium text-green-800 mb-2">This is equivalent to:</p>
+        <p className="text-sm font-medium text-green-800 mb-2">You've saved the equivalent of:</p>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-blue-600 mb-1" style={{fontSize: '24px'}}>directions_car</span>
             <div className="text-sm font-semibold">{carKilometers} km</div>
-            <div className="text-xs text-gray-600">not driven by car</div>
+            <div className="text-xs text-green-600">of car journeys</div>
           </div>
           
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-green-600 mb-1" style={{fontSize: '24px'}}>forest</span>
             <div className="text-sm font-semibold">{treeEquivalent} trees</div>
-            <div className="text-xs text-gray-600">absorbing CO₂ for a year</div>
+            <div className="text-xs text-green-600">working for a year</div>
           </div>
           
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-purple-600 mb-1" style={{fontSize: '24px'}}>celebration</span>
             <div className="text-sm font-semibold">{balloonsEquivalent} balloons</div>
-            <div className="text-xs text-gray-600">of CO₂ not released</div>
+            <div className="text-xs text-green-600">worth of fresh air</div>
           </div>
           
           <div className="bg-white rounded-lg p-3 flex flex-col items-center text-center">
             <span className="material-icons text-amber-600 mb-1" style={{fontSize: '24px'}}>directions_bus</span>
             <div className="text-sm font-semibold">{Math.round(carKilometers * 1.3)} km</div>
-            <div className="text-xs text-gray-600">by public transport</div>
+            <div className="text-xs text-green-600">of bus travel</div>
           </div>
         </div>
       </div>
