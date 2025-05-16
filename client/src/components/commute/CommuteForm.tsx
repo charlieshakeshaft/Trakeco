@@ -388,7 +388,9 @@ const CommuteForm = ({ userId, onSuccess }: CommuteFormProps) => {
       await queryClient.invalidateQueries({ queryKey: ['/api/leaderboard'] });
       
       // Reload the commute logs to ensure we have the latest data
-      const response = await fetch(`/api/commutes/current?userId=${userId}`);
+      const response = await fetch(`/api/commutes/current?userId=${userId}`, {
+        credentials: 'include' // Add credentials for authentication
+      });
       if (response.ok) {
         const updatedLogs = await response.json();
         

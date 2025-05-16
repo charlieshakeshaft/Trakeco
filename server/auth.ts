@@ -38,19 +38,22 @@ export function getSession() {
   // Using 'SESSION_SECRET' from env or fallback for development
   const sessionSecret = process.env.SESSION_SECRET || "dev-session-secret-for-testing";
   
-  // Simplified session configuration for better cross-environment compatibility
+  // Enhanced session configuration for reliable authentication
   let sessionConfig: session.SessionOptions = {
     secret: sessionSecret,
-    resave: true, // Set to true to ensure session is saved on every request
-    saveUninitialized: true, // Set to true to create session for all visitors
+    resave: true, // Save session on every request
+    saveUninitialized: true, // Create session for all visitors
     cookie: {
-      // Disable secure cookies in all environments for debugging
-      // In production with HTTPS, this should be set to true
-      secure: false, 
+      secure: process.env.NODE_ENV === 'production', // Only use secure in production
       httpOnly: true,
-      // Set a shorter expiration to avoid stale sessions
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    }
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days for better persistence
+      sameSite: 'lax' // More permissive cookie policy
+    },
+    store: new PgSession({
+      conString: process.env.DATABASE_URL,
+      tableName: 'sessions', // Store sessions in database for persistence
+      createTableIfMissing: true
+    })
   };
   
   // Log detailed session configuration for debugging
